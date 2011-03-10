@@ -1,0 +1,214 @@
+\documentclass[12pt,magyar,a4paper]{article}
+\usepackage{graphicx}
+\usepackage[magyar]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{amsthm}
+\usepackage{babel}
+\usepackage{ae,aecompl}
+
+%\theoremstyle{plain}
+\newtheorem{thm}{Tétel}[section]
+\newtheorem{thmsub}{Tétel}[subsection]
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{lemsub}[thmsub]{Lemma}
+\newtheorem{all}[thm]{Állítás}
+\newtheorem{allsub}[thmsub]{Állítás}
+\newtheorem{kov}[thm]{Következmény}
+\newtheorem{sej}[thm]{Sejtés}
+
+%\theoremstyle{definition}
+\newtheorem{defn}[thm]{Definíció}
+\newtheorem{defnsub}[thmsub]{Definíció}
+\newtheorem{jel}[thm]{Jelölés}
+
+%\theoremstyle{remark}
+\newtheorem{alg}[thm]{Algoritmus}
+\newtheorem{megj}[thm]{Megjegyzés}
+\newenvironment{biz}{Bizonyítás: }{$\square$}
+
+\begin{document}
+
+\title{Jegyzet 2011.01.25.}
+\author{Boróczki Lajos}
+
+\maketitle
+
+\section{Diplomamunkából újra felhasználandó anyagok}
+Egyelőre csak címszavakban.
+
+\subsection{Bevezetés}
+Tetszőleges kövezésből készíthető algebrai leírás baricentrikus felbontás
+segítségével. A témánk a lehetséges algebrai leírások alapján visszakapható
+kövezésekről szól.
+
+\subsection{D-szimbólum rövid ismertetése és felépítése egy példa alapján}
+\subsubsection{D-szimbólum felépítése}
+Baricentrikus felbontás.
+
+Szomszédsági operációk.
+
+$\mathcal{R}$ és $\mathcal{M}$ mátrixfüggvények.
+
+\subsubsection{Példa}
+Az $\mathbb{E}^3$ tér négyzetes hasábbal történő egyik legegyszerűbb
+térkitöltése.
+
+\subsection{D-szimbólum követelmények}
+\label{D-sym-cond}
+Az összes 3 dimenziós geometriában az összes lehetséges kövezés felsorolásához
+szeretnénk a D-szimbólumokat felhasználni. A következő szükséges feltételeket
+támasztjuk a D-szimbólumokkal szemben:
+\begin{itemize}
+  \item D-szimbólum absztrakt definíciója
+  \item Megkötések $\mathcal{R}$ és $\mathcal{M}$ mátrixfüggvényekre (valódi
+    vagy végtelen távoli szimplex csúcsok, jó orbifold feltételek)
+\end{itemize}
+
+\subsection{D-szimbólumok felsorolásához szükséges algoritmusok}
+\subsubsection{D-diagramok felsorolása}
+Rendezés bevezetése a D-diagramokra.
+
+A használt algoritmus ismertetése. (Döntési fa modellel egyszerűen
+szemléltethető.)
+
+\subsubsection{A D-diagramokhoz tartozó mátrixfüggvények felsorolása}
+Az $\mathcal{R}$ mátrixfüggvény és a paraméterek felírhatóak a D-diagram
+alapján. A lehetséges $\mathcal{M}$ mátrixfüggvények illetve a hozzájuk tartozó
+paraméterértékek pedig véges sokan vannak vagy végtelen láncokat alkotnak (lásd
+\ref{D-sym-cond} fejezet: megkötések a mátrixfüggvényekre).
+
+Rendezés bevezetése a teljes D-szimbólumra.
+
+Algoritmus ismertetése.
+
+\section{Továbblépések}
+Ezek csak jegyzetek, gondolatmenetek.
+
+\subsection{Adott D-szimbólumhoz tartozó fundamentális tartomány előállítása}
+FIXME Megtehető konvex módon. Kérdés, hogy a ragasztás során végig konvex
+marad-e a rendszer, vagy csak a legvégén. (Diplomamunkabeli D.109 esetén pl.
+nem tud a rendszer végig konvex maradni.)
+
+Mikor tud elromlani a konvexitás (ezeket a helyzeteket ki kell küszöbölni):
+\begin{itemize}
+  \item Pontosan akkor lesz az alakzat konkáv, ha van konkáv lapszöge
+  \item Ha adott egy él, amit szimplexekkel körbe tudunk rakni ismétlés nélkül,
+    a szimplexek "felénél többet", de nem az összeset ragasztjuk körbe az él
+    körül. Ilyen éleket az irányitott (tükrözés mentes) 1 értékű paraméterek
+    jelentenek.
+  \item Ha egy élet csak ismétléssel tudunk körbe rakni, akkor nem tud konkáv
+    lenni a hozzá tartozó lapszög.
+\end{itemize}
+
+További gondolatok:
+\begin{itemize}
+  \item Tükörképeket nem ragasztunk (ugyanazt a szimplexet 1-szer hasznaljuk fel
+    a fundamentális tartomány ragasztásakor)
+  \item Ha egy él körülrakásában van tükrözés, nem okoz gondot az él, mert lesz
+    ismétlés a körberakásában.
+  \item Ha nincs tükrözés, de legálabb 2-szer körbemegyünk (azaz a paraméter
+    értéke legalább 2), szintén nem okoz gondot az él, mert lesz ismétlés a
+    körberakásában.
+  \item Ha 1 élet teljesen körbe rakunk szimplexekkel, akkor a fundamentális
+    tartomány egy "belső élévé" változik, így nem alakít ki lapszöget.
+  \item Azokat az eseteket kell tehát csak megvizsgálni, ahol több élet is körbe
+    lehet rakni szimplexekkel ismétlés nélkül (vagyis irányított 1 paraméterű
+    él-körből több is van.)
+\end{itemize}
+
+Az utolsó további gondolat folytatása és egy leendő algoritmus:
+\begin{itemize}
+  \item Vesszük az irányított 1 értékű paramétereket (él-körök), az általuk
+    érintett szimplexek száma szerint csökkenő sorrendben
+  \item Az első ilyenhez tartozó élet körbe ragasztjuk szimplexekkel.
+  \item Megnézzük, hogy a maradék él-körök közül hány olyan van, aminek csak 1
+    közös szimplexe van az eddig kiválasztott körök uniojával, vesszük a
+    legnagyobb ilyet és kezdjük elölről az algoritmust (lásd \ref{ftrajz1}. ábra.)
+    \begin{figure}
+      \caption{\label{ftrajz1} Két irányított kör, 1 közös szimplexszel.}
+      \center
+      \includegraphics[width=0.4\textwidth]{fund-tart_rajz1.pdf}
+    \end{figure}
+  \item Megnézzük, hogy a maradék él-körök közül hány olyan van, aminek legalább
+    2 közös szimplexe van az eddig kiválasztott körök uniojával. Vesszük azt,
+    aminek a legtöbb szimplexe van még szabadon, és kétoldalról elkezdjük
+    összerakni a kört (lásd \ref{ftrajz2}. ábra.) Fontos, hogy a maradék
+    kört nem tudjuk körbe összeragasztani mert csak ekvivalens éleket jár
+    körbe a két útvonal, de nem ugyanazt.
+    \begin{figure}
+      \caption{\label{ftrajz2} Két irányított kör, 2 közös szimplexszel.}
+      \center
+      \includegraphics[width=0.4\textwidth]{fund-tart_rajz2.pdf}
+    \end{figure}
+  \item A maradék szimplexek között megnézzük, hogy van-e még él-kör, ha igen,
+    a maradékra is végrehajtjuk a fenti algoritmust
+  \item Mostanra kaptunk néhány (esetleg 1 elemű) komponenst, melyeket szabadon
+    összeragaszthatunk egy-egy operáció mentén, mert a "veszélyes" éleket már
+    hatástalanítottuk.
+\end{itemize}
+
+\subsection{Generátorok és relációk}
+Először a fundamentális tartományt kell felépíteni.
+
+\subsection{Schönfliess-Bieberbach tétel általánosítása}
+Sch-B tétel kimondása.
+
+A Schönflies-Bieberbach tételt általánosíthatjuk tetszőleges geometriára
+úgy, hogy rácsok helyett fixpont mentes egybevágóságokat vizsgálunk.
+
+Írunk egy módszert, ami egy adott D-szimbólumhoz előállít egy fixpont mentes
+egybevágóságcsoportot leíró "felfújt" D-szimbólumot.
+
+Az algoritmus:
+\begin{itemize}
+  \item Sorra vesszük a tükrözéseket (lexikografikusan első az operáció száma,
+    második a szimplex sorszáma,) és minden tükrözésre megduplázzuk a
+    D-szimbólumot. Az eredeti és az új D-szimbólumot az adott tükrözéshez
+    tartozó operáció köti csak össze. (Ilyenkor el tud romlani a nem szomszédos
+    operációk által meghatározott élek körberakásának feltétele... lásd
+    \ref{schrajz1}. ábra.) Ez nem elég.
+    \begin{figure}
+      \caption{\label{schrajz1} Tükrözések felbontása 1.}
+      \center
+      \includegraphics[width=0.3\textwidth]{sch-b-alt_rajz1.pdf}
+    \end{figure}
+  \item Javított első lépés: Megnézzük az ekvivalens tükrözéseket. Mit is jelent
+    ez: A súlyzó alakú rendszereket ki kell javítani vele (lásd \ref{schrajz2}.
+    ábra.) Hogyan lehet továbblépni?
+    \begin{figure}
+      \caption{\label{schrajz2} Tükrözések felbontása 2.}
+      \center
+      \includegraphics[width=0.3\textwidth]{sch-b-alt_rajz2.pdf}
+    \end{figure}
+  \item Új verzió: Az összes élet vizsgáljuk:
+    \begin{enumerate}
+      \item Sorra vesszük a nem iranyítottan (tükrözés segítségével) körberakott
+	éleket. Minden ilyet megszüntetünk úgy, hogy a körberakáshoz tartozó
+	paraméter duplájaszor lemásoljuk a teljes D-szimbólumot, és a
+	tükrözött szimplexeket és másolataikat kapcsoljuk össze a tükrözés
+	operátorával (lásd \ref{schrajz3}. ábra.)
+	\begin{figure}
+	  \caption{\label{schrajz3} Irányítatlan kör felbontása}
+	  \center
+	  \includegraphics[width=0.75\textwidth]{sch-b-alt_rajz3.pdf}
+	\end{figure}
+      \item Sorra vesszük az irányítottan (tükrözés nélkül) körberakott éleket.
+	Minden ilyet megszüntetünk úgy, hogy először szétvágjuk a kört egy
+	tetszőleges helyen, majd a körberakáshoz tartozo paraméterszer
+	lemásoljuk a teljes szétvágott D-szimbólumot, és a vágáshoz betoldjuk
+	(lásd \ref{schrajz4}. ábra.)
+	\begin{figure}
+	  \caption{\label{schrajz4} Irányított kör felbontása}
+	  \center
+	  \includegraphics[width=0.75\textwidth]{sch-b-alt_rajz4.pdf}
+	\end{figure}
+    \end{enumerate}
+\end{itemize}
+
+
+\end{document}

@@ -1,0 +1,153 @@
+(progn
+  (merge-baseap appearance {
+    face
+    -edge
+    vect
+    -transparent
+    evert
+    shading flat
+    normscale 1
+    -normal
+    linewidth 1 
+    patchdice 10 10
+    material {
+      shininess 15.000000
+      ka 0.300000
+      kd 1.000000
+      ks 0.300000
+      alpha 1.000000
+      ambient 1.000000 1.000000 1.000000
+      diffuse 1.000000 1.000000 1.000000
+      specular 1.000000 1.000000 1.000000
+      edgecolor 0.000000 0.000000 0.000000
+      normalcolor 1.000000 1.000000 1.000000
+    }
+    lighting {
+      ambient 0.2 0.2 0.2
+      localviewer 1
+      attenconst 1
+      attenmult 0
+      replacelights
+      light {
+        ambient 0.000000 0.000000 0.000000
+        color 0.750000 0.750000 0.750000
+        position 0.000000 0.000000 10.000000 0.000000
+      }
+      light {
+        ambient 0.000000 0.000000 0.000000
+        color 0.600000 0.600000 0.600000
+        position 0.000000 1.000000 -1.000000 0.000000
+      }
+      light {
+        ambient 0.000000 0.000000 0.000000
+        color 0.400000 0.400000 0.400000
+        position 1.000000 -2.000000 -1.000000 0.000000
+      }
+    }
+  }
+  ) # end base appearance
+(xform-set "worldgeom" transform {
+    0.10127369   -0.52953678    0.84222108             0
+   -0.67049956    0.58908641    0.45100683             0
+   -0.73496664    -0.6103847    -0.2953957             0
+             0             0             0             1
+
+  }
+)
+  (new-geometry "[g1]"	# hasab_bari.list
+    {
+      LIST
+      {
+        appearance {
+          -face
+          edge
+        }
+BBOX
+ -1 -1 -2
+ 1 1 2      }
+      {
+        appearance {
+          edge
+          shading constant
+        }
+OFF
+4 4 6
+
+0 0 0
+0 0 2
+0 1 2
+1 1 2
+
+3	 0 1 2	0.5 0 0 0.666667
+3	 0 1 3	0.5 0 0 0.666667
+3	 0 2 3	0.5 0 0 0.666667
+3	 1 2 3	0.5 0 0 0.666667
+      }
+      {
+        appearance {
+          edge
+          shading constant
+        }
+OFF
+4 4 6
+
+0 0 0
+0 1 0
+0 1 2
+1 1 2
+
+3	 0 1 2	0 0 0.5 0.666667
+3	 0 1 3	0 0 0.5 0.666667
+3	 0 2 3	0 0 0.5 0.666667
+3	 1 2 3	0 0 0.5 0.666667
+      }
+      {
+        appearance {
+          edge
+          shading constant
+        }
+OFF
+4 4 6
+
+0 0 0
+0 1 0
+1 1 0
+1 1 2
+
+3	 0 1 2	0 0.5 0 0.666667
+3	 0 1 3	0 0.5 0 0.666667
+3	 0 2 3	0 0.5 0 0.666667
+3	 1 2 3	0 0.5 0 0.666667
+      }
+    }
+  ) # end geometry "[g1]" hasab_bari.list
+  (bbox-draw "[g1]" on)
+  (bbox-color "[g1]" 0.000000 0.000000 0.000000)
+  (normalization "[g1]" each)
+  (name-object "[g1]" "hasab_bari.list")
+
+  (window default { position 0 1439 0 881 })
+  (camera "Camera" camera {
+    camtoworld transform {
+             1             0             0             0
+             0             1             0             0
+             0             0             1             0
+             0             0             3             1
+
+    }
+    perspective 1  stereo 0
+    fov 40
+    frameaspect 1.63265
+    focus 3
+    near 0.1
+    far 100
+    bgcolor 0.333333 0.333333 0.333333 0
+  }
+  ) # camera "Camera" ...
+  (backcolor "Camera" 1. 1. 1.)
+  (window "Camera" window { size 1440 882 position 0 1439 0 881 resize curpos 0 1439 0 881 viewport 0 1439 0 881 }
+  )
+  # end camera Camera
+
+  (ui-target "World")
+)
