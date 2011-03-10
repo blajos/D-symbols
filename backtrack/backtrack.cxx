@@ -138,8 +138,8 @@ void Dsym::atsorszamoz(int i) {
       D[r]=D[r-1]->szomszed[1];
     }
     else 
-      for (int k=r-1;k>=0;k--) {
-	for (int j=0;j<dim+1;j++) {
+      for (int j=0;j<dim+1;j++) {
+	for (int k=r-1;k>=0;k--) {
 	  if (my_find(D[k]->szomszed[j],r,D) == 0) {
 	    D[r]=D[k]->szomszed[j];
 	    break;
@@ -275,39 +275,39 @@ int Dsym::osszefuggo(int elhagy) {
 //pontba. Es feltoltjuk a matrixokban az informaciot (a szabad parameterekkel
 //meg nem foglalkozunk, csak beirjuk oket a matrixba.) 0-t adunk vissza, ha nem
 //teljesul a fenti feltetel, 1-et, ha teljesul.
-  int Dsym::uvw(void) {
-    if(!csucsok[1][0]->mx)   //ha nincs lefoglalva, lefoglaljuk a helyet
-      for (int r=0;r<car;r++) {
-	csucsok[1][r]->mx=new int*[dim+1];
-	for (int i=0;i<dim+1;i++) csucsok[1][r]->mx[i]=new int[dim+1];
-      }
-
-    for (int r=0;r<car;r++) {				//atlotol tavolabbi
-      for (int i=0;i<dim-1;i++)
-	for (int i1=i+2;i1<dim+1;i1++){
-	  if(csucsok[1][r]->szomszed[i]->szomszed[i1]->szomszed[i]->szomszed[i1]
-	      != csucsok[1][r]){
-	    return 0;
-	  }
-	  else {
-	    csucsok[1][r]->mx[i][i1]=2;
-	    csucsok[1][r]->mx[i1][i]=2;
-	  }
-	}
-      for (int i=0;i<dim+1;i++) csucsok[1][r]->mx[i][i]=1;     //atlo
-      for (int i=0;i<dim;i++) {				       //atlo szomszedok
-	int u=1;
-	simplex* csucs=csucsok[1][r];
-	while (csucs->szomszed[i]->szomszed[i+1] != csucsok[1][r]) {
-	  u++;
-	  csucs=csucs->szomszed[i]->szomszed[i+1];
-	}
-	csucsok[1][r]->mx[i][i+1]=u;
-	csucsok[1][r]->mx[i+1][i]=u;
-      }
+int Dsym::uvw(void) {
+  if(!csucsok[1][0]->mx)   //ha nincs lefoglalva, lefoglaljuk a helyet
+    for (int r=0;r<car;r++) {
+      csucsok[1][r]->mx=new int*[dim+1];
+      for (int i=0;i<dim+1;i++) csucsok[1][r]->mx[i]=new int[dim+1];
     }
-    return 1;
+
+  for (int r=0;r<car;r++) {				//atlotol tavolabbi
+    for (int i=0;i<dim-1;i++)
+      for (int i1=i+2;i1<dim+1;i1++){
+	if(csucsok[1][r]->szomszed[i]->szomszed[i1]->szomszed[i]->szomszed[i1]
+	    != csucsok[1][r]){
+	  return 0;
+	}
+	else {
+	  csucsok[1][r]->mx[i][i1]=2;
+	  csucsok[1][r]->mx[i1][i]=2;
+	}
+      }
+    for (int i=0;i<dim+1;i++) csucsok[1][r]->mx[i][i]=1;     //atlo
+    for (int i=0;i<dim;i++) {				       //atlo szomszedok
+      int u=1;
+      simplex* csucs=csucsok[1][r];
+      while (csucs->szomszed[i]->szomszed[i+1] != csucsok[1][r]) {
+	u++;
+	csucs=csucs->szomszed[i]->szomszed[i+1];
+      }
+      csucsok[1][r]->mx[i][i+1]=u;
+      csucsok[1][r]->mx[i+1][i]=u;
+    }
   }
+  return 1;
+}
 
 
 //Dsym::ellenoriz: Az elobb definialt ellenorzesek lefuttatasa.
@@ -322,68 +322,68 @@ int Dsym::ellenoriz(void) {
 //Dsym::elhozzaad(...): A szin, honnan, hova valtozoharmas altal leirt elt adja
 //hozza a multigrafhoz, ha ezt meg lehet tenni, azaz egyik csucsanal sincs meg
 //definialva a szin altal leirt szomszedsagi operacio.
-  int Dsym::elhozzaad(int szin, int honnan, int hova) {
-    if (szin<0 || szin>dim || honnan<0 || honnan >=car || hova<0 || hova>=car ) 
-      return 0;
-    if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][honnan] ||
-	csucsok[0][hova]->szomszed[szin] != csucsok[0][hova]) {
-      //cout << "Nem tudok elt hozzaadni, mert nincs torolve az elozo" << endl;
-      return 0;
-    }
-    csucsok[0][honnan]->szomszed[szin]=csucsok[0][hova];
-    csucsok[0][hova]->szomszed[szin]=csucsok[0][honnan];
-    return 1;
+int Dsym::elhozzaad(int szin, int honnan, int hova) {
+  if (szin<0 || szin>dim || honnan<0 || honnan >=car || hova<0 || hova>=car ) 
+    return 0;
+  if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][honnan] ||
+      csucsok[0][hova]->szomszed[szin] != csucsok[0][hova]) {
+    //cout << "Nem tudok elt hozzaadni, mert nincs torolve az elozo" << endl;
+    return 0;
   }
+  csucsok[0][honnan]->szomszed[szin]=csucsok[0][hova];
+  csucsok[0][hova]->szomszed[szin]=csucsok[0][honnan];
+  return 1;
+}
 
 //Dsym::eltorol: Torli a megfelelo elt, ha ez ertelmesen megteheto.
-  void Dsym::eltorol(int szin, int honnan, int hova) {
-    if (szin<0 || szin>dim || honnan<0 || honnan >=car || hova<0 || hova>=car ) 
-      return;
-    if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][hova]) {
-      cerr << "Nincs el (szin, honnan, hova): " <<szin<<" "<<honnan<<" "<<hova
-						  << endl;
-      return;
-    }
-    csucsok[0][honnan]->szomszed[szin]=csucsok[0][honnan];
-    csucsok[0][hova]->szomszed[szin]=csucsok[0][hova];
+void Dsym::eltorol(int szin, int honnan, int hova) {
+  if (szin<0 || szin>dim || honnan<0 || honnan >=car || hova<0 || hova>=car ) 
+    return;
+  if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][hova]) {
+    cerr << "Nincs el (szin, honnan, hova): " <<szin<<" "<<honnan<<" "<<hova
+						<< endl;
+    return;
   }
+  csucsok[0][honnan]->szomszed[szin]=csucsok[0][honnan];
+  csucsok[0][hova]->szomszed[szin]=csucsok[0][hova];
+}
 
 
 //Dsym::invol_create: involuciokent egyszeruen abrazolhato a multigraf konzolon.
 //Ezt hozzuk itt letre. Csak az elore elek kellenek nekunk 
 //(kisebb sorszam->nagyobb sorszam)
-  void Dsym::invol_create(int var) {
-    if(involucio)
-      for (int j=0;j<dim+1;j++) {
-	for (int d=0;d<*involucio[j][car];d++)
-	  delete[] involucio[j][d];
-	delete involucio[j][car];
-	delete[] involucio[j];
-      }
-    involucio=new int**[dim+1];
+void Dsym::invol_create(int var) {
+  if(involucio)
     for (int j=0;j<dim+1;j++) {
-      involucio[j]=new int*[car+1];
-      involucio[j][car]=new int;	//*involucio[j][car] az aktualis hossz
-      *involucio[j][car]=0;
-      for (int i=0;i<car;i++) {
-	int kell=1;
-	int masik=csucsok[var][i]->szomszed[j]->sorszam[var];
-	if(masik==i) continue;
-	for(int k=0;k<*involucio[j][car];k++){
-	  if (involucio[j][k][1]==i ) {
-	    kell=0;
-	    break;
-	  }
+      for (int d=0;d<*involucio[j][car];d++)
+	delete[] involucio[j][d];
+      delete involucio[j][car];
+      delete[] involucio[j];
+    }
+  involucio=new int**[dim+1];
+  for (int j=0;j<dim+1;j++) {
+    involucio[j]=new int*[car+1];
+    involucio[j][car]=new int;	//*involucio[j][car] az aktualis hossz
+    *involucio[j][car]=0;
+    for (int i=0;i<car;i++) {
+      int kell=1;
+      int masik=csucsok[var][i]->szomszed[j]->sorszam[var];
+      if(masik==i) continue;
+      for(int k=0;k<*involucio[j][car];k++){
+	if (involucio[j][k][1]==i ) {
+	  kell=0;
+	  break;
 	}
-	if (kell==1) {
-	  involucio[j][*involucio[j][car]]=new int[2];
-	  involucio[j][*involucio[j][car]][0]=i;
-	  involucio[j][*involucio[j][car]][1]=masik;
-	  ++(*involucio[j][car]);
-	}
+      }
+      if (kell==1) {
+	involucio[j][*involucio[j][car]]=new int[2];
+	involucio[j][*involucio[j][car]][0]=i;
+	involucio[j][*involucio[j][car]][1]=masik;
+	++(*involucio[j][car]);
       }
     }
   }
+}
 
 
 //Dsym::print: A fenti involucio konzolra irasa, illetve az egyes operaciok 
@@ -736,19 +736,19 @@ void Dsym::change_param(list<param>::iterator currparam,int i){
 }
 
 //A kovetkezo ket fuggveny csak az elnevezest segiti.
-  void Dsym::increase_param(list<param>::iterator currparam){ 
-    if (currparam->ertek>100000)
-      change_param(currparam,-currparam->ertek+currparam->min_ertek);
-    else
-      change_param(currparam,1);
-  }
+void Dsym::increase_param(list<param>::iterator currparam){ 
+  if (currparam->ertek>100000)
+    change_param(currparam,-currparam->ertek+currparam->min_ertek);
+  else
+    change_param(currparam,1);
+}
 
-  void Dsym::decrease_param(list<param>::iterator currparam){
-    if (currparam->ertek==currparam->min_ertek)
-      change_param(currparam,inf++);
-    else
-      change_param(currparam,-1);
-  }
+void Dsym::decrease_param(list<param>::iterator currparam){
+  if (currparam->ertek==currparam->min_ertek)
+    change_param(currparam,inf++);
+  else
+    change_param(currparam,-1);
+}
 
 //Dsym::print_possible_mxes: Backtrack algoritmus segitsegevel felsoroljuk az
 //osszes lehetseges parameter-beallitast, amire meg teljesul a 0. es a 3.

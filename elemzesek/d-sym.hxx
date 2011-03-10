@@ -152,6 +152,39 @@ class Dsym : public Ddiag{
        */
     int check_simplex_vertices(void);
 
+    /* Func: is_spherical()
+       If we have a 2 dimensional D-symbol we can check if it's tiling is
+       spherical.
+
+	Returns:
+	1 - We have a 2 dimensional spherical tiling.
+	0 - We have a 2 dimensional non-spherical tiling.
+	-1 - The dimension is not 2.
+	*/
+    int is_spherical(void);
+
+    /* Func: is_euclidean()
+       If we have a 2 dimensional D-symbol we can check if it's tiling is
+       euclidean.
+
+	Returns:
+	1 - We have a 2 dimensional euclidean tiling.
+	0 - We have a 2 dimensional non-euclidean tiling.
+	-1 - The dimension is not 2.
+	*/
+    int is_euclidean(void);
+
+    /* Func: is_hyperbolic()
+       If we have a 2 dimensional D-symbol we can check if it's tiling is
+       hyperbolic.
+
+	Returns:
+	1 - We have a 2 dimensional euclidean tiling.
+	0 - We have a 2 dimensional non-euclidean tiling.
+	-1 - The dimension is not 2.
+	*/
+    int is_hyperbolic(void);
+
     /* Func: dump()
        Dump Dsym in machine readable format.
 
