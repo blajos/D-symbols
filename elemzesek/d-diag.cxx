@@ -144,8 +144,38 @@ void Ddiag::create_numbering(Simplex* first){
   }
 }
 
-Mxfunction *Ddiag::Rmx(void);
-Ddiag* Ddiag::dual(void);
+Mxfunction *Ddiag::Rmx(void) {
+  if (!buf_Rmx){
+    buf_Rmx=new Mxfunction(dim,car);
+    for (int r=0;r<car;r++)
+      for (int i=0;i<dim+1;i++)
+	for (int j=0;j<dim+1;j++) {
+	  Simplex* start=simplex_orbits[0][r];
+	  Simplex* next=start->szomszed[i]->szomszed[j];
+	  int steps=1;
+	  while (next!=start){
+	    next=next->szomszed[i]->szomszed[j];
+	    steps++;
+	  }
+	  buf_Rmx->set(r,i,j,steps);
+	}
+  }
+  return buf_Rmx;
+}
+
+Ddiag* Ddiag::dual(void) {
+  if (!buf_dual){
+    buf_dual=new Ddiag(dim,car);
+    for (int r=0;r<car;r++)
+      for (int i=0;i<dim+1;i++){
+	int icsucsjszomszedja=simplex_orbits[0][r]->szomszed[i]->sorszam[0];
+        buf_dual->simplex_orbits[0][r]->szomszed[dim-i]=buf_dual->csucsok[0][icsucsjszomszedja];
+	buf_dual->simplex_orbits[0][r]->sorszam[0]=r;
+      }
+  }
+  return buf_dual;
+}
+
 list<Ddiag*> *Ddiag::cancel_operation(int i);
 int Ddiag::filter_bad_orbifolds(list<Param*>*);
 int Ddiag::check_dual(void);
