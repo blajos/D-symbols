@@ -11,7 +11,7 @@
 //#include <algorithm>
 //#include <set>
 //#include <boost/math/common_factor.hpp>
-//#include <math.h>
+#include <math.h>
 //#include <sstream>
 //#define PI 3.14159265
 
@@ -37,7 +37,7 @@ class Ddiag : public Base {
     int buf_symmetries=0;
     Ddiag* buf_dual=0;
     list<Param*> *buf_params;
-    list<Ddiag*> *buf_cancel_operation;
+    vector<list<Ddiag*> *> buf_cancel_operation;
     Mxfunction* buf_Rmx=0;
 
     /* Variable: simplex_orbits
@@ -151,9 +151,9 @@ class Ddiag : public Base {
        diagram. Meanwhile we fill up <Ddiag.symmetries> variable.
 
        Returns:
-       1 - There are smaller possible numberings
+       1 - We have found the one and only best numbering
        0 - We have the best numbering, but there are multiple best numberings
-       -1 - We have found the one and only best numbering
+       -1 - There are smaller possible numberings
        */
     int check_numberings(void);
 
@@ -173,19 +173,19 @@ class Ddiag : public Base {
        Check if matrix function R is sane: 
        - Main diagonal has only 1's
        - Every element at least 2 away from the diagonal is not more than 2
+
+	Returns:
+	1 - R is sane
+	0 - R is wrong
        */
     int check_r(void);
-
-    /* Func: check_all
-       Run check_numberings, check_r and check_connected
-       */
-    int check_all(void);
 
     /*
        Func: is_bigraph()
       
        Is the graph a bipartite graph? In 2 dimensions a bipartite graph shows
-       an orientable orbifold. (FIXME We need a citeable theorem...)
+       an orientable orbifold. (FIXME We need a citeable theorem... How about
+       loops?)
     */
     int is_bigraph(void);
 

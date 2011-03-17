@@ -1,7 +1,8 @@
 #include "d-diag.hxx"
 
 Ddiag::Ddiag(int dim,int car):
-  Base(dim,car)
+  Base(dim,car),
+  buf_symmetries(0)
 {
   simplex_orbits=new simplex**[car+1];
   for (int k=0;k<car+1;k++) simplex_orbits[k]=new simplex*[car];
@@ -11,6 +12,7 @@ Ddiag::Ddiag(int dim,int car):
 Ddiag::Ddiag(Ddiag* olddiag){
   dim=olddiag->dim;
   car=olddiag->car;
+  Ddiag(dim,car);
   for(int i=0;i<car;i++) 
     for(int j=0;j<dim+1;j++) {
       // We set helper variable to k where D_k=\sigma_j(D_i)
@@ -176,15 +178,269 @@ Ddiag* Ddiag::dual(void) {
   return buf_dual;
 }
 
-list<Ddiag*> *Ddiag::cancel_operation(int i);
-int Ddiag::filter_bad_orbifolds(list<Param*>*);
-int Ddiag::check_dual(void);
-int Ddiag::check_numberings(void);
-int Ddiag::symmetries(void);
-int Ddiag::check_r(void);
-int Ddiag::check_all(void);
-int Ddiag::is_bigraph(void);
-int Ddiag::is_smaller(int i,Ddiag* other,int j);
-list<Param*> *Ddiag::params(void);
-int Ddiag::dump(ostream*);
+list<Ddiag*> *Ddiag::cancel_operation(int cancel_op) {
+  if(cancel_op<0 or cancel_op > dim+1){
+    throw "Operation out of range";
+  }
+  if(!buf_cancel_operation){
+    buf_cancel_operation=new vector<list<Ddiag*> *>(dim+2,NULL);
+  }
+  if(!buf_cancel_operation[cancel_op]){
+    buf_cancel_operation[cancel_op]=new list<Ddiag*>;
+
+    list<int> unreachable;
+   
+    for(int i=0;i<car;i++) unreachable.push_back(i);    //fill unreachable
+    while (!unreachable.empty()) {
+      list<int> current_component;
+      list<int> new_elements;
+      new_elements.push_back(*unreachable.begin());
+      while (!new_elements.empty()) {
+	list<int> previous_elements;
+        utolso.clear();
+        for ( list<int>::iterator p = new_elements.begin(); p !=
+	    new_elements.end(); ++p ) {
+          previous_elements.push_back(*p);
+	  current_component.push_back(*p);
+	}
+        new_elements.clear();
+        for ( list<int>::iterator r = previous_elements.begin();
+	    r!=previous_elements.end(); ++r ){
+          //utolso szomszedai metszet nemelerheto->uj
+          for (int j=0;j<dim+1;j++) {                                                                    
+	    if ( j!=cancel_op ){
+	      list<int>::iterator new_unreachable=find(unreachable.begin(),
+		  unreachable.end(),simplex_orbits[0][*r]->szomszed[j]->sorszam[0]);
+	      if (new_unreachable != unreachable.end() ) {
+		new_elements.push_back(*new_unreachable);
+		unreachable.erase(new_unreachable);    //talalt nemelerhetoek torlese
+	      }
+	    }
+	  }
+	}
+      }
+
+      Ddiag* curr=new Ddiag(dim-1,current_component.size());
+      int num=0;
+
+      //Copy simplexes...
+      // indexes[n]= Index of the simplex in the original diagram, whose index in the component
+      // is n.
+      vector<int> indexes;
+      for ( list<int>::iterator r = current_component.begin();
+	  r!=current_component.end(),r++)
+	indexes.push_back(simplex_orbits[0][*r]->sorszam[0]);
+
+      for ( list<int>::iterator r = current_component.begin();
+	  r!=current_component.end(),r++){
+	for ( int j=0;j<dim+1;j++){
+	  // helper=index of the j-th adjacent simplex in the original diagram.
+	  int helper = simplex_orbits[0][indexes[num]]->szomszed[j]->sorszam[0];
+
+	  // helper1= index of the j-th adjacent simplex in the component
+	  vector<int>::iterator helper1 = find(indexes.begin(),indexes.end(),helper);
+	  curr->simplex_orbits[0][num]->szomszed[j] = curr->simplex_orbits[0][helper1];
+	}
+	num++;
+      }
+      buf_cancel_operation[cancel_op]->push_back(curr);
+    }
+  }
+  return buf_cancel_operation[cancel_op];
+}
+
+int Ddiag::check_dual(void){
+  return -is_smaller(1,dual(),1);
+}
+
+int Ddiag::check_numberings(void){
+  buf_symmetries=1;
+  for (int i=2;i<car+1;i++){
+    int ret=is_smaller(1,this,i);
+    if (ret == -1){
+      return -1;
+    }
+    if (ret == 0){
+      buf_symmetries++;
+    }
+  }
+  if (buf_symmetries > 1)
+    return 0;
+  else
+    return 1;
+}
+
+int Ddiag::symmetries(void){
+  if (buf_symmetries == 0)
+    check_numberings();
+  return buf_symmetries;
+}
+
+int Ddiag::check_r(void) {
+  Mxfunction* R=Rmx();
+  for(int i=0;i<car;i++)
+    for (int u=0;u<dim+1;u++)
+      for (int v=u;v<dim+1;v++){
+	int val=R->get(simplex_orbits[0][i],u,v);
+	if (val < 1)
+	  return 0;
+        if (val > 2 and abs(u-v)>=2)
+	  return 0;
+	if (val > 1 and u==v)
+	  return 0;
+      }
+  return 1;
+}
+
+int Ddiag::is_bigraph(void) {
+  list<Simplex*> component1,component2,*curr_comp,*other_comp,unreached;
+  curr_comp=&component1;
+  other_comp=&component2;
+  curr_comp->push_back(simplex_orbits[0][0]);
+  for(int i=1;i<car;i++)
+    unreached.push_back(simplex_orbits[0][i]);
+  
+  while (!unreached.empty()){
+    for(list<Simplex*>::iterator curr_sim=curr_comp->begin();
+	curr_sim!=curr_comp->end(); curr_sim++)
+      for(int i=0;i<dim+1;i++)
+	// For every simplex in the component we check, if any of the operations
+	// points to an other simplex in the same component; if so we don't have
+	// a bipartite graph.
+	if((*curr_sim)->szomszed[i]!=*curr_sim){
+	  if(find(curr_comp->begin(),curr_comp->end(),(*curr_sim)->szomszed[i])
+	      != curr_comp->end())
+	    return 0;
+	  else {
+	    // Else we add only the new simplexes to the other component, and
+	    // remove them from the unreached list.
+	    list<Simplex*>::iterator unreached_it=find(unreached.begin(),
+		unreached.end(), (*curr_sim)->szomszed[i]);
+	    if(unreached_it != unreached.end()){
+	      other_comp->push_back((*curr_sim)->szomszed[i]);
+	      unreached.erase(unreached_it);
+	    }
+	  }
+	}
+    // Swap current and other components
+    list<Simplex*> *temp=curr_comp;
+    curr_comp=other_comp;
+    other_comp=temp;
+  }
+}
+
+int Ddiag::is_smaller(int thisindex,Ddiag* other,int otherindex){
+  if (dim > other->dim)
+    return -1;
+  if (dim < other->dim)
+    return 1;
+
+  if (car > other->car)
+    return -1;
+  if (car < other->car)
+    return 1;
+
+  simplex** thissimplex=simplex_orbits[thisindex];
+  simplex** othersimplex=other->simplex_orbits[otherindex];
+  for (int j=dim;j>=0;j--)
+    for (int i=0;i<car-1;i++){
+      if (thissimplex[i]->szomszed[j]->sorszam[thisindex] >
+          othersimplex[i]->szomszed[j]->sorszam[otherindex])
+	return -1;
+      if (thissimplex[i]->szomszed[j]->sorszam[thisindex] <
+          othersimplex[i]->szomszed[j]->sorszam[otherindex])
+	return 1;
+    }
+  return 0;
+}
+
+list<Param*> *Ddiag::params(void){
+  if (!buf_params){
+    char my_character='m';
+    for(int op0=0;op0<dim;op0++){
+      int op1=op0+1;
+      list<Simplex*> unreached;
+      for(int i=0;i<car;i++) unreached.push_back(simplex_orbits[0][i]);
+      while (!unreached.empty()){
+	int coeff;
+	bool orientable;
+	list<Simplex*> reached;
+	list<Simplex*>::iterator unreached_it;
+	reached.push_back(*unreached.begin());
+	Simplex* starting_point=*unreached.begin();
+	unreached.erase(unreached.begin());
+	while((*reached.rbegin())->szomszed[op0]->szomszed[op1] !=
+	    starting_point) {
+	  // We don't reach the end in 1 pair of steps
+	  // Add every simplex on the route to reached
+	  unreached_it=find(unreached.begin(), unreached.end(),
+	      (*reached.rbegin())->szomszed[op0]);
+	  if(unreached_it!=unreached.end()){
+	    reached.push_back(*unreached_it);
+	    unreached.erase(unreached_it);
+	  }
+	  else 
+	    orientable=false;
+
+	  unreached_it=find(unreached.begin(), unreached.end(),
+	      (*reached.rbegin())->szomszed[op0]->szomszed[op1]);
+	  if(unreached_it!=unreached.end()){
+	    reached.push_back(*unreached_it);
+	    unreached.erase(unreached_it);
+	  }
+	  else 
+	    orientable=false;
+	}
+	// There can be one more step with operation op0
+	unreached_it=find(unreached.begin(), unreached.end(),
+	    (*reached.rbegin())->szomszed[op0]);
+	if(unreached_it!=unreached.end()){
+	  reached.push_back(*unreached_it);
+	  unreached.erase(unreached_it);
+	}
+	else 
+	  orientable=false;
+
+	coeff=Rmx()->get(starting_point,op0,op1);
+
+	Param* curr_param=new Param(my_character++,coeff,orientable);
+	for(list<Simplex*>::iterator reached_it=reached.begin();
+	    reached_it!=reached.end(); reached_it++)
+	  curr_param->simplex_operations.push_back(Pair(*reached_it,op0));
+	buf_params->push_back(curr_param);
+      }
+    }
+  }
+  filter_bad_orbifolds(buf_params);
+  return buf_params;
+}
+
+int Ddiag::dump(ostream*){
+  *out << dim << car;
+  for(int i=0;i<dim+1;i++){
+    *out << '(';
+    list<int> simplex_indexes;
+    for(int j=0;j<car;j++)
+      simplex_indexes.push_back(j);
+    while(! simplex_indexes.empty()){
+      int first=*simplex_indexes.begin();
+      simplex_indexes.erase(simplex_indexes.begin());
+      int second=simplex_orbits[0][first]->szomszed[i];
+      *out << '(' << first;
+      if (second!=first){
+	*out << ',' << second;
+	simplex_indexes.erase(find(simplex_indexes.begin(),
+	      simplex_indexes.end(), second));
+      }
+      *out << ')';
+    }
+    *out << ')';
+  }
+  return 0;
+}
+
 int Ddiag::print_html(ostream*);
+
+int Ddiag::filter_bad_orbifolds(list<Param*>*){
+}
+

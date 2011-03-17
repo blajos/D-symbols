@@ -5,7 +5,9 @@ Param::Param(char letter, int coeff, bool orientable):
   coeff(coeff),
   orientable(orientable)
 {
-  return;
+  min=0;
+  while (coeff*min<2)
+    min++;
 }
 
 Param::~Param(void){
