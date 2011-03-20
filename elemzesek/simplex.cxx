@@ -21,3 +21,11 @@ Simplex::~Simplex(void) {
   delete[] sorszam;
   delete[] szomszed;
 }
+
+int Simplex::dump(ostream*){
+  return 0;
+}
+
+int print_html(ostream*){
+  return 0;
+}

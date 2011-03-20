@@ -9,6 +9,7 @@
    Class for representing parameters in M matrix function.
    */
 class Param {
+  public:
   /* Variables: Parameter variables
      coeff - Coefficient of parameter.
      min - Smallest possible value.

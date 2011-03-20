@@ -38,6 +38,17 @@ class Simplex : public Base {
        Destroy Simplex, reclaim memory.
        */
     ~Simplex(void);
+
+    /* Func: dump()
+       FIXME
+       */
+    int dump(ostream*);
+
+    /* Func: print_html()
+       FIXME
+       */
+    int print_html(ostream*);
+
 };
 
 #endif /* __simplex_h */

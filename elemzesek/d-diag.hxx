@@ -5,10 +5,12 @@
 #include "simplex.hxx"
 #include "svg.hxx"
 #include "param.hxx"
+#include "mxfunction.hxx"
 #include <iostream>
 //#include <fstream>
 #include <list>
-//#include <algorithm>
+#include <vector>
+#include <algorithm>
 //#include <set>
 //#include <boost/math/common_factor.hpp>
 #include <math.h>
@@ -34,11 +36,11 @@ class Ddiag : public Base {
        buf_cancel_operation - Buffer for <Ddiag::cancel_operation()>.
        buf_Rmx - Buffer for <Ddiag::Rmx()>.
        */
-    int buf_symmetries=0;
-    Ddiag* buf_dual=0;
+    int buf_symmetries;
+    Ddiag* buf_dual;
     list<Param*> *buf_params;
     vector<list<Ddiag*> *> buf_cancel_operation;
-    Mxfunction* buf_Rmx=0;
+    Mxfunction* buf_Rmx;
 
     /* Variable: simplex_orbits
        We use <Base.car> different Simplex* pointers for vertices/simplex

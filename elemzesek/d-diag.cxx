@@ -4,9 +4,11 @@ Ddiag::Ddiag(int dim,int car):
   Base(dim,car),
   buf_symmetries(0)
 {
-  simplex_orbits=new simplex**[car+1];
-  for (int k=0;k<car+1;k++) simplex_orbits[k]=new simplex*[car];
-  for (int i=0;i<car;i++) simplex_orbits[0][i]=new simplex(dim,car,i);
+  buf_dual=0;
+  buf_Rmx=0;
+  simplex_orbits=new Simplex**[car+1];
+  for (int k=0;k<car+1;k++) simplex_orbits[k]=new Simplex*[car];
+  for (int i=0;i<car;i++) simplex_orbits[0][i]=new Simplex(dim,car,i);
 }
 
 Ddiag::Ddiag(Ddiag* olddiag){
@@ -31,7 +33,7 @@ Ddiag::Ddiag(Ddiag* olddiag){
     }
 }
 
-Ddiag::Ddiag(istream*){
+Ddiag::Ddiag(istream* in){
   *in >> dim >> car;
   Ddiag(dim,car);
   char level_control;
@@ -67,19 +69,22 @@ Ddiag::~Ddiag(void){
   delete buf_dual;
   delete buf_Rmx;
 
-  for(list<Param*>::iterator it=buf_params->begin();it1!=buf_params->end();
+  for(list<Param*>::iterator it1=buf_params->begin();it1!=buf_params->end();
       ++it1){
     // it1 is a pointer to Param* elements, so *it1 is a Param* element
     delete *it1;
   }
   delete buf_params;
 
-  for(list<Ddiag*>::iterator it=buf_cancel_operation->begin();
-      it1!=buf_cancel_operation->end(); ++it1){
-    // it1 is a pointer to Ddiag* elements, so *it1 is a Ddiag* element
+  for(vector<list<Ddiag*> *>::iterator it1=buf_cancel_operation.begin();
+      it1!=buf_cancel_operation.end(); ++it1){
+    // it1 is a pointer to list<Ddiag*> * elements
+    for(list<Ddiag*>::iterator it2=(*it1)->begin(); it2!=(*it1)->end(); ++it2){
+      // it2 is a pointer to Ddiag* elements, so *it1 is a Ddiag* element
+      delete *it2;
+    }
     delete *it1;
   }
-  delete buf_cancel_operation;
 }
 
 int Ddiag::create_edge(int color,int from,int to) {
@@ -107,7 +112,7 @@ void Ddiag::remove_edge(int color,int from,int to){
 }
 
 void Ddiag::create_numbering(Simplex* first){
-  vector<Simplex*> D;
+  list<Simplex*> D;
   D.push_back(first);
   int r=0;
   // The generated numberings are indexed from 1, but the first simplex orbit is
@@ -115,33 +120,33 @@ void Ddiag::create_numbering(Simplex* first){
   int i=first->sorszam[0]+1; // Number of first in the base numbering
   first->sorszam[i]=r++;
   while (D.size() < car){
-    vector<Simplex*>::iterator it;
-    if (find(D.begin(),D.end(),*(D.rbegin())->szomszed[0]) != D.end()) {
-      D.push_back(*(D.rbegin())->szomszed[0]);
+    // (*D.rbegin()) is a Simplex*
+    if (find(D.begin(),D.end(),(*D.rbegin())->szomszed[0]) == D.end()) {
+      D.push_back((*D.rbegin())->szomszed[0]);
     }
-    else if (find(D.begin(),D.end(),*(D.rbegin())->szomszed[1]) != D.end()) {
-      D.push_back(*(D.rbegin())->szomszed[1]);
+    else if (find(D.begin(),D.end(),(*D.rbegin())->szomszed[1]) == D.end()) {
+      D.push_back((*D.rbegin())->szomszed[1]);
     }
     else
       try {
 	for (int j=0;j<dim+1;j++) {
-	  for (vector<Simplex*>::iterator it=D.rbegin(),it!=D.rend(),it++){
-	    if (find(D.begin(),D.end(),*it->szomszed[j]) != D.end()) {
-	      D.push_back(*it->szomszed[j]);
+	  for (list<Simplex*>::reverse_iterator it=D.rbegin();it!=D.rend();it++){
+	    if (find(D.begin(),D.end(),(*it)->szomszed[j]) == D.end()) {
+	      D.push_back((*it)->szomszed[j]);
 	      throw 0;
 	    }
 	  }
 	}
       }
       catch (int a){
-	void;
+	a=0;
       }
-    *(D.rbegin())->sorszam[i]=r++;
+    (*D.rbegin())->sorszam[i]=r++;
   }
 
   // nem csak sorszam szerint lehet vegigmenni...
-  for (vector<Simplex*>::iterator it=D.begin(),it!=D.end(),it++){
-    int a=*it->sorszam[i];
+  for (list<Simplex*>::iterator it=D.begin();it!=D.end();it++){
+    int a=(*it)->sorszam[i];
     simplex_orbits[i][a]=*it;
   }
 }
@@ -159,7 +164,7 @@ Mxfunction *Ddiag::Rmx(void) {
 	    next=next->szomszed[i]->szomszed[j];
 	    steps++;
 	  }
-	  buf_Rmx->set(r,i,j,steps);
+	  buf_Rmx->set(simplex_orbits[0][r],i,j,steps);
 	}
   }
   return buf_Rmx;
@@ -171,7 +176,7 @@ Ddiag* Ddiag::dual(void) {
     for (int r=0;r<car;r++)
       for (int i=0;i<dim+1;i++){
 	int icsucsjszomszedja=simplex_orbits[0][r]->szomszed[i]->sorszam[0];
-        buf_dual->simplex_orbits[0][r]->szomszed[dim-i]=buf_dual->csucsok[0][icsucsjszomszedja];
+        buf_dual->simplex_orbits[0][r]->szomszed[dim-i]=buf_dual->simplex_orbits[0][icsucsjszomszedja];
 	buf_dual->simplex_orbits[0][r]->sorszam[0]=r;
       }
   }
@@ -182,10 +187,8 @@ list<Ddiag*> *Ddiag::cancel_operation(int cancel_op) {
   if(cancel_op<0 or cancel_op > dim+1){
     throw "Operation out of range";
   }
-  if(!buf_cancel_operation){
-    buf_cancel_operation=new vector<list<Ddiag*> *>(dim+2,NULL);
-  }
-  if(!buf_cancel_operation[cancel_op]){
+  buf_cancel_operation.resize(dim+2,0);
+  if(buf_cancel_operation[cancel_op]==0){
     buf_cancel_operation[cancel_op]=new list<Ddiag*>;
 
     list<int> unreachable;
@@ -197,7 +200,6 @@ list<Ddiag*> *Ddiag::cancel_operation(int cancel_op) {
       new_elements.push_back(*unreachable.begin());
       while (!new_elements.empty()) {
 	list<int> previous_elements;
-        utolso.clear();
         for ( list<int>::iterator p = new_elements.begin(); p !=
 	    new_elements.end(); ++p ) {
           previous_elements.push_back(*p);
@@ -228,18 +230,18 @@ list<Ddiag*> *Ddiag::cancel_operation(int cancel_op) {
       // is n.
       vector<int> indexes;
       for ( list<int>::iterator r = current_component.begin();
-	  r!=current_component.end(),r++)
+	  r!=current_component.end();r++)
 	indexes.push_back(simplex_orbits[0][*r]->sorszam[0]);
 
       for ( list<int>::iterator r = current_component.begin();
-	  r!=current_component.end(),r++){
+	  r!=current_component.end();r++){
 	for ( int j=0;j<dim+1;j++){
 	  // helper=index of the j-th adjacent simplex in the original diagram.
 	  int helper = simplex_orbits[0][indexes[num]]->szomszed[j]->sorszam[0];
 
 	  // helper1= index of the j-th adjacent simplex in the component
 	  vector<int>::iterator helper1 = find(indexes.begin(),indexes.end(),helper);
-	  curr->simplex_orbits[0][num]->szomszed[j] = curr->simplex_orbits[0][helper1];
+	  curr->simplex_orbits[0][num]->szomszed[j] = curr->simplex_orbits[0][*helper1];
 	}
 	num++;
       }
@@ -340,8 +342,8 @@ int Ddiag::is_smaller(int thisindex,Ddiag* other,int otherindex){
   if (car < other->car)
     return 1;
 
-  simplex** thissimplex=simplex_orbits[thisindex];
-  simplex** othersimplex=other->simplex_orbits[otherindex];
+  Simplex** thissimplex=simplex_orbits[thisindex];
+  Simplex** othersimplex=other->simplex_orbits[otherindex];
   for (int j=dim;j>=0;j--)
     for (int i=0;i<car-1;i++){
       if (thissimplex[i]->szomszed[j]->sorszam[thisindex] >
@@ -406,7 +408,7 @@ list<Param*> *Ddiag::params(void){
 	Param* curr_param=new Param(my_character++,coeff,orientable);
 	for(list<Simplex*>::iterator reached_it=reached.begin();
 	    reached_it!=reached.end(); reached_it++)
-	  curr_param->simplex_operations.push_back(Pair(*reached_it,op0));
+	  curr_param->simplex_operations.push_back(pair<Simplex*,int>(*reached_it,op0));
 	buf_params->push_back(curr_param);
       }
     }
@@ -415,7 +417,7 @@ list<Param*> *Ddiag::params(void){
   return buf_params;
 }
 
-int Ddiag::dump(ostream*){
+int Ddiag::dump(ostream* out){
   *out << dim << car;
   for(int i=0;i<dim+1;i++){
     *out << '(';
@@ -425,7 +427,7 @@ int Ddiag::dump(ostream*){
     while(! simplex_indexes.empty()){
       int first=*simplex_indexes.begin();
       simplex_indexes.erase(simplex_indexes.begin());
-      int second=simplex_orbits[0][first]->szomszed[i];
+      int second=simplex_orbits[0][first]->szomszed[i]->sorszam[0];
       *out << '(' << first;
       if (second!=first){
 	*out << ',' << second;
@@ -439,8 +441,11 @@ int Ddiag::dump(ostream*){
   return 0;
 }
 
-int Ddiag::print_html(ostream*);
+int Ddiag::print_html(ostream*){
+  return 0;
+}
 
 int Ddiag::filter_bad_orbifolds(list<Param*>*){
+  return 0;
 }
 
