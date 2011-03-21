@@ -1,6 +1,6 @@
 #include "svg.hxx"
 
-Svg::Svg(ostream* out,int dimin,int carin):
+Svg::Svg(int dimin,int carin):
   Base(dimin,carin)
 {
   rad=20;
@@ -12,8 +12,6 @@ Svg::Svg(ostream* out,int dimin,int carin):
     koordx[i]=int(round(size/2+(size/2-rad)*cos(PI-i*2*PI/car)));
     koordy[i]=int(round(size/2-(size/2-rad)*sin(PI-i*2*PI/car)));
   }
-  *out << "<svg:svg viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" << 
-    size << "px\" height=\""<<size<<"px\" version=\"1.1\">" <<endl;
 }
 
 void Svg::create_circle(int n) {
@@ -60,11 +58,30 @@ void Svg::create_line(int n0,int n1,int szin) {
 }
 
 Svg::~Svg(void) {
+  delete[] koordx;
+  delete[] koordy;
+}
+
+int Svg::print_html(ostream* out){
+  *out << "<svg:svg viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" << 
+    size << "px\" height=\""<<size<<"px\" version=\"1.1\">" <<endl;
+
+  for(list<vector<int> >::iterator it=lines.begin();it!=lines.end();it++){
+    create_line((*it)[0],(*it)[1],(*it)[2]);
+
   for(int i=0;i<car;i++){
     create_circle(i);
     create_numtext(i);
   }
   *out << "</svg:svg>" <<endl;
-  delete[] koordx;
-  delete[] koordy;
+  return 0;
+}
+
+int Svg::add_line(int n0,int n1,int szin){
+  vector<int> *a=new vector<int>;
+  a->push_back(n0);
+  a->push_back(n1);
+  a->push_back(szin);
+  lines.push_back(&a);
+  return 0;
 }

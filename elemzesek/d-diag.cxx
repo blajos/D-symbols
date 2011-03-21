@@ -441,11 +441,43 @@ int Ddiag::dump(ostream* out){
   return 0;
 }
 
-int Ddiag::print_html(ostream*){
+int Ddiag::print_html(ostream* out){
+  *out << "<html>" <<endl << "  <body>" << endl << "    <table border=\"2\">" <<
+    endl << "      <tr><td>";
+
+  Svg my_svg(dim,car);
+  for(int i=0;i<car;i++)
+    for(int j=0;j<dim+1;j++){
+      int other=simplex_orbits[0][i]->szomszed[j]->sorszam[0];
+      if(other!=i)
+        my_svg.add_line(i,other,j);
+    }
+  my_svg.print_html(out);
+
+  *out << "</td>" << endl;
+  *out << "      <td><table>" << endl;
+  *out << "        <tr><td>";
+  Rmx()->print_html(out);
+  *out << "</td></tr>" << endl;
+  *out << "        <tr><td colspan=\"" << car << "\">Number of " << dim-1 << 
+    " dimensional components: (" << cancel_operation(0)->size();
+  for (int j=1;j<dim+1;j++)
+    *out << "," << cancel_operation(j)->size();
+  *out << ")</td></tr>" << endl;
+  *out << "        <tr><td colspan=\"" << car << "\">Parameters:";
+  for (list<Param*>::iterator it=params()->begin();it!=params()->end();it++)
+    *out << " " << (*it)->coeff << (*it)->letter << ((*it)->orientable ? "+" : "");
+  *out << "</td></tr>" << endl;
+  *out << "      </table></td></tr>" << endl;
+  *out << "    </table>" << endl;
+  *out << "  </body>" << endl;
+  *out << "</html>" << endl;
   return 0;
 }
 
 int Ddiag::filter_bad_orbifolds(list<Param*>*){
+  // Let's ignore this for now, because it's possible to have a Euclidean
+  // tiling, which doesn't suffer from the bad orbifold problem.
   return 0;
 }
 

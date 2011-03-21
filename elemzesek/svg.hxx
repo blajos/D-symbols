@@ -5,7 +5,8 @@
 #include <iostream>
 #include <string>
 //#include <fstream>
-//#include <list>
+#include <list>
+#include <vector>
 //#include <algorithm>
 //#include <set>
 //#include <boost/math/common_factor.hpp>
@@ -19,11 +20,6 @@ using namespace std;
    Svg object for writing a D-diagram's SVG graphics code some output.
    */
 class Svg : public Base{
-  /* Variable: out
-     Output stream to write to. Of course we need the basic informations
-     (dimension, cardinality).
-     */
-  ostream* out;
   /* Variables: Geometric variables
      koordx - Array of x coordinates.
      koordy - Array of y coordinates.
@@ -32,11 +28,13 @@ class Svg : public Base{
      fontsize - Size of fonts.
      */
   int *koordx,*koordy,rad,size,fontsize;
+  list<vector<int> > lines;
+
   public:
   /* Constructor: Svg
      Initialize Svg object.
      */
-  Svg(ostream* out,int dim,int car);
+  Svg(int dim,int car);
   /* Destructor: ~Svg
      Destroy Svg object.
      */
@@ -54,6 +52,8 @@ class Svg : public Base{
      *color*.
    */
   void create_line(int n0,int n1,int color);
+  int add_line(int n0,int n1,int color);
+  int print_html(ostream*);
 };
 
 #endif /* __svg_h */
