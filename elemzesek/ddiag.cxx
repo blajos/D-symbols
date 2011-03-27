@@ -1,10 +1,10 @@
-#include "d-diag.hxx"
+#include "ddiag.hxx"
 
 Ddiag::Ddiag(int dim,int car):
   Base(dim,car),
   buf_symmetries(0)
 {
-  buf_dual=0;
+  buf_dual_diag=0;
   buf_Rmx=0;
   simplex_orbits=new Simplex**[car+1];
   for (int k=0;k<car+1;k++) simplex_orbits[k]=new Simplex*[car];
@@ -66,7 +66,7 @@ Ddiag::~Ddiag(void){
   for (int i=0;i<car;i++) delete simplex_orbits[0][i];
   for (int i=0;i<car;i++) delete[] simplex_orbits[i];
   delete[] simplex_orbits;
-  delete buf_dual;
+  delete buf_dual_diag;
   delete buf_Rmx;
 
   for(list<Param*>::iterator it1=buf_params->begin();it1!=buf_params->end();
@@ -76,8 +76,8 @@ Ddiag::~Ddiag(void){
   }
   delete buf_params;
 
-  for(vector<list<Ddiag*> *>::iterator it1=buf_cancel_operation.begin();
-      it1!=buf_cancel_operation.end(); ++it1){
+  for(vector<list<Ddiag*> *>::iterator it1=buf_cancel_operation_diag.begin();
+      it1!=buf_cancel_operation_diag.end(); ++it1){
     // it1 is a pointer to list<Ddiag*> * elements
     for(list<Ddiag*>::iterator it2=(*it1)->begin(); it2!=(*it1)->end(); ++it2){
       // it2 is a pointer to Ddiag* elements, so *it1 is a Ddiag* element
@@ -170,26 +170,26 @@ Mxfunction *Ddiag::Rmx(void) {
   return buf_Rmx;
 }
 
-Ddiag* Ddiag::dual(void) {
-  if (!buf_dual){
-    buf_dual=new Ddiag(dim,car);
+Ddiag* Ddiag::dual_diag(void) {
+  if (!buf_dual_diag){
+    buf_dual_diag=new Ddiag(dim,car);
     for (int r=0;r<car;r++)
       for (int i=0;i<dim+1;i++){
 	int icsucsjszomszedja=simplex_orbits[0][r]->szomszed[i]->sorszam[0];
-        buf_dual->simplex_orbits[0][r]->szomszed[dim-i]=buf_dual->simplex_orbits[0][icsucsjszomszedja];
-	buf_dual->simplex_orbits[0][r]->sorszam[0]=r;
+        buf_dual_diag->simplex_orbits[0][r]->szomszed[dim-i]=buf_dual_diag->simplex_orbits[0][icsucsjszomszedja];
+	buf_dual_diag->simplex_orbits[0][r]->sorszam[0]=r;
       }
   }
-  return buf_dual;
+  return buf_dual_diag;
 }
 
-list<Ddiag*> *Ddiag::cancel_operation(int cancel_op) {
+list<Ddiag*> *Ddiag::cancel_operation_diag(int cancel_op) {
   if(cancel_op<0 or cancel_op > dim+1){
     throw "Operation out of range";
   }
-  buf_cancel_operation.resize(dim+2,0);
-  if(buf_cancel_operation[cancel_op]==0){
-    buf_cancel_operation[cancel_op]=new list<Ddiag*>;
+  buf_cancel_operation_diag.resize(dim+2,0);
+  if(buf_cancel_operation_diag[cancel_op]==0){
+    buf_cancel_operation_diag[cancel_op]=new list<Ddiag*>;
 
     list<int> unreachable;
    
@@ -245,14 +245,14 @@ list<Ddiag*> *Ddiag::cancel_operation(int cancel_op) {
 	}
 	num++;
       }
-      buf_cancel_operation[cancel_op]->push_back(curr);
+      buf_cancel_operation_diag[cancel_op]->push_back(curr);
     }
   }
-  return buf_cancel_operation[cancel_op];
+  return buf_cancel_operation_diag[cancel_op];
 }
 
 int Ddiag::check_dual(void){
-  return -is_smaller(1,dual(),1);
+  return -is_smaller(1,dual_diag(),1);
 }
 
 int Ddiag::check_numberings(void){
@@ -460,9 +460,9 @@ int Ddiag::print_html(ostream* out){
   Rmx()->print_html(out);
   *out << "</td></tr>" << endl;
   *out << "        <tr><td colspan=\"" << car << "\">Number of " << dim-1 << 
-    " dimensional components: (" << cancel_operation(0)->size();
+    " dimensional components: (" << cancel_operation_diag(0)->size();
   for (int j=1;j<dim+1;j++)
-    *out << "," << cancel_operation(j)->size();
+    *out << "," << cancel_operation_diag(j)->size();
   *out << ")</td></tr>" << endl;
   *out << "        <tr><td colspan=\"" << car << "\">Parameters:";
   for (list<Param*>::iterator it=params()->begin();it!=params()->end();it++)

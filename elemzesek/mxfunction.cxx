@@ -14,6 +14,16 @@ Mxfunction::Mxfunction(int dim,int car):
   }
 }
 
+Mxfunction::Mxfunction(Mxfunction* oldmx):
+  Base(oldmx->dim,oldmx->car)
+{
+  Mxfunction(dim,car);
+  for(int i=0;i<car;i++)
+    for(int j=0;j<dim+1;j++)
+      for(int k=0;k<dim+1;k++)
+	mx[i][j][k]=oldmx->get(i,j,k);
+}
+
 // FIXME Kell ez?
 Mxfunction::Mxfunction(int,int,list<Param*>*):
   Base(dim,car)
@@ -59,6 +69,15 @@ int Mxfunction::get(Simplex* orbit,int x,int y){
 
 int Mxfunction::set(Simplex* orbit,int x,int y,int z){
   mx[orbit->sorszam[0]][x][y]=z;
+  return 0;
+}
+
+int Mxfunction::get(int k,int x,int y){
+  return mx[k][x][y];
+}
+
+int Mxfunction::set(int k,int x,int y,int z){
+  mx[k][x][y]=z;
   return 0;
 }
 

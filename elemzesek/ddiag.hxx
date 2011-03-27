@@ -31,15 +31,15 @@ class Ddiag : public Base {
   private:
     /* Variables: Buffer variables
        buf_symmetries - Buffer for <Ddiag::symmetries()>.
-       buf_dual - Buffer for <Ddiag::dual()>.
+       buf_dual_diag - Buffer for <Ddiag::dual_diag()>.
        buf_params - Buffer for <Ddiag::params()>.
-       buf_cancel_operation - Buffer for <Ddiag::cancel_operation()>.
+       buf_cancel_operation_diag - Buffer for <Ddiag::cancel_operation_diag()>.
        buf_Rmx - Buffer for <Ddiag::Rmx()>.
        */
     int buf_symmetries;
-    Ddiag* buf_dual;
+    Ddiag* buf_dual_diag;
     list<Param*> *buf_params;
-    vector<list<Ddiag*> *> buf_cancel_operation;
+    vector<list<Ddiag*> *> buf_cancel_operation_diag;
     Mxfunction* buf_Rmx;
 
     /* Variable: simplex_orbits
@@ -128,15 +128,15 @@ class Ddiag : public Base {
        Operation number 0 becomes number <Base.dim>, operation number 1 becomes
        <Base.dim>-1 and so on.
        */
-    Ddiag* dual(void);
+    Ddiag* dual_diag(void);
 
     /*
-       Func: cancel_operation()
+       Func: cancel_operation_diag()
       
        If we cancel the *i*th operation in the diagram, we can get some D-diagram
        components in a smaller dimension.
        */
-    list<Ddiag*> *cancel_operation(int i);
+    list<Ddiag*> *cancel_operation_diag(int i);
 
     /* Func: check_dual
        Check if the dual diagram is smaller.
@@ -146,7 +146,7 @@ class Ddiag : public Base {
        0 - Selfdual
        1 - The dual is bigger
        */
-    int check_dual(void);
+    virtual int check_dual(void);
 
     /* Func: check_numberings
        Check if there are alternate good numberings which give us a smaller
@@ -157,7 +157,7 @@ class Ddiag : public Base {
        0 - We have the best numbering, but there are multiple best numberings
        -1 - There are smaller possible numberings
        */
-    int check_numberings(void);
+    virtual int check_numberings(void);
 
     /* Func: symmetries()
        Is the D-diagram symmetric?

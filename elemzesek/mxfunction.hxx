@@ -25,6 +25,11 @@ class Mxfunction : public Base {
     Mxfunction(int,int);
 
     /* Constructor: Mxfunction
+       Copy constructor
+       */
+    Mxfunction(Mxfunction*);
+
+    /* Constructor: Mxfunction
        Create Mxfunction from parameters. FIXME Kell ez?
        */
     Mxfunction(int,int,list<Param*>*);
@@ -45,6 +50,13 @@ class Mxfunction : public Base {
        */
     int get(Simplex* orbit,int x,int y);
     int set(Simplex* orbit,int x,int y,int z);
+
+    /* Funcs: Simple functions
+       get() - Get the matrix element *x*,*y* from the *k*th matrix.
+       set() - Set the matrix element *x*,*y* to *z* in the *k*th matrix.
+       */
+    int get(int k,int x,int y);
+    int set(int k,int x,int y,int z);
 
     /* Func: dump
        Dump Mxfunction in machine readable format. 

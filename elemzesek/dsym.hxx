@@ -26,20 +26,20 @@ class Dsym : public Ddiag{
   private:
     /* Variables: Buffer variables
        buf_symmetries - Buffer for <Dsym::symmetries()>.
-       buf_dual - Buffer for <Dsym::dual()>.
+       buf_dual_sym - Buffer for <Dsym::dual()>.
        buf_cancel_operation - Buffer for <Dsym::cancel_operation()>.
        buf_Mmx - Buffer for <Ddiag::Mmx()>.
        */
-    int buf_symmetries=0;
-    Dsym* buf_dual=0;
-    list<Dsym*> *buf_cancel_operation;
-    Mxfunction* buf_Mmx=0;
+    int buf_symmetries;
+    Dsym* buf_dual_sym;
+    vector<list<Dsym*>*> buf_cancel_operation_sym;
+    Mxfunction* buf_Mmx;
 
   public:
     Dsym(int,int);
-    Dsym(Dsym&);
-    Dsym(Ddiag&);
-    Dsym(Ddiag&, Mxfunction&);
+    Dsym(Dsym*);
+    Dsym(Ddiag*);
+    Dsym(Ddiag*, Mxfunction*);
     ~Dsym(void);
 
     /* Func: Mmx
@@ -60,7 +60,7 @@ class Dsym : public Ddiag{
        Operation number 0 becomes number <Base.dim>, operation number 1 becomes
        <Base.dim>-1 and so on.
        */
-    Dsym* dual(void);
+    Dsym* dual_sym(void);
 
     /* Func: check_dual
        Check if the dual symbol is smaller.
@@ -109,7 +109,7 @@ class Dsym : public Ddiag{
        If we cancel the nth operation in the symbol, we can get some D-symbol
        components in a smaller dimension.
        */
-    list<Dsym*> cancel_operation(int);
+    list<Dsym*> *cancel_operation_sym(int);
 
     /*
        Func: is_smaller()
@@ -151,6 +151,13 @@ class Dsym : public Ddiag{
 	0 - There are bad barycentric-simplex vertices
        */
     int check_simplex_vertices(void);
+
+    /* Func: combinatoric_curvature()
+       Combinatoric curvature of a 2 dimensional D-symbol
+
+       FIXME Theory
+       */
+    double combinatoric_curvature(void);
 
     /* Func: is_spherical()
        If we have a 2 dimensional D-symbol we can check if it's tiling is
