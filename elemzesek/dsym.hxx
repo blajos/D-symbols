@@ -28,12 +28,12 @@ class Dsym : public Ddiag{
        buf_symmetries - Buffer for <Dsym::symmetries()>.
        buf_dual_sym - Buffer for <Dsym::dual()>.
        buf_cancel_operation - Buffer for <Dsym::cancel_operation()>.
-       buf_Mmx - Buffer for <Ddiag::Mmx()>.
+       Mmx - Matrix function M.
        */
     int buf_symmetries;
     Dsym* buf_dual_sym;
     vector<list<Dsym*>*> buf_cancel_operation_sym;
-    Mxfunction* buf_Mmx;
+    Mxfunction* Mmx;
 
   public:
     Dsym(int,int);
@@ -42,13 +42,13 @@ class Dsym : public Ddiag{
     Dsym(Ddiag*, Mxfunction*);
     ~Dsym(void);
 
-    /* Func: Mmx
+    /* Func: get_Mmx()
        This is the M matrix function, which can be generated from the parameters
        and their values, or can be preset.
 
        FIXME? Theory
        */
-    Mxfunction *Mmx(void);
+    Mxfunction *get_Mmx(void);
 
     /* Func: update_Mmx
        Set the values of M matrix function from the parameters and their values.
@@ -112,7 +112,7 @@ class Dsym : public Ddiag{
     list<Dsym*> *cancel_operation_sym(int);
 
     /*
-       Func: is_smaller()
+       Func: is_smaller_sym()
        Is this D-symbol with first vertice *i* smaller than the other D-symbol
        with first vertice *j*?
 
@@ -126,7 +126,7 @@ class Dsym : public Ddiag{
        Remarks:
        FIXME The used numberings should be generated beforehand.
        */
-    int is_smaller(int i,Dsym* other,int j);
+    int is_smaller_sym(int i,Dsym* other,int j);
 
     /* Func: check_simplex_vertices()
        Check that tilings around barycentric-simplex vertices give us spherical

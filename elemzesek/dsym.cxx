@@ -4,35 +4,34 @@ Dsym::Dsym(int dim,int car):
   Ddiag(dim,car)
 {
   buf_dual_sym=0;
-  buf_Mmx=0;
-  //create default Mmx
+  Mmx=new Mxfunction(dim,car);
 }
 
 Dsym::Dsym(Dsym* oldsym):
   Ddiag((Ddiag*)oldsym)
 {
-  buf_Mmx=new Mxfunction(oldsym->Mmx());
+  Mmx=new Mxfunction(oldsym->get_Mmx());
 }
 
 Dsym::Dsym(Ddiag* olddiag):
   Ddiag(olddiag)
 {
   buf_dual_sym=0;
-  buf_Mmx=buf_Mmx=new Mxfunction(dim,car);
+  Mmx=new Mxfunction(dim,car);
 }
 
 Dsym::Dsym(Ddiag* olddiag, Mxfunction* oldmmx):
   Ddiag(olddiag)
 {
-  buf_Mmx=new Mxfunction(oldmmx);
+  Mmx=new Mxfunction(oldmmx);
 }
 
 Dsym::~Dsym(void){
   return;
 }
 
-Mxfunction* Dsym::Mmx(void){
-  return buf_Mmx;
+Mxfunction* Dsym::get_Mmx(void){
+  return Mmx;
 }
 
 void Dsym::update_Mmx(void){
@@ -40,19 +39,41 @@ void Dsym::update_Mmx(void){
 }
 
 Dsym* Dsym::dual_sym(void){
+  if(!buf_dual_sym){
+    buf_dual_sym=new Dsym(dual_diag());
+    for(int i=0;i<car;i++)
+      for(int j=0;j<dim+1;j++)
+	for(int k=0;k<dim+1;k++)
+	  buf_dual_sym->Mmx->set(i,j,k,Mmx->get(i,dim-j,dim-k));
+  }
   return buf_dual_sym;
 }
 
 int Dsym::check_dual(void){
-  return 0;
+  return -is_smaller_sym(1,dual_sym(),1);
 }
 
 int Dsym::check_numberings(void){
-  return 0;
+  buf_symmetries=1;
+  for (int i=2;i<car+1;i++){
+    int ret=is_smaller_sym(1,this,i);
+    if (ret == -1){
+      return -1;
+    }
+    if (ret == 0){
+      buf_symmetries++;
+    }
+  }
+  if (buf_symmetries > 1)                                                                             
+    return 0;                                                                                          
+  else                                                                                                 
+    return 1;
 }
 
 int Dsym::symmetries(void){
-  return 0;
+  if (buf_symmetries == 0)
+    check_numberings();
+  return buf_symmetries;
 }
 
 int Dsym::check_m(void){
@@ -63,8 +84,13 @@ list<Dsym*>* Dsym::cancel_operation_sym(int i){
   return buf_cancel_operation_sym[i];
 }
 
-int Dsym::is_smaller(int i,Dsym* other,int j){
-  return 0;
+int Dsym::is_smaller_sym(int thisindex,Dsym* other,int otherindex){
+  if(is_smaller_diag(thisindex,(Ddiag*)other,otherindex))
+    return is_smaller_diag(thisindex,(Ddiag*)other,otherindex);
+  else {
+    // MX fuggvenyek...
+    return 0;
+  }
 }
 
 int Dsym::check_simplex_vertices(void){
