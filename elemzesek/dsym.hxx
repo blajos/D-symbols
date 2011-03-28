@@ -27,7 +27,7 @@ class Dsym : public Ddiag{
     /* Variables: Buffer variables
        buf_symmetries - Buffer for <Dsym::symmetries()>.
        buf_dual_sym - Buffer for <Dsym::dual()>.
-       buf_cancel_operation - Buffer for <Dsym::cancel_operation()>.
+       buf_cancel_operation_sym - Buffer for <Dsym::cancel_operation_sym()>.
        Mmx - Matrix function M.
        */
     int buf_symmetries;
@@ -104,7 +104,7 @@ class Dsym : public Ddiag{
     int check_m(void);
 
     /*
-       Func: cancel_operation()
+       Func: cancel_operation_sym()
       
        If we cancel the nth operation in the symbol, we can get some D-symbol
        components in a smaller dimension.
@@ -157,7 +157,7 @@ class Dsym : public Ddiag{
 
        FIXME Theory
        */
-    double combinatoric_curvature(void);
+    float combinatoric_curvature(void);
 
     /* Func: is_spherical()
        If we have a 2 dimensional D-symbol we can check if it's tiling is

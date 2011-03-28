@@ -231,6 +231,7 @@ class Ddiag : public Base {
        Pretty print Ddiag.
        */
     virtual int print_html(ostream*);
+    friend class Dsym;
 };
 
 #endif /* __ddiag_h */
