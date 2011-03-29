@@ -11,6 +11,7 @@ Dsym::Dsym(Dsym* oldsym):
   Ddiag((Ddiag*)oldsym)
 {
   Mmx=new Mxfunction(oldsym->get_Mmx());
+  // Set up parameters
 }
 
 Dsym::Dsym(Ddiag* olddiag):
@@ -24,6 +25,7 @@ Dsym::Dsym(Ddiag* olddiag, Mxfunction* oldmmx):
   Ddiag(olddiag)
 {
   Mmx=new Mxfunction(oldmmx);
+  // Set up parameters
 }
 
 Dsym::~Dsym(void){
