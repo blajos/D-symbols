@@ -27,7 +27,14 @@ Dsym::Dsym(Ddiag* olddiag, Mxfunction* oldmmx):
 }
 
 Dsym::~Dsym(void){
-  return;
+  delete buf_dual_sym;
+  delete Mmx;
+  for(vector<list<Dsym*>*>::iterator it1=buf_cancel_operation_sym.begin();
+      it1!=buf_cancel_operation_sym.end();it1++){
+    for(list<Dsym*>::iterator it2=(*it1)->begin(); it2!=(*it1)->end(); it2++)
+      delete *it2;
+    delete *it1;
+  }
 }
 
 Mxfunction* Dsym::get_Mmx(void){
@@ -100,6 +107,7 @@ list<Dsym*>* Dsym::cancel_operation_sym(int cancel_op){
       Dsym* new_element=new Dsym((*it));
       buf_cancel_operation_sym[cancel_op]->push_back(new_element);
       // A cancel operation hogyan tudja megtartani a 0. szamozast?
+      // Uj valtozo a Simplex osztalyban: original_label
     }
   }
   return buf_cancel_operation_sym[cancel_op];
@@ -156,7 +164,15 @@ float Dsym::combinatoric_curvature(void){
 
 int Dsym::is_spherical(void){
   if(combinatoric_curvature()>0){
-    // Check orbifold criteria
+    list<Param*> real_params;
+    for(list<Param*>::iterator it=params()->begin(); it!=params()->end(); it++)
+      if((*it)->val > 1)
+        real_params.push_back(*it);
+    if(real_params.size() == 1)
+      return 0;
+    else if (real_params.size() == 2 && 
+	(*real_params.begin())->orientable == (*real_params.begin()++)->orientable)
+      return 0;
     return 1;
   }
   return 0;
@@ -181,6 +197,9 @@ int Dsym::dump(ostream* out){
   return 0;
 }
 
-int Dsym::print_html(ostream*){
+int Dsym::print_html(ostream* out){
+  Ddiag::print_html(out);
+  *out << "    <p>M matrix function:</p>" << endl;
+  Mmx->print_html(out);
   return 0;
 }

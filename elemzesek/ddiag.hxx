@@ -90,7 +90,7 @@ class Ddiag : public Base {
       Destructor: ~Ddiag
       Reclaim allocated memory.
       */
-    ~Ddiag(void);
+    virtual ~Ddiag(void);
     
     /* Func: create_edge
        Create a *color* colored edge from *from* to *to*, if possible.

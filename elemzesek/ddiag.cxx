@@ -442,7 +442,8 @@ int Ddiag::dump(ostream* out){
 }
 
 int Ddiag::print_html(ostream* out){
-  *out << "<html>" <<endl << "  <body>" << endl << "    <table border=\"2\">" <<
+  //*out << "<html>" <<endl << "  <body>" << endl;
+  *out << "    <table border=\"2\">" <<
     endl << "      <tr><td>";
 
   Svg my_svg(dim,car);
@@ -470,8 +471,8 @@ int Ddiag::print_html(ostream* out){
   *out << "</td></tr>" << endl;
   *out << "      </table></td></tr>" << endl;
   *out << "    </table>" << endl;
-  *out << "  </body>" << endl;
-  *out << "</html>" << endl;
+  //*out << "  </body>" << endl;
+  //*out << "</html>" << endl;
   return 0;
 }
 
