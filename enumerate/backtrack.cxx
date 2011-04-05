@@ -308,8 +308,7 @@ int Dsym::ellenoriz(void) {
   if (osszefuggo(-1) > 1) return 1; //csak az osszefuggoek erdekesek
   int sor=sorszamozas();
   if (sor==1) return 1; 
-  //Ez most nem annyira erdekel, kesobb visszatesszuk
-  //if (!uvw()) return 1;
+  if (!uvw()) return 1;
   return -1;
 }
 
@@ -1106,23 +1105,72 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
     return;
   }
 
-
-  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1);
-  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1);
-  else {
-    int van_el=0;
-    //Kis heurisztika: nem lehet osszefuggo a graf, ha van elszigetelt csucsa
-    for(int j=0;j<dim+1;j++) 
-      if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
-	van_el=1;
-    if(van_el==1) backtrack(D,saved,0,honnan+1,honnan+2);
-  }
+  // Ellenorizzuk, hogy az uvw feltetelnek meg meg tudunk felelni
+  // Nem nyert, tul lassu...
+  //if (backtrack_breaks_uvw(D,honnan)){
+  //  return;
+  //}
 
   //ha tudunk elt hozzaadni, ujra meghivjuk onmagunkat
   if (D->elhozzaad(szin,honnan,hova)){
     backtrack(D,saved,szin,honnan,hova);
     D->eltorol(szin,honnan,hova);
   }
+
+  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1);
+  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1);
+  else {
+    int szukseges_fok=0;
+    int fok=0;
+    //Kis heurisztika: az elozo csucs fokszamanal
+    //(0.operator+2*1.op+4*2.op+8*3.op a fok) nem vehetunk kisebbet
+    for(int j=0;j<dim+1;j++) 
+      if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
+	fok+=1 << j;
+    if (honnan > 0){
+      for(int j=0;j<dim+1;j++)
+	if (D->csucsok[0][honnan-1]->szomszed[j] != D->csucsok[0][honnan-1])
+	  szukseges_fok+=1 << j;
+      if(fok >= szukseges_fok) backtrack(D,saved,0,honnan+1,honnan+2);
+    }
+    else if(fok>=1)  
+      backtrack(D,saved,0,honnan+1,honnan+2);
+  }
+}
+
+bool backtrack_breaks_uvw(Dsym* D,int honnan){
+  int dim=D->dim;
+  simplex*** csucsok=D->csucsok;
+  for (int r=0;r<=honnan;r++)
+    for (int i=0;i<dim-1;i++)
+      for (int i1=i+2;i1<dim+1;i1++)
+	if(csucsok[0][r]->szomszed[i]->szomszed[i1]->szomszed[i]->szomszed[i1]
+	    != csucsok[0][r]){
+	  // Mikor lehet ez meg jo?
+	  // Ha i,i1 operacio part egymas utan tobbszor alkalmazva osszesen max.
+	  // 4 kulonbozo csucsot erintunk; amik kozul a legnagyobb nem kisebb,
+	  // mint *honnan*.
+	  list<simplex*> kor;
+	  simplex* csucs=csucsok[0][r];
+	  do {
+	    if(find(kor.begin(),kor.end(),csucs)!=kor.end())
+	      kor.push_back(csucs);
+	    csucs=csucs->szomszed[i];
+	    if(find(kor.begin(),kor.end(),csucs)!=kor.end())
+	      kor.push_back(csucs);
+	    csucs=csucs->szomszed[i1];
+	  } while (csucs!=csucsok[0][r]);
+	  if ( kor.size() > 4 ) {
+	    return true;
+	  }
+	  int max;
+	  for (list<simplex*>::iterator it=kor.begin();it!=kor.end();it++)
+	    if(max < (*it)->sorszam[0])
+	      max = (*it)->sorszam[0];
+	  if (max < honnan)
+	    return true;
+	}
+  return false;
 }
 
 //Dsymlista::check: Hatulrol indulva megnezzuk, hogy hanyadik helyre kene tenni
@@ -1292,8 +1340,8 @@ void Dsymlista::print_html(void){
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
-    it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
-	&currD);
+    //it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
+    //	&currD);
     currD<<endl<<"</tbody></table></body></html>"<<endl;
 
     //html file:

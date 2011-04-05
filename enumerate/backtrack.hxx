@@ -242,6 +242,9 @@ class Dsymlista {
 //               int,int,int: vizsgalt el: (szin,honnan,hova)
 void backtrack(Dsym*,Dsymlista*,int,int,int);
 
+//Lehet-e meg jo a diagram?
+bool backtrack_breaks_uvw(Dsym*,int);
+
 //Rendezes matrixok nelkul: elso multigraf es kezdopontja, masodik multigraf es
 // kezdopontja. 
 // Elso kisebb:1	egyenlok:0	masodik kisebb:-1
