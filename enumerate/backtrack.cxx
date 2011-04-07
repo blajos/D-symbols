@@ -127,7 +127,7 @@ Dsym* Dsym::save_with_start(int start) {
     //sorszamok
     saved->csucsok[0][i]->sorszam[0]=csucsok[start][i]->sorszam[start];	
   }
-  saved->sorszamozas();
+  for(int i=0;i<car;i++) saved->atsorszamoz(i+1);
   saved->invol_create(0);
   saved->invol_create(1);
   //mx mentese
@@ -1131,9 +1131,11 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
     if (joe==-1) {
       bt1++;
       int start=1;
-      for(int i=1;i<car;i++)
+      for(int i=1;i<car;i++){
+	D->atsorszamoz(i+1);
 	if(kisebb(D,i+1,D,start)==1)
 	  start=i+1;
+      }
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD,1)==0) saved->append(ujD->save());
     }
@@ -1375,8 +1377,8 @@ void Dsymlista::print_html(void){
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
-    //it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
-    //	&currD);
+    it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
+    	&currD);
     currD<<endl<<"</tbody></table></body></html>"<<endl;
 
     //html file:
