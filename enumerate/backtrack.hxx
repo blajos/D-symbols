@@ -136,6 +136,7 @@ class Dsym {
     Dsym(int,int);
     ~Dsym(void);
     Dsym* save(void);
+    Dsym* save_with_start(int);
     int elhozzaad(int,int,int);
     void eltorol(int,int,int);
     void atsorszamoz(int);

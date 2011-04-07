@@ -112,6 +112,36 @@ Dsym* Dsym::save(void) {
   return saved;
 }
 
+//Dsym::save_with_start: letrehoz egy uj Dsym objektumra mutato pointert, es egy uj
+//objektumot is. 
+//Atmasoljuk bele az osszes adatot az eredetibol, figyelve arra, hogy veletlenul
+//se az eredeti egy simplexere mutato pointert mentsunk, hanem a sajaton belul a
+//megfelelo sorszamut talaljuk meg. A 0. simplex mas lesz.
+Dsym* Dsym::save_with_start(int start) {
+  Dsym* saved=new Dsym(dim,car);
+  for(int i=0;i<car;i++) for(int j=0;j<dim+1;j++) {
+    //Ehhez kell tudni azonositani a csucsokat:
+    int icsucsjszomszedja=csucsok[start][i]->szomszed[j]->sorszam[start];  
+    //szomszedsagok beallitasa
+    saved->csucsok[0][i]->szomszed[j]=saved->csucsok[0][icsucsjszomszedja];	
+    //sorszamok
+    saved->csucsok[0][i]->sorszam[0]=csucsok[start][i]->sorszam[start];	
+  }
+  saved->sorszamozas();
+  saved->invol_create(0);
+  saved->invol_create(1);
+  //mx mentese
+  for (int r=0;r<car;r++){
+    saved->csucsok[0][r]->mx=new int*[dim+1];
+    for (int i=0;i<dim+1;i++) 
+      saved->csucsok[0][r]->mx[i]=new int[dim+1];
+    for (int i=0;i<dim+1;i++)
+      for (int j=0;j<dim+1;j++)
+	saved->csucsok[0][r]->mx[i][j]=csucsok[start][r]->mx[i][j];
+  }
+  return saved;
+}
+
 //Dsym::atsorszamoz(i): i=1..car (0-val nem hivjuk meg, mert azt tetszolegesen
 //toltjuk fel.)
 //Az i. csucsbol(szimplexbol) indulva alkalmazzuk a sorszamozo algoritmust, es a
@@ -307,7 +337,7 @@ int Dsym::uvw(void) {
 int Dsym::ellenoriz(void) {
   if (osszefuggo(-1) > 1) return 1; //csak az osszefuggoek erdekesek
   int sor=sorszamozas();
-  if (sor==1) return 1; 
+  //if (sor==1) return 1; 
   if (!uvw()) return 1;
   return -1;
 }
@@ -1100,7 +1130,12 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
     //mentes, ha kell
     if (joe==-1) {
       bt1++;
-      if (saved->check(D,1)==0) saved->append(D->save());
+      int start=1;
+      for(int i=1;i<car;i++)
+	if(kisebb(D,i+1,D,start)==1)
+	  start=i+1;
+      Dsym* ujD=D->save_with_start(start);
+      if (saved->check(ujD,1)==0) saved->append(ujD->save());
     }
     return;
   }

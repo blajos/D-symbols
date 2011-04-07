@@ -1,0 +1,13 @@
+Lehetseges heurisztikak:
+- Adott pontbol nem lephetunk tovabb, amig nincs legalabb egy akkora ele, mint a
+  korabbi pontok kozti legnagyobb el (ez nem igaz szimmetriak eseten, illetve az
+  utolso pontra)
+- Ez nem igaz, illetve nem eleg: csak a kiindulasi pontot vehetjuk alapnak,
+  annak a legnagyobb operaciojat kell megugrani a tobbi csucson
+
+- backtrack soran specialis uvw ellenorzest csinalhatunk (ez lassu)
+
+- Minden csucs fokszamat is vizsgaljuk: (0.operator+2*1.op+4*2.op+8*3.op a fok);
+  az elso csucs csak a legkisebb foku lehet, fokszam szerint vehetunk novekvo
+  sorrendet; DE: nem fog minden sorrend eloallni, esetleg a legjobb szamozas
+  sem.
