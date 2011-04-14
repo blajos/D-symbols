@@ -161,17 +161,24 @@ void Dsym::atsorszamoz(int i) {
   while (r<car-1){
     r++;
     D[r]=NULL;
-    for (int j=0;j<dim+1;j++) {
-      for (int k=r-1;k>=0;k--) {
-	if (my_find(D[k]->szomszed[j],r,D) == 0) {
-	  D[r]=D[k]->szomszed[j];
-	  break;
-	}
-      }
-      if (D[r] != NULL) {
-	break;
-      }
-    }
+    if (my_find(D[r-1]->szomszed[0],r,D) == 0) {
+      D[r]=D[r-1]->szomszed[0];
+    }                
+    else if (my_find(D[r-1]->szomszed[1],r,D) == 0) {
+      D[r]=D[r-1]->szomszed[1];
+    }                
+    else             
+      for (int j=0;j<dim+1;j++) {
+	for (int k=r-1;k>=0;k--) {
+	  if (my_find(D[k]->szomszed[j],r,D) == 0) {
+	    D[r]=D[k]->szomszed[j];
+	    break;    
+	  }           
+	}             
+	if (D[r] != NULL) {
+	  break;      
+	}             
+      }              
     D[r]->sorszam[i]=r;
   }
   for (r=0;r<car;r++) {
@@ -1136,6 +1143,7 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
 	if(kisebb(D,i+1,D,start)==1)
 	  start=i+1;
       }
+      //cout << " " << bt1 << " " << start << endl;
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD,1)==0) saved->append(ujD->save());
     }
@@ -1157,18 +1165,30 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
   if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1);
   else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1);
   else {
-    int szukseges_fok=0;
-    int fok=0;
+    unsigned long long szukseges_fok=0;
+    unsigned long long fok=0;
     //Kis heurisztika: az elozo csucs fokszamanal
     //(0.operator+2*1.op+4*2.op+8*3.op a fok) nem vehetunk kisebbet
+    //*2^car es az elek tulso veget is hozzavesszuk
+    //
+    //FIXME Korlat: dim+car+1<64
     for(int j=0;j<dim+1;j++) 
       if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
-	fok+=1 << j;
+	//fok+=1 << j;
+	fok+=(1ULL << (j+car)) +
+	  (1ULL << D->csucsok[0][honnan]->szomszed[j]->sorszam[0]);
     if (honnan > 0){
       for(int j=0;j<dim+1;j++)
 	if (D->csucsok[0][honnan-1]->szomszed[j] != D->csucsok[0][honnan-1])
-	  szukseges_fok+=1 << j;
+	  //szukseges_fok+=1 << j; 
+	  szukseges_fok+=(1ULL << (j+car)) + 
+	    (1ULL << D->csucsok[0][honnan-1]->szomszed[j]->sorszam[0]);
       if(fok >= szukseges_fok) backtrack(D,saved,0,honnan+1,honnan+2);
+      /*else {
+	cout << endl << "Vagas: " << szin << ":" << honnan << "->" << hova << endl;
+        cout << fok << " " << szukseges_fok << endl;
+	D->print(0);
+      }*/
     }
     else if(fok>=1)  
       backtrack(D,saved,0,honnan+1,honnan+2);
@@ -1378,7 +1398,7 @@ void Dsymlista::print_html(void){
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
     it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
-    	&currD);
+	&currD);
     currD<<endl<<"</tbody></table></body></html>"<<endl;
 
     //html file:

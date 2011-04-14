@@ -11,3 +11,14 @@ Lehetseges heurisztikak:
   az elso csucs csak a legkisebb foku lehet, fokszam szerint vehetunk novekvo
   sorrendet; DE: nem fog minden sorrend eloallni, esetleg a legjobb szamozas
   sem.
+
+Megoldando grafelemeleti vagy algebrai problema: 
+- Nem akarjuk az osszes permutaciot felsorolni
+- Az eleket olyan sorrendben kene probalgatni, es egy olyan rendezest talalni;
+  hogy ha talalunk egy allapotot, amikor a csucsok permutaciojaval kisebb
+  diagramot kapunk, akkor az osszes kovetkezo allapot ilyen.
+- Algebrai kerdes: dim+1-szer direktszorozzuk az involuciokat, faktorizalunk a
+  permutacioval. (Bizonyos rossz allapotokban metszeni is tudunk.) Vagyis a
+  csoport Coxeter csoport ugyesen valasztva: barmely ket szimplex kozti barmely
+  operacio egy-egy csoport-elemet jelol.
+  (C x C x C x C)/S_n
