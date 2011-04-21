@@ -342,10 +342,17 @@ int Dsym::uvw(void) {
 
 //Dsym::ellenoriz: Az elobb definialt ellenorzesek lefuttatasa.
 int Dsym::ellenoriz(void) {
-  if (osszefuggo(-1) > 1) return 1; //csak az osszefuggoek erdekesek
+  if (osszefuggo(-1) > 1){
+    //cout << "Nem osszefuggo" <<endl;
+    return 1; //csak az osszefuggoek erdekesek
+  }
   int sor=sorszamozas();
   //if (sor==1) return 1; 
-  if (!uvw()) return 1;
+  if (!uvw()){
+    //cout << "Nem uvw0" <<endl;
+    //print(0);
+    return 1;
+  }
   return -1;
 }
 
@@ -1145,16 +1152,10 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
       }
       //cout << " " << bt1 << " " << start << endl;
       Dsym* ujD=D->save_with_start(start);
-      if (saved->check(ujD,1)==0) saved->append(ujD->save());
+      if (saved->check(ujD,1)==0) saved->append(ujD);
     }
     return;
   }
-
-  // Ellenorizzuk, hogy az uvw feltetelnek meg meg tudunk felelni
-  // Nem nyert, tul lassu...
-  //if (backtrack_breaks_uvw(D,honnan)){
-  //  return;
-  //}
 
   //ha tudunk elt hozzaadni, ujra meghivjuk onmagunkat
   if (D->elhozzaad(szin,honnan,hova)){
@@ -1167,9 +1168,8 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
   else {
     unsigned long long szukseges_fok=0;
     unsigned long long fok=0;
-    //Kis heurisztika: az elozo csucs fokszamanal
-    //(0.operator+2*1.op+4*2.op+8*3.op a fok) nem vehetunk kisebbet
-    //*2^car es az elek tulso veget is hozzavesszuk
+    //Heurisztika: az elozo csucs fokszamanal nem veszunk nagyobb elore mutato
+    //fokszamu esetet (lexikografikusan: szinek szomszedok)
     //
     //FIXME Korlat: dim+car+1<64
     for(int j=0;j<dim+1;j++) 
@@ -1183,12 +1183,8 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
 	  //szukseges_fok+=1 << j; 
 	  szukseges_fok+=(1ULL << (j+car)) + 
 	    (1ULL << D->csucsok[0][honnan-1]->szomszed[j]->sorszam[0]);
-      if(fok >= szukseges_fok) backtrack(D,saved,0,honnan+1,honnan+2);
-      /*else {
-	cout << endl << "Vagas: " << szin << ":" << honnan << "->" << hova << endl;
-        cout << fok << " " << szukseges_fok << endl;
-	D->print(0);
-      }*/
+      if(fok <= szukseges_fok && fok >= 1 && not backtrack_breaks_uvw(D,honnan))
+	backtrack(D,saved,0,honnan+1,honnan+2);
     }
     else if(fok>=1)  
       backtrack(D,saved,0,honnan+1,honnan+2);
@@ -1197,36 +1193,40 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
 
 bool backtrack_breaks_uvw(Dsym* D,int honnan){
   int dim=D->dim;
+  int max=honnan+1;
   simplex*** csucsok=D->csucsok;
-  for (int r=0;r<=honnan;r++)
+  for (int r=0;r<=max;r++)
     for (int i=0;i<dim-1;i++)
-      for (int i1=i+2;i1<dim+1;i1++)
-	if(csucsok[0][r]->szomszed[i]->szomszed[i1]->szomszed[i]->szomszed[i1]
-	    != csucsok[0][r]){
-	  // Mikor lehet ez meg jo?
-	  // Ha i,i1 operacio part egymas utan tobbszor alkalmazva osszesen max.
-	  // 4 kulonbozo csucsot erintunk; amik kozul a legnagyobb nem kisebb,
-	  // mint *honnan*.
-	  list<simplex*> kor;
-	  simplex* csucs=csucsok[0][r];
-	  do {
-	    if(find(kor.begin(),kor.end(),csucs)!=kor.end())
-	      kor.push_back(csucs);
-	    csucs=csucs->szomszed[i];
-	    if(find(kor.begin(),kor.end(),csucs)!=kor.end())
-	      kor.push_back(csucs);
-	    csucs=csucs->szomszed[i1];
-	  } while (csucs!=csucsok[0][r]);
-	  if ( kor.size() > 4 ) {
-	    return true;
-	  }
-	  int max;
-	  for (list<simplex*>::iterator it=kor.begin();it!=kor.end();it++)
-	    if(max < (*it)->sorszam[0])
-	      max = (*it)->sorszam[0];
-	  if (max < honnan)
-	    return true;
+      for (int i1=i+2;i1<dim+1;i1++){
+	/* A kovetkezo minta felismerese: |_
+	   Ha talalunk nem szomszedos operacio parokkal 2 hosszu lancot, ahol mindket
+	   tag nem nagyobb, mint max; az rossz. */
+	if(csucsok[0][r]->szomszed[i] == csucsok[0][r] &&
+	    csucsok[0][r]->szomszed[i1] != csucsok[0][r] &&
+	    csucsok[0][r]->szomszed[i1]->sorszam[0] <= max &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] == csucsok[0][r]->szomszed[i1]->szomszed[i]){
+	  //cout << "Nem uvw1" <<endl;
+	  //D->print(0);
+	  return true;
 	}
+	/* A kovetkezo minta felismerese: |_|
+	   Ha talalunk nem szomszedos operacio parokkal 3 hosszu valamit, ahol mindket
+	   tag nem nagyobb, mint max, es nem zarodik vissza; az is rossz. */
+	if(csucsok[0][r]->szomszed[i] == csucsok[0][r] &&
+	    csucsok[0][r]->szomszed[i1] != csucsok[0][r] &&
+	    csucsok[0][r]->szomszed[i1]->sorszam[0] <= max &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] != csucsok[0][r]->szomszed[i1]->szomszed[i] &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->sorszam[0] <= max &&
+	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->szomszed[i] != csucsok[0][r]){
+	  //cout << "Nem uvw2" <<endl;
+	  //D->print(0);
+	  return true;
+	}
+      }
   return false;
 }
 

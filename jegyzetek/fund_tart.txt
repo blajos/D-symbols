@@ -1,0 +1,13 @@
+Elso szimplex: valami fix, ez kb. nem erdekes, oldalai kulonbozo szinuek (ez,
+lehet, hogy meg nem fontos.)
+
+Ragasztas muvelete: Mindig 1 uj csucsot kell az eddigi rendszerhez hozzavenni.
+Vesszuk a face sulypontjat (ez konnyen szamolhato) es a kifele mutato
+normalvektorral eltoljuk 1 egysegnyit. Minden kulso face-re megnezzuk, hogy jo
+oldalon vagyunk-e (nem akarunk a hataron sem lenni.) Ha igen, akkor ok, ha nem
+akkor a sulypontot csak az elozo probalkozas felevel toljuk el. Elobb-utobb jo
+lesz.
+
+Nyilvan kell tartani: kulso face-ek listajat (normalvektor, egyenlet tuloldala)
+
+A vegen szinezunk.
