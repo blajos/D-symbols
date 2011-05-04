@@ -4,6 +4,9 @@
 #include <algorithm>
 #include <set>
 
+#define THRESH 0.0000001
+#define DEGENERATION_LIMIT 2
+
 using namespace std;
 
 //simplex osztaly: A D-szimbolumok szimplexeinek avagy csucsainak tarolasara.

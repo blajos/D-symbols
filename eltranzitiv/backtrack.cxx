@@ -581,8 +581,7 @@ int Dsym::kdimsf(list<param>::iterator inf_param){
 	    if(params[(*currszim)->sorszam[1]][j]!=inf_param)
 	      sum+=1.0/float((*currszim)->mx[j][j+1]);
 	    else
-#define THRESH 0.0000001
-	      sum+=10*THRESH;
+	      sum+=10*THRESH; // Ezzel jelezzuk, hogy a vegtelen lancnak az elemei erdekesek, nem a hatarerteke
 	sum-=0.5;
       }
       if(sum<-THRESH) {
@@ -685,7 +684,7 @@ void Dsym::create_params(void){
 
 	currparam.eh++;
       }
-      for(currparam.min_ertek=0;currparam.eh*currparam.min_ertek<2;
+      for(currparam.min_ertek=0;currparam.eh*currparam.min_ertek < DEGENERATION_LIMIT;
 	  currparam.min_ertek++);
       if ( ir!=1 ) currparam.eh=-currparam.eh;
       plist.push_back(currparam);
@@ -742,7 +741,7 @@ void Dsym::filter_bad_orbifolds(void){
 	egyik->eh=(egyik->eh<0 ? -1 : 1 ) *
 	  boost::math::lcm(egyik->eh,masik->eh);
 
-	for(egyik->min_ertek=0;abs(egyik->eh)*egyik->min_ertek<3;
+	for(egyik->min_ertek=0;abs(egyik->eh)*egyik->min_ertek < DEGENERATION_LIMIT;
 	    egyik->min_ertek++);
 
 	for(list<simplex*>::iterator szit=masik->szek.begin();
