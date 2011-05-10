@@ -73,12 +73,54 @@ class Fundom{
   int print_geomview(ostream*);
 };
 
+/* Class: Tetrahedron
+   General n-dimensional tetrahedron class for generating fundamental domains.
+
+     FIXME Simplex osztalyba nem lehet betenni? (Talan nem kene eroltetni, mert
+     az simplex orbitokrol szol...)
+   */
 class Tetrahedron{
   /* Variables:
      dim - Dimension
      points - Vector of the points of the tetrahedron
-
-     FIXME Simplex osztalyba nem lehet betenni? (Talan nem kene eroltetni...)
+     facets - List/vector of facets
   */
+  int dim;
+  vector<Point*> points;
+  list<Facet*> facets;
+};
+
+/* Class: Facet
+   *dim-1* dimensional facet of a Tetrahedron. It has points, a color
+   ((from,to,operation) tuple), a normal vector and is possibly invisible.
+   */
+class Facet{
+  /* Variables:
+     dim - Dimension
+     points - Vector of the points of the facet
+     color - Color of the facet ((from,to,operation) tuple)
+     normal - Normal vector (Point type)
+     visible - Is visible?
+  */
+  int dim;
+  vector<Point*> points;
+  vector<int> color;
+  Point normal;
+  bool visible;
+};
+
+/* Class: Point
+   *dim* dimensional vector or point.
+
+   FIXME Kell ez? Siman vetor<int> is eleg lenne...
+   */
+class Point{
+  /* Variables:
+     dim - Dimension
+     coordinates - Coordinates
+     */
+  int dim;
+  vector<double> coordinates;
+};
 
 #endif /* __fundom_h */
