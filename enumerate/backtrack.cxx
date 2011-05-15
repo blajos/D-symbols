@@ -647,7 +647,7 @@ int Dsym::min(void){
 //szimplexben. Egy parameter egyutthatoja negativ, ha iranyitatlan, pozitiv, ha
 //iranyitott. (A mx-okban csak az abszolut erteket tuntejuk fel.)
 void Dsym::create_params(void){
-  char karakter='m';
+  char karakter='a';
   for(int op0=0;op0<dim;op0++){ 
     int op1=op0+1;
     list<int> nemelerheto;

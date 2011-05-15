@@ -5,7 +5,7 @@
 #include <set>
 
 #define THRESH 0.0000001
-#define DEGENERATION_LIMIT 2
+#define DEGENERATION_LIMIT 3
 
 using namespace std;
 
