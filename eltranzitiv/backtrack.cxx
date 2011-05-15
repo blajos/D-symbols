@@ -1137,7 +1137,7 @@ bool operator == (Dsym::param a,Dsym::param b) {
 int bt;
 int bt1;
 long long bt0;
-void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
+void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current_largest) {
   int car=D->car;
   int dim=D->dim;
   bt0++;
@@ -1164,38 +1164,60 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
     return;
   }
 
-  //ha tudunk elt hozzaadni, ujra meghivjuk onmagunkat
-  if (D->elhozzaad(szin,honnan,hova)){
-    backtrack(D,saved,szin,honnan,hova);
+  // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni
+  bool ures=true;
+  for(int j=0;j<dim+1;j++)
+    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova])
+      ures=false;
+
+  bool erdemes=true;
+  if ( ures )
+    for (int i=1;i<hova;i++){ // A 0-adik csucs uressege nem szamit
+      bool ures1=true;
+      for(int j=0;j<dim+1;j++)
+       if (D->csucsok[0][i]->szomszed[j] != D->csucsok[0][i]){
+         ures1=false;
+         break;
+       }
+      if (ures1){
+       erdemes=false;
+       break;
+      }
+    }
+
+  //ha erdemes elt hozzaadni, ujra meghivjuk onmagunkat
+  if (erdemes && D->elhozzaad(szin,honnan,hova)){
+    int largest=current_largest;
+    if (hova > largest)
+      largest=hova;
+    backtrack(D,saved,szin,honnan,hova,largest);
     D->eltorol(szin,honnan,hova);
   }
 
-  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1);
-  else if(szin+1<dim+1 && szin==0) backtrack(D,saved,szin+2,honnan,honnan+1);
-  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1);
+  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1,current_largest);
+  else if(szin+1<dim+1 && szin==0) backtrack(D,saved,szin+2,honnan,honnan+1,current_largest);
+  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1,current_largest);
   else {
-    unsigned long long szukseges_fok=0;
-    unsigned long long fok=0;
-    //Heurisztika: az elozo csucs fokszamanal nem veszunk nagyobb elore mutato
-    //fokszamu esetet (lexikografikusan: szinek szomszedok)
-    //
-    //FIXME Korlat: dim+car+1<64
+    int szukseges_fok=0;
+    int fok=0;
+    //Heurisztika: az elso csucs fokszamanal nem veszunk nagyobb fokszamu esetet
+    //(lexikografikusan: szinek szerint)
+
     for(int j=0;j<dim+1;j++) 
       if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
-	//fok+=1 << j;
-	fok+=(1ULL << (j+car)) +
-	  (1ULL << D->csucsok[0][honnan]->szomszed[j]->sorszam[0]);
+	fok+=1 << j;
     if (honnan > 0){
       for(int j=0;j<dim+1;j++)
-	if (D->csucsok[0][honnan-1]->szomszed[j] != D->csucsok[0][honnan-1])
-	  //szukseges_fok+=1 << j; 
-	  szukseges_fok+=(1ULL << (j+car)) + 
-	    (1ULL << D->csucsok[0][honnan-1]->szomszed[j]->sorszam[0]);
-      if(fok <= szukseges_fok && fok >= 1 && not backtrack_breaks_uvw(D,honnan))
-	backtrack(D,saved,0,honnan+1,honnan+2);
+       if (D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
+         szukseges_fok+=1 << j;
+      if(fok <= szukseges_fok &&
+         fok >= 1 &&
+         current_largest >= honnan+1 &&
+         not backtrack_breaks_uvw(D,honnan))
+        backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
     }
-    else if(fok>=1)  
-      backtrack(D,saved,0,honnan+1,honnan+2);
+    else if(fok>=1)  // current largest ekkor egyertelmu
+      backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
   }
 }
 
@@ -1303,7 +1325,7 @@ int Dsymlista::check(Dsym* uj_elem,int var_uj) {
 //Dsymlista::append: az uj elemet a linkelt lista it-vel mutatott eleme moge
 //szurja be. Fontos, hogy check(uj_elem,1)-et meg kell hivni elotte.
 void Dsymlista::append(Dsym* uj_elem) {
-  cout<<count++<<endl;
+  cerr<<"\r"<<count++;
   Dsymlinklist* uj=new Dsymlinklist;
   uj->curr=uj_elem;
   uj->ssz=1;
@@ -1370,6 +1392,8 @@ void Dsymlista::print(void){
 //annyi pluszt teszunk hozza, hogy kulon fajlba (currD) kiirjuk az osszes
 //lehetseges matrix-rendszert is.
 void Dsymlista::print_html(void){
+  if (first==NULL)
+    return;
   int dim=first->curr->dim;
   int car=first->curr->car;
   ostringstream filename;
@@ -1381,6 +1405,7 @@ void Dsymlista::print_html(void){
   html_file<<"<html>"<<endl<<"<body>"<<endl;
 
   for (Dsymlinklist* it=first;it!=NULL;it=it->next) {
+    cerr<<"\r"<<it->ssz;
     it->curr->dual=0;
     it->curr->dualis();
     inf=1000000;
@@ -1592,7 +1617,7 @@ int main(int,char**,char**){
   bt=0;
   bt1=0;
   bt0=0;
-  backtrack(D,saved,0,0,1);
+  backtrack(D,saved,0,0,1,0);
   int ujssz=1;
   for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
     it->ssz=ujssz++;
