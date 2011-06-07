@@ -25,12 +25,15 @@ simplex::simplex(int dimin,int carin,int ssz):
   sorszam[0]=ssz;
   szomszed=new simplex*[dim+1];
   for(int i=0;i<dim+1;i++) szomszed[i]=this;
+  mx=new int*[dim+1];
+  for (int i=0;i<dim+1;i++) mx[i]=new int[dim+1];
 }
 
 //simplex destruktor: a lefoglalt memoriakat felszabaditjuk
 simplex::~simplex(void) {
   delete[] sorszam;
   delete[] szomszed;
+  for (int i=0;i<dim+1;i++) delete[] mx[i];
   delete[] mx;
 }
 
@@ -53,14 +56,13 @@ Dsym::Dsym(int dimin, int carin):
   for (int i=0;i<car;i++) csucsok[0][i]=new simplex(dim,car,i);
   params=new list<param>::iterator*[car];
   for (int i=0;i<car;i++) params[i]=new list<param>::iterator[dim];
+  dual=0;
+  klist=new list<kisebbdim>[dim+1];
 }
 
 //Dsym destruktor: memoria felszabaditasa
 Dsym::~Dsym(void) {
-  for (int i=0;i<car;i++) delete csucsok[0][i];
-  for (int i=0;i<car;i++) delete[] csucsok[i];
-  delete[] csucsok;
-  delete dual;
+  if(dual!=0) delete dual;
   if(involucio) {
     for(int j=0;j<dim+1;j++){
       for(int k=0;k<*involucio[j][car];k++)
@@ -74,7 +76,12 @@ Dsym::~Dsym(void) {
     for (int i=0;i<car;i++) delete[] params[i];
     delete[] params;
   }
+  delete[] klist;
 
+  // Ez a vegere kell...
+  for (int i=0;i<car;i++) delete csucsok[0][i];
+  for (int i=0;i<car+1;i++) delete[] csucsok[i];
+  delete[] csucsok;
 }
 
 //Dsym::save: letrehoz egy uj Dsym objektumra mutato pointert, es egy uj
@@ -98,13 +105,10 @@ Dsym* Dsym::save(void) {
       saved->csucsok[k][i]=saved->csucsok[0][icsucsksorszama];
       saved->csucsok[k][i]->sorszam[k]=i;
     }
-  saved->invol_create(0);
-  saved->invol_create(1);
+  //saved->invol_create(0);
+  //saved->invol_create(1);
   //mx mentese
   for (int r=0;r<car;r++){
-    saved->csucsok[0][r]->mx=new int*[dim+1];
-    for (int i=0;i<dim+1;i++) 
-      saved->csucsok[0][r]->mx[i]=new int[dim+1];
     for (int i=0;i<dim+1;i++)
       for (int j=0;j<dim+1;j++)
 	saved->csucsok[0][r]->mx[i][j]=csucsok[0][r]->mx[i][j];
@@ -128,13 +132,10 @@ Dsym* Dsym::save_with_start(int start) {
     saved->csucsok[0][i]->sorszam[0]=csucsok[start][i]->sorszam[start];	
   }
   for(int i=0;i<car;i++) saved->atsorszamoz(i+1);
-  saved->invol_create(0);
-  saved->invol_create(1);
+  //saved->invol_create(0);
+  //saved->invol_create(1);
   //mx mentese
   for (int r=0;r<car;r++){
-    saved->csucsok[0][r]->mx=new int*[dim+1];
-    for (int i=0;i<dim+1;i++) 
-      saved->csucsok[0][r]->mx[i]=new int[dim+1];
     for (int i=0;i<dim+1;i++)
       for (int j=0;j<dim+1;j++)
 	saved->csucsok[0][r]->mx[i][j]=csucsok[start][r]->mx[i][j];
@@ -306,12 +307,6 @@ int Dsym::osszefuggo(int elhagy) {
 //meg nem foglalkozunk, csak beirjuk oket a matrixba.) 0-t adunk vissza, ha nem
 //teljesul a fenti feltetel, 1-et, ha teljesul.
 int Dsym::uvw(void) {
-  if(!csucsok[1][0]->mx)   //ha nincs lefoglalva, lefoglaljuk a helyet
-    for (int r=0;r<car;r++) {
-      csucsok[1][r]->mx=new int*[dim+1];
-      for (int i=0;i<dim+1;i++) csucsok[1][r]->mx[i]=new int[dim+1];
-    }
-
   for (int r=0;r<car;r++) {				//atlotol tavolabbi
     for (int i=0;i<dim-1;i++)
       for (int i1=i+2;i1<dim+1;i1++){
@@ -474,7 +469,6 @@ void Dsym::write_xfig(string file) {
 //Vegul megnezzuk, hogy a komponens iranyitott vagy iranyitatlan feluletet ad
 //meg.
 void Dsym::create_kdim(void) {
-  klist=new list<kisebbdim>[dim+1];
   for (int elhagy=0;elhagy<dim+1;elhagy++){
     int currkis=elhagy;
 
@@ -1349,6 +1343,15 @@ void Dsymlista::append(Dsym* uj_elem) {
 //Dsymlista konstruktor: ures lista alapertelemezesei.
 Dsymlista::Dsymlista(void):first(0),last(0),count(0) {}
 
+//Dsymlista destruktor: 
+Dsymlista::~Dsymlista(void){
+  for (Dsymlinklist* it=first;it!=NULL;it=it->next) {
+    delete it->curr;
+    delete it->prev;
+  }
+  delete last;
+}
+
 //Dsymlista::print: kiirja a konzolra a multigrafot (involucio alakban) egy
 //sorszammal; kiszamolja, hogy a listaban hanyadik elem a dulisa, majd kiirja;
 //operacio-paronkent kiirja egy sorba az oda tartozo parametereket (+-szal
@@ -1628,5 +1631,7 @@ int main(int,char**,char**){
   cout<<float(bt1)/float(saved->count)<<endl;
   cout<<bt0<<endl;
   saved->print_html();
+  delete D;
+  delete saved;
   return 0;
 }

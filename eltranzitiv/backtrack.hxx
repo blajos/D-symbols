@@ -229,6 +229,7 @@ class Dsymlista {
     int count;
 
     Dsymlista(void);
+    ~Dsymlista(void);
     void append(Dsym* uj_elem);
 
     int check(Dsym*,int);
