@@ -1,0 +1,92 @@
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+%\usepackage{amsthm}
+\usepackage{ae,aecompl}
+
+\usetheme{Goettingen}
+%\usetheme{Singapore}
+
+\title{Algorithms for finding 3 dimensional D-symbols}
+\author{Boróczki, Lajos}
+\date{2011-06-20}
+
+\begin{document}
+
+\begin{frame}
+  \maketitle
+\end{frame}
+
+\begin{frame}
+  \mode<presentation>{\frametitle{Outline}}
+  \tableofcontents
+\end{frame}
+\newpage
+
+\section{D-symbols}
+\begin{frame}
+  D-symbols:
+  \begin{itemize}
+    \item Based on the baricentric subdivision of a tiling
+    \item Structure:
+      \begin{itemize}
+	\item D-diagram: $dim+1$ colored graph, which represents adjacencies of
+	  simplex-orbits
+	\item Matrix function on simplex orbits, which represents the number of
+	  simplexes (not orbits) around a $dim-2$ dimensional edge.
+      \end{itemize}
+    \item Conditions:
+      \begin{itemize}
+	\item Compatibility between the diagram and the matrix function.
+	\item Compatibility with baricentric subdivision
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Finding D-diagrams}
+\begin{frame}
+  Simple algorithm for finding D-diagrams:
+  \begin{itemize}
+    \item Fixed dimension and cardinality
+    \item Take $car$ number of graph vertices and $dim+1$ number of colors
+    \item Enumerate every possible edge-combinations and on the way drop the
+      "bad" and duplicate combinations
+    \item Conditions:
+      \begin{itemize}
+	\item Rank of vertices
+	\item Patterns which makes the diagram incompatible with baricentric
+	  subdivision
+	\item Is connected?
+	\item Permutation of vertices (ordering of diagrams; and always take the
+	  smallest empty vertex)
+      \end{itemize}
+  \end{itemize}
+\end{frame}
+
+\section{Finding matrix-functions}
+\begin{frame}
+  Algorithm for finding possible matrix-functions of a D-diagram in
+  $3$-dimensions:
+  \begin{itemize}
+    \item Parametric matrix function, minimal values
+    \item $2$-dimensional components (simplex point stabilizers):
+      \begin{itemize}
+	\item Based on combinatorial curvature (decreases if we increase the
+	  parameter values)
+	\item Only spherical or euclidean
+	\item If spherical we have to exclude bad orbifolds
+      \end{itemize}
+    \item Increase every parameter one by one, manage infinite series
+  \end{itemize}
+  Some easy to answer questions:
+  \begin{itemize}
+    \item Does the D-symbol have inner symmetries (diagram and matrix function)?
+    \item Does the D-symbol have ideal simplex points?
+  \end{itemize}
+\end{frame}
+
+\end{document}
