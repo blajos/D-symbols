@@ -31,6 +31,7 @@ tiling, with a little modification: for quadrangles we have to write
 2-1/m_{01}-1/m_{12}-1/m_{23}-1/m_{30} instead of 1-1/m_{01}-1/m_{12}-1/m_{20}.
 (The combinatorial curvature function does not increase if we increase the value
 of parameters.)
+Watch out for bad orbifolds in S^2...
 
 
 C++:
