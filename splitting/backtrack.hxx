@@ -196,7 +196,7 @@ class Dsym {
 	pointlist,list<kisebbdim*> part1list, list<kisebbdim*> notpart1list,
 	list<pair<kisebbdim*,kisebbdim*> > outbound_edges);
     void print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
-	outbound_edges);
+	outbound_edges, list<kisebbdim*> part1list);
 };
 
 bool operator == (Dsym::param,Dsym::param);
