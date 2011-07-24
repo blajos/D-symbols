@@ -1188,7 +1188,8 @@ void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> po
       }
     if (do_we_care_about_the_edge){
       part1list1.push_back(new_point);
-      list<pair<kisebbdim*,kisebbdim*> > outbound_edges2 = list<pair<kisebbdim*,kisebbdim*> >(outbound_edges1);
+      list<pair<kisebbdim*,kisebbdim*> > outbound_edges2 = list<pair<kisebbdim*,kisebbdim*> >(outbound_edges);
+      outbound_edges2.remove(current_edge);
 
       //list of edges going out+=new point's edges going out
       for(int op=0;op<dim+1;op++)
@@ -1284,7 +1285,7 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
   //parameters</td></tr>
   *out << "<tr>";
   *out << "<td>";
-  for(int op=0;op<dim+1;op++){
+  /*for(int op=0;op<dim+1;op++){
     if ( op != 0 )
       *out << "; ";
     bool colon=false;
@@ -1301,6 +1302,12 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
 	*out << min_sorsz+1;
       }
     }
+  }*/
+  for ( list<kisebbdim*>::iterator currpoint=part1list.begin(); currpoint!=part1list.end(); currpoint++ ){
+    *out << (*currpoint)->op << ": ";
+    for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin(); szimp!=(*currpoint)->szek.end(); szimp++ )
+      *out << (*szimp)->sorszam[0]+1 << " ";
+    *out << "<br>";
   }
   *out << "</td>";
 
@@ -1318,6 +1325,21 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
     if (param!=splitting_params.begin())
       *out << ", ";
     *out << (*param)->kar;
+  }
+  *out << "</td>";
+
+  //debug
+  *out << "<td>";
+  for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
+    *out << edge->first->op << ": ";
+    for ( list<simplex*>::iterator szimp=edge->first->szek.begin(); szimp!=edge->first->szek.end(); szimp++ )
+      *out << (*szimp)->sorszam[0]+1 << " ";
+    *out << " &rarr; ";
+
+    *out << edge->second->op << ": ";
+    for ( list<simplex*>::iterator szimp=edge->second->szek.begin(); szimp!=edge->second->szek.end(); szimp++ )
+      *out << (*szimp)->sorszam[0]+1 << " ";
+    *out << "<br>";
   }
   *out << "</td>";
 
@@ -1638,14 +1660,13 @@ void Dsymlista::print_html(void){
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
-    //it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
-    //	&currD);
+    it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(), &currD);
     currD<<endl<<"</tbody></table>";
     // Possible splittings
     currD<<"<br><table border=\"1\" cellpadding=\"3\">"
       <<endl<<"<caption>Possible splittings:</caption>"<<endl
       <<"<thead><tr>";
-    currD<<endl<<"<td>Vertices of one part</td><td>Type of splitting</td><td>Essential parameters</td></tr>";
+    currD<<endl<<"<td>Vertices of one part</td><td>Type of splitting</td><td>Essential parameters</td><td>Edges split</td></tr>";
     it->curr->print_possible_splittings(&currD);
     currD<<endl<<"</table>";
     currD<<endl<<"</body></html>"<<endl;
