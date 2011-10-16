@@ -1175,12 +1175,10 @@ void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> po
   part1.
    */
 
-  list<pair<kisebbdim*,kisebbdim*> > outbound_edges1 = list<pair<kisebbdim*,kisebbdim*> >(outbound_edges);
   list<kisebbdim*> notpart1list1 = list<kisebbdim*>(notpart1list);
-  while (outbound_edges1.size() > 0){
+  for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge_it=outbound_edges.begin(); edge_it!=outbound_edges.end(); edge_it++){
     list<kisebbdim*> part1list1 = list<kisebbdim*>(part1list);
-    pair<kisebbdim*,kisebbdim*> current_edge = outbound_edges1.front();
-    outbound_edges1.pop_front();
+    pair<kisebbdim*,kisebbdim*> current_edge = *edge_it;
     kisebbdim* new_point = current_edge.second;
     bool do_we_care_about_the_edge=true;
     for(list<kisebbdim*>::iterator it=notpart1list1.begin(); it!=notpart1list1.end(); it++)
@@ -1190,7 +1188,8 @@ void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> po
       }
     if (do_we_care_about_the_edge){
       part1list1.push_back(new_point);
-      list<pair<kisebbdim*,kisebbdim*> > outbound_edges2 = list<pair<kisebbdim*,kisebbdim*> >(outbound_edges1);
+      list<pair<kisebbdim*,kisebbdim*> > outbound_edges1 = list<pair<kisebbdim*,kisebbdim*> >(outbound_edges);
+      outbound_edges1.remove(current_edge);
 
       //list of edges going out+=new point's edges going out
       for(int op=0;op<dim+1;op++)
@@ -1203,14 +1202,14 @@ void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> po
 		if (*szimp1 == *szimp2)
 		  vankozos=true;
 	    if (vankozos and find(part1list.begin(),part1list.end(),&(*komp))==part1list.end()){
-	      outbound_edges2.push_back(pair<kisebbdim*,kisebbdim*>(new_point,&(*komp)));
+	      outbound_edges1.push_back(pair<kisebbdim*,kisebbdim*>(new_point,&(*komp)));
 	    }
 	  }
 
       //list of edges going out-=new point's edges going in
-      for(list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges2.begin(); edge!=outbound_edges2.end();edge++)
-	while (edge!=outbound_edges2.end() and edge->second == new_point)
-	  edge=outbound_edges2.erase(edge);
+      for(list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges1.begin(); edge!=outbound_edges1.end();edge++)
+	while (edge!=outbound_edges1.end() and edge->second == new_point)
+	  edge=outbound_edges1.erase(edge);
 
       if (part1list1.size() > 1 and pointlist.size()-part1list1.size() > 1 and
 	  is_connected(notpart1list1))
@@ -1275,6 +1274,8 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
     }
 
     for (list<simplex*>::iterator szimp=simpleces_of_edge.begin(); szimp!=simpleces_of_edge.end(); szimp++){
+      //FIXME mx[i][j] helyett a parameter minimalis erteket kene venni...
+      //Es tarolni, hogy egy-egy parameterrel hanyszor foglalkoztunk
       sum+=1.0/(*szimp)->mx[i][j];
       simplex_sum+=1;
       if (find(simpleces.begin(),simpleces.end(),*szimp) == simpleces.end())
@@ -1287,7 +1288,7 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
   //parameters</td></tr>
   *out << "<tr>";
   *out << "<td>";
-  for(int op=0;op<dim+1;op++){
+  /*for(int op=0;op<dim+1;op++){
     if ( op != 0 )
       *out << "; ";
     bool colon=false;
@@ -1304,6 +1305,12 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
 	*out << min_sorsz+1;
       }
     }
+  }*/
+  for ( list<kisebbdim*>::iterator currpoint=part1list.begin(); currpoint!=part1list.end(); currpoint++ ){
+    *out << (*currpoint)->op << ": ";
+    for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin(); szimp!=(*currpoint)->szek.end(); szimp++ )
+      *out << (*szimp)->sorszam[0]+1 << " ";
+    *out << "<br>";
   }
   *out << "</td>";
 
@@ -1320,7 +1327,23 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> > outb
   for (list<param*>::iterator param=splitting_params.begin(); param!=splitting_params.end(); param++){
     if (param!=splitting_params.begin())
       *out << ", ";
+    //FIXME Hanyszorosan szamit egy-egy parameter?
     *out << (*param)->kar;
+  }
+  *out << "</td>";
+
+  //debug
+  *out << "<td>";
+  for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
+    *out << edge->first->op << ": ";
+    for ( list<simplex*>::iterator szimp=edge->first->szek.begin(); szimp!=edge->first->szek.end(); szimp++ )
+      *out << (*szimp)->sorszam[0]+1 << " ";
+    *out << " &rarr; ";
+
+    *out << edge->second->op << ": ";
+    for ( list<simplex*>::iterator szimp=edge->second->szek.begin(); szimp!=edge->second->szek.end(); szimp++ )
+      *out << (*szimp)->sorszam[0]+1 << " ";
+    *out << "<br>";
   }
   *out << "</td>";
 
@@ -1641,14 +1664,18 @@ void Dsymlista::print_html(void){
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
+<<<<<<< HEAD
     it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
     	&currD);
+=======
+    it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(), &currD);
+>>>>>>> 024af9cc6f0dc35c17ebe70dd29fb4676acfe572
     currD<<endl<<"</tbody></table>";
     // Possible splittings
     currD<<"<br><table border=\"1\" cellpadding=\"3\">"
       <<endl<<"<caption>Possible splittings:</caption>"<<endl
       <<"<thead><tr>";
-    currD<<endl<<"<td>Vertices of one part</td><td>Type of splitting</td><td>Essential parameters</td></tr>";
+    currD<<endl<<"<td>Vertices of one part</td><td>Type of splitting</td><td>Essential parameters</td><td>Edges split</td></tr>";
     it->curr->print_possible_splittings(&currD);
     currD<<endl<<"</table>";
     currD<<endl<<"</body></html>"<<endl;
