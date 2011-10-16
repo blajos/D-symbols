@@ -1,0 +1,31 @@
+Mirol is szoljon az eloadas?
+D-symbolumok, eltranzitiv D-szimbolumok, splitting, parameterek (min., max.)
+errol/ezekrol rajzok
+
+Bevezetes:
+- max. 2 slide-on D-szimbolumok bevezetese
+- A kovezesek vizsgalata mindenfele felteteleket indukal a D-szimbolumokra (2
+  slide): baricentrikus felbontas, resz D-szimbolumok (szferikus vagy euklideszi
+  kovezesek => max. param ertekek)
+- D-sym modszer a kompakt 3-sokasagok (vagy kompakt alaptartomanyu 3d kovezesek)
+  leirasara. 1-1 ertelmu, ha bizonyos konfiguraciokat nem engedunk meg (pl. M
+  matrixfv elemek vegtelensege <=> vegtelen tavoli egyenes korul van)
+
+Eltranzitiv D-szim:
+- Jellemzes
+- Eredmenyek
+
+Splitting:
+- Thurston: torusz menti hasitasokkal szetbontva minden kovezes a 8 geom.
+  valamelyikeben realizalodik
+- Tobb, mint 1 csucs koruli resz-kovezes
+- nem eleg a resz D-szimbolum koncepcio, de felirhatoak a 2dim kovezes
+  "epitokockai" es a forgas/tukrozes rendek. Ebbol a kombinatorikus gorbuletfv.
+  is
+- torusz (euklideszi): hasitas, szferikus: pontra huzhato => ezek kizarasa min.
+  param ertekekhez vezet
+- Tovabbi vizsgalando eset: szferikus esetben a rossz orbifoldokat ki kene
+  zarjuk
+
+
+Zold:1 kek:2 piros:3
