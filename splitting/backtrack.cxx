@@ -1169,6 +1169,8 @@ void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> po
   //going out(double copy solves this problem)
   done
 
+  Problem FIXME: Only print splittings if notpart1 is connected!
+
   outbound_edges' elements' first half is in part1; second part is not in
   part1.
    */
@@ -1210,7 +1212,8 @@ void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> po
 	while (edge!=outbound_edges2.end() and edge->second == new_point)
 	  edge=outbound_edges2.erase(edge);
 
-      if (part1list1.size() > 1 and pointlist.size()-part1list1.size() > 1 )
+      if (part1list1.size() > 1 and pointlist.size()-part1list1.size() > 1 and
+	  is_connected(notpart1list1))
 	print_splitting(out, outbound_edges2, part1list1);
       print_possible_splittings_recursion(out, pointlist, part1list1, notpart1list1, outbound_edges2);
       notpart1list1.push_back(new_point);
@@ -1638,8 +1641,8 @@ void Dsymlista::print_html(void){
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
-    //it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
-    //	&currD);
+    it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
+    	&currD);
     currD<<endl<<"</tbody></table>";
     // Possible splittings
     currD<<"<br><table border=\"1\" cellpadding=\"3\">"
