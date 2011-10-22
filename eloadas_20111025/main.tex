@@ -1,40 +1,18 @@
-\usepackage[magyar]{babel}
-\usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{graphicx}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{amssymb}
-%\usepackage{amsthm}
 \usepackage{ae,aecompl}
 
 \usetheme{Goettingen}
-%\usetheme{Singapore}
+\beamertemplatenavigationsymbolsempty
 
-%\theoremstyle{plain}
-\newtheorem{thm}{Tétel}[section]
-\newtheorem{thmsub}{Tétel}[subsection]
-\newtheorem{lem}[thm]{Lemma}
-\newtheorem{lemsub}[thmsub]{Lemma}
-\newtheorem{all}[thm]{Állítás}
-\newtheorem{allsub}[thmsub]{Állítás}
-\newtheorem{kov}[thm]{Következmény}
-\newtheorem{sej}[thm]{Sejtés}
-
-%\theoremstyle{definition}
-\newtheorem{defn}[thm]{Definíció}
-\newtheorem{defnsub}[thmsub]{Definíció}
-\newtheorem{jel}[thm]{Jelölés}
-
-%\theoremstyle{remark}
-\newtheorem{alg}[thm]{Algoritmus}
-\newtheorem{megj}[thm]{Megjegyzés}
-\newenvironment{biz}{Bizonyítás: }{$\square$}
 \newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
 
-\title{3 dimenziós D-szimbólumok és a Thurston-sejtés}
-\author{Boróczki Lajos}
-\date{2011. október 25.}
+\title{3 dimensional D-symbols and the Thurston conjecture}
+\author{Boróczki, Lajos}
+\date{October 25, 2011}
 
 \begin{document}
 
@@ -43,79 +21,73 @@
 \end{frame}
 
 \begin{frame}
-  \mode<presentation>{\frametitle{Kivonat}}
+  \mode<presentation>{\frametitle{Outline}}
   \tableofcontents
 \end{frame}
 \newpage
 
-\section{D-szimbólum felépítése}
+\section{D-symbols}
 \begin{frame}
-  \frametitle{D-szimbólum, mint új nyelvezet}
+  \frametitle{D-symbol, an algebraic way to describe tilings}
   \begin{itemize}
-    \item Kompakt alaptartományú kövezés baricentrikus felbontása
-    \item Szomszédsági operációk \mode<article>{Következő lépésként bevezetünk
-      szomszédsági operációkat az előbb előállított baricentrikus szimplexekre:
-      $\sigma_0,\sigma_1,\ldots,\sigma_d.$ Az operációk jelentése: $\sigma_i(C)$
-      a $C\in \mathcal{C}$ szimplex azon szomszédja, amely az $i$-lapja, azaz az
-      $i$. csúccsal szemközti lap mentén szomszédos $C$-vel.  Minden $\sigma_i$
-      operáció egy involúció a fent leírt szimplexek $\mathcal{C}$ halmazán.}
-      Jelölés:\\<all>
-\setlength{\unitlength}{1cm}
-$\sigma_0$:
-\begin{picture}(1,0.2)
-  \multiput(0,0.1)(0.2,0){5}{\circle*{0.001}}
-\end{picture},
-$\sigma_1$:
-\begin{picture}(1,0.2)                                                                                 
-  \multiput(0,0.1)(0.25,0){4}{\line(1,0){0.15}}                                                        
-\end{picture},
-$\sigma_2$:
-\begin{picture}(1,0.2)
-  \put(0,0.1){\line(1,0){1}}
-\end{picture},
-$\sigma_3$:
-\begin{picture}(1.5,0.2)
-  \multiput(0,0.1)(0.5,0){3}{\line(1,0){0.2}}
-  \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
-\end{picture}
-    \item Egybevágóság csoport szerinti szimplex pályák halmaza
-      \mode<article>{Általában megkövetelhetjük, hogy a kövezésnek egy
-      egybevágóság csoportja változatlanul hagyja a kövezés kombinatorikus
-      struktúráját, így a baricentrikus felbontást is. Vehetjük az egybevágóság
-      csoport szerinti szimplex pályák halmazát, ezeken is jól értelmezett lesz
-      a szomszédsági operáció.}
-    \item $(d-2)$-lap körüli szimplex pályák. \mode<article>{Következő lépésként
-      vizsgáljuk meg, hogy egy $(d-2)$-lap körül ($3$ dimenzióban él körül) hány
-      baricentrikus szimplex ($\mathcal{M}$ mátrix-függvény értékeinek duplája)
-      illetve hány szimplex pálya ($\mathcal{R}$ mátrix-függvény értékek
-      duplája) csatlakozik.}
-    \item Egyértelműség: A baricentrikus felbontásban csak az alaptartomány
-      csúcspontjaihoz tartozó szimplex csúcsok lehetnek végtelen távoli pontok,
-      ezért minden kövezés leírható D-szimbólummal és ez permutáció erejéig
-      egyértelmű. FIXME: Miért nem foglalkozunk azzal az esettel, amikor egy
-      egész él végtelen távol van?
+    \item Based on the baricentric subdivision of a tiling
+    \item Structure:
+      \begin{itemize}
+	\item D-diagram: $dim+1$ colored graph, which represents adjacencies of
+	  simplex-orbits
+	\item Matrix function on simplex orbits, which represents the number of
+	  simpleces (not orbits) around a $dim-2$ dimensional edge
+      \end{itemize}
+    \item Constraints:
+      \begin{itemize}
+	\item Compatibility between the diagram and the matrix function
+	\item Compatibility with baricentric subdivision
+	\item Lower dimensional constraints
+      \end{itemize}
+    \item Every "nice" tiling has a corresponding D-symbol which is unambigous
+      up to permutation \mode<article>{"Nice" tilings are the ones, whose
+      baricentric subdivision has finitely many simplex-orbits and does not have
+      ideal simplex-vertices except for "real" vertices or "domain-center"
+      vertices.  FIXME pontos kifejezesek}
   \end{itemize}
 \end{frame}
 
-\subsection{Példa}
+\subsection{Example}
 \begin{frame}
-  Az $\mathbb{E}^3$ tér négyzetes hasábbal történő egyik legegyszerűbb
-  térkitöltése. Baricentrikus felbontása és a szimplex pályákhoz tartozó
-  multigráf: \mode<article>{\ref{abra:hasab_bari}.
-  ábra. Mivel minden szimplex pályára definiálva van minden szomszédsági
-  reláció, ezért az áttekinthetőség kedvéért azokat a hurok relációkat nem ábrázoljuk,
-  melyek sík tükrözéssel önmagára képezik le a pályát.}
+  One of the simplest tilings of space $\mathbb{E}^3$ is with a square prism.
+  It's baricentric subdivision and D-diagram: \mode<article>{figure \ref{abra:hasab_bari}.
+  As adjacency relations are defined for every simplex orbit, we can skip
+  showing the loops which map the orbits mirroring to a plane.}
   \begin{figure}
-    \mode<article>{\caption{\label{abra:hasab_bari} Piros:1, kék:2, zöld:3}}
+    \mode<article>{\caption{\label{abra:hasab_bari} Red:1, blue:2, green:3}}
     \center
     \includegraphics[width=0.4\textwidth]{hasab_bari.pdf}
     \includegraphics[width=0.35\textwidth]{hasab_D-graf.pdf}
   \end{figure}
+  Notation:\\<all>
+  \setlength{\unitlength}{1cm}
+  $\sigma_0$:
+  \begin{picture}(1,0.2)
+    \multiput(0,0.1)(0.2,0){5}{\circle*{0.001}}
+  \end{picture},
+  $\sigma_1$:
+  \begin{picture}(1,0.2)                                                                                 
+    \multiput(0,0.1)(0.25,0){4}{\line(1,0){0.15}}                                                        
+  \end{picture},
+  $\sigma_2$:
+  \begin{picture}(1,0.2)
+    \put(0,0.1){\line(1,0){1}}
+  \end{picture},
+  $\sigma_3$:
+  \begin{picture}(1.5,0.2)
+    \multiput(0,0.1)(0.5,0){3}{\line(1,0){0.2}}
+    \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
+  \end{picture}
 \end{frame}
 
 \begin{frame}
-  A mátrixfüggvények ($\mathcal{D}$ a szimplex pályák halmaza,
-  $D_i\in\mathcal{D}$):
+  $\mathcal{R}$ and $\mathcal{M}$ matrix-functions (where $\mathcal{D}$ is the set
+  of simplex-orbits, $D_i\in\mathcal{D}$):
   \begin{equation*}
     \mathcal{R}(D_1)=
     \left(
@@ -164,108 +136,101 @@ $\sigma_3$:
   \end{equation*}
 \end{frame}
 
-\section{Lehetséges D-szimbólumok}
-\subsection{Feltételek}
+\section{Constraints for D-symbols}
+The following constraints are needed for a D-symbol to have a corresponding
+tiling.
+
+\subsection{General constraints}
 \begin{frame}
-  D-szimbólum: $(\Sigma_I,\mathcal{D},\mathcal{M})$ hármasok. \mode<article>{Az
-  alábbi feltételeknek megfelelő $(\Sigma_I,\mathcal{D},\mathcal{M})$ hármasokat
-  nevezzük Delone-Delaney-Dress szimbólumnak, röviden D-szimbólumnak.}
+  D-symbol: $(\Sigma_I,\mathcal{D},\mathcal{M})$ triplets. \mode<article>{Where
+  $I$ is the index set of the dimension ($|I|=dim+1$), $\Sigma_I$ is the set of
+  adjacency operations (interpreted accordingly on the simplex-orbits and the
+  simpleces), $\mathcal{D}$ is the set of simplex-orbits and $\mathcal{M}$ is
+  the matrix-function on simpleces. These are the Delone-Delaney-Dress symbols,
+  briefly D-symbols.}
   \begin{itemize}
-    \item Természetes feltételek D-diagramokra\mode<article>{ (mivel kövezések baricentrikus
-      felbontásainak leírására használjuk őket.)}:
+    \item Natural constraints for D-diagrams:
       \begin{enumerate}
-	\item $\mathcal{D}$ véges
-	\item A szimplex pályákon értelmezett szomszédsági operációk involutív
-	  permutációk\mode<article>{, vagyis $\forall i\in I, \sigma_i\in
+	\item $\mathcal{D}$ is finite
+	\item Adjacency operations on simplex-orbits are involutive 
+	  permutations\mode<article>{, this means $\forall i\in I, \sigma_i\in
 	  \Sigma_I, \forall D\in \mathcal{D}$:
 	  \begin{align*}
 	    \sigma_i\sigma_i(D)=D 
 	  \end{align*}
-	  A diagram minden csúcsában az azonos
-	  színű élek foka 1 vagy 2. A fok pontosan akkor 2, ha az él egy hurok
-	  (kezdő és végpontja azonos.)}
-	\item Nem szomszédos operáció-párokat alkalmazva legfeljebb $2$ lépésből
-	  visszajutunk a kiindulási csúcsba\mode<article>{. \newline $\forall
+	  The degree of the uniformly colored edges in every vertice of the
+	  diagram is 1 or 2. It is 2 iff the edge is a loop.}
+	\item Using not neighbouring operation-pairs we get back to the starting
+	  vertice in at most $2$ steps\mode<article>{. \newline $\forall
 	  i,j\in I, \forall D\in \mathcal{D}$:
 	  \begin{align*}
 	    |i-j|\geq 2 \Rightarrow (\sigma_j\sigma_i)^2(D)=D
 	  \end{align*}}
       \end{enumerate}
-    \item Bevezetjük a szimplex pályákon (D-diagram csúcsokon) értelmezett $\mathcal{R}$
-      mátrix-függvényt\mode<article>{.
-	\newline $\forall i,j\in I, \forall D\in \mathcal{D}$:
+    \item We can calculate the $\mathcal{R}$ matrix function\mode<article>{,
+      which is the same for simplex-orbits as the $\mathcal{M}$ matrix function
+      for simpleces: \newline $\forall i,j\in I, \forall D\in \mathcal{D}$:
       \begin{align*}
 	r_{ij}(D)=r_{ji}(D)=\mathrm{min}\left\{r\in \mathbb{N}^+|(\sigma_j\sigma_i)^r(D)=D\right\}
       \end{align*}
-      A D-diagram feltételei $\mathcal{R}$ mátrix-függvényre vetítve:
-      $r_{ii}(D)=1$, illetve $|i-j|\geq 2 \Rightarrow r_{ij}(D)\leq2$}
-    \item Feltételek a diagramhoz tartozó $\mathcal{M}$ mátrix-függvényre:
+      Constraints of the D-diagram on $\mathcal{R}$ matrix-function:
+      $r_{ii}(D)=1$, and $|i-j|\geq 2 \Rightarrow r_{ij}(D)\leq2$}
+    \item Constraints of the $\mathcal{M}$ matrix function:
       \begin{enumerate}
-	\item Az $\mathcal{R}$ mátrix-függvény minden elemének osztania kell az
-	  $\mathcal{M}$ mátrix-függvény megfelelő elemét.
-	  \mode<article>{
-	  Csak így biztosítható, hogy egy $d-2$ dimenziós lap ($3$ dimenzióban él)
-	  teljes körüljárásakor azonos szimplex pályába érkezünk; ami pedig szükséges
-	  ahhoz, hogy azonos szimplexbe érkezhessünk. Az $\mathcal{M}$ és
-	  $\mathcal{R}$ mátrix-függvények értékeinek hányadosa a kövezés
-	  periodicitását mutatja az adott él körül.
+	\item Every element of $\mathcal{R}$ has to divide the appropriate
+	  element of $\mathcal{M}$ (parameters)\mode<article>{. Because we have to get to the
+	  same simplex walking around a $d-2$ dimensional face (which is an edge
+	  in $3$ dimensions,) which means we have to get to the same
+	  simplex-orbit too. The quotient of the elements of $\mathcal{M}$ and
+	  $\mathcal{R}$ shows the periodicity of the tiling around the $d-2$
+	  dimensional face.
 	  \newline $\forall i,j\in I, \forall D\in \mathcal{D}$:
 	  $r_{ij}(D)|m_{ij}(D)$
 	  }
-	\item Pálya feltétel\mode<article>{. Minden operáció-párhoz és
-	  kiindulási diagram-csúcshoz definiálhatjuk a hozzá tartozó pályát: az
-	  összes diagram-csúcs, amit érintünk miközben az operációkat
-	  elvégezzük. Az $\mathcal{M}$ mátrix-függvény értékeinek egy-egy pályán belül
-	  meg kell egyeznie, különben a kapott kövezésben függne az él körüli
-	  szimplexek száma a kezdő szimplextől. A pályát visszafelé bejárva is
-	  ugyanazt az utat kell megtennünk, ezért az $\mathcal{M}$
-	  mátrix-függvény mátrixai szimmetrikusak.
+	\item Orbits of adjacency-operation pairs\mode<article>{. An orbit can
+	  be defined for every operation-pair and starting simplex-orbit
+	  (diagram-vertex). Elements of $\mathcal{M}$ has to be the same inside
+	  such an orbit. The reversed orbit has to contain the same number of
+	  simpleces, so the matrices of $\mathcal{M}$ has to be symmetric.
 	  \begin{align*}
 	    &\forall i,j\in I, \forall D\in \mathcal{D} \\
 	    &\mathcal{D}'=\left\{(\sigma_j\sigma_i)^k(D)|k\in
 	    \mathbb{N}\right\}\cup\left\{\sigma_i(\sigma_j\sigma_i)^k(D)|k\in
 	    \mathbb{N}\right\}\\
 	    &\forall D_1,D_2 \in \mathcal{D}'\\
-            &m_{ij}(D_1)=m_{ij}(D_2)=m_{ji}(D_1)=m_{ji}(D_2)
+	    &m_{ij}(D_1)=m_{ij}(D_2)=m_{ji}(D_1)=m_{ji}(D_2)
 	  \end{align*}
 	  }
-	\item Az $\mathcal{M}$ mátrix-függvény minden mátrixának főátlójától legalább
-	  2 távolságra lévő helyeken $2$-esek állnak\mode<article>{, különben nem
-	  kapjuk vissza a baricentrikus felbontást.
-	  \newline $\forall i,j\in I, \forall D\in \mathcal{D}$:
+	\item The values of the main diagonal has to be $1$\mode<article>{,
+	  because we have adjacency operations.}
+	\item The values of the first diagonal above and below the main has to
+	  be $\geq2$\mode<article>{. In case of equality we get
+	  degenerated tilings, in which for example digons can be facets. (In
+	  case of nice tilings in 3 dimensions every vertex joins at least 3
+	  edges and 3 facets, every facet has at least 3 edges and every edge
+	  joins 3 facets and 3 bodies.)}
+	\item Every other value has to be exactly $2$\mode<article>{, so we stay
+	  compatible with baricentric subdivision.}
+	  $\forall i,j\in I, \forall D\in \mathcal{D}$:
 	  \begin{align*}
-	    m_{ij}(D)=2
-	  \end{align*}}
-	\item A főátlótól $1$ távolságra lévő helyeken a mátrix-függvény értékei
-	  legyenek nagyobbak vagy egyenlőek, mint 2\mode<article>{. Egyenlőség esetén
-	  degenerált, illetve mesterkélt esetekhez jutunk, melyekben például
-	  digonok is lehetnek lapok. (Szép kövezés esetén egy 3 dimenziós poliéder bármely
-	  csúcsában legalább 3 él és 3 lap találkozik, minden lapnak legalább 3
-	  oldaléle van, minden élnél legalább 3 test és 3 lap fut össze.)
-	  \newline $\forall i\in I-\{0\}, \forall D\in \mathcal{D}$:
-	  \begin{align*}
-	    m_{i(i-1)}(D)\geq 2
-	  \end{align*}}
+	    i=j & \Rightarrow m_{ij}(D)=1 \\
+	    |i-j| = 1 &\Rightarrow m_{ij}(D)\geq2 \\
+	    |i-j|\geq2 &\Rightarrow m_{ij}(D)=2
+	  \end{align*}
       \end{enumerate}
   \end{itemize}
 \end{frame}
 
-Az eddigi megállapítások szükséges (de nem mindig elégséges)
-feltételek olyan $d$ dimenziós (nem feltétlenül euklideszi) térkitöltés
-létezésére (amelynek D-szimbóluma $(\Sigma_I,\mathcal{D},\mathcal{M})$.) Most nézzük
-speciálisan a 3 dimenziós eset további követelményeit.
-
-\subsection{Rész D-szimbólum}
+\subsection{2 dimensional subtilings I.}
 \begin{frame}
-  Rész D-szimbólum:
+  From now on we only consider 3 dimensional D-symbols. \newline
+  D-subsymbol:
   \begin{itemize}
-    \item Az i-edik komponens vagy rész D-szimbólum
-      $(\Sigma_I^i,\mathcal{D}^i,\mathcal{M}^i)$ jelentése\mode<article>{: az i-edik
-      operációt elhagyjuk a diagramból illetve a mátrix-függvény soraiból és
-      oszlopaiból is.}
-    \item A kombinatorikus görbületi függvény számolható\mode<article>{. A rész
-      D-szimbólum komponenseihez tartozó kövezésben a D-szimbólum alapján
-      felírható a kombinatorikus görbületi függvény:}
+    \item The $i$-th D-subsymbol 
+      $(\Sigma_I^i,\mathcal{D}^i,\mathcal{M}^i)$\mode<article>{ can be got by
+      eliminating the $i$-th operation from the diagram and the rows and columns
+      of the matrix functions.}
+    \item We can calculate the combinatorial curvature function of the subsymbol:
       \begin{align*}
 	K(\leftexp{c}{\mathcal{D}}^i)=\sum_{D\in
 	\leftexp{c}{\mathcal{D}}^i}\left(-1+\sum_{\substack{0\le j<k\le d \\
@@ -276,90 +241,66 @@ speciálisan a 3 dimenziós eset további követelményeit.
 	  < & & H^2
 	\end{array}
       \end{align*}
-      \mode<article>{Ez alapján eldönthető, hogy a 3 lehetséges felület közül melyiken valósul
-      meg.}
-    \item Vizuális jelentés\mode<article>{: A rész D-szimbólum vizuális
-      jelentése az adott i-indexű csúcs körüli 1-gyel kisebb dimenziós felületen
-      létrehozott $(3-1)$-dimenziós kövezés D-szimbóluma az i-indexű csúcs
-      stabilizátora szerint.  Ezért egy i-indexű valódi szimplex-csúcs körüli
-      rész D-szimbólum egy szférikus kövezéshez kell tartozzon, egy ideális
-      szimplex-csúcs körül euklideszi kövezés alakul ki pl. a hiperbolikus tér
-      paraszféra (horoszféra) felületén; a hiperbolikus síkkövezéseket
-      kizárjuk, mert modellen kívüli (végtelennél távolabbi) pontot, mint
-      i-csúcsot jellemezne.}
-    \item Jó orbifold feltétel\mode<article>{: Szférikus síkon történő
-      kövezésnek további feltétele, hogy az úgy nevezett  rossz orbifoldokat
-      kizárjuk, azaz a következő lehetőségek hibásak (Convay illetve
-      Macbeath-féle jelöléseik alapján):
-      \begin{align*}
-	u=(+,0;[u];\{\}), & & 1<u;\\
-	*u=(+,0;[];\{(u)\}), & & 1<u;\\
-	uv=(+,0;[u,v];\{\}), & & 1<u<v;\\
-	*uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
-      \end{align*}
-      Ezek a csepp felületekre illetve az észak-déli póluson nem azonosan viselkedő
-      gömb felületekre utalnak.}
+      \mode<article>{Based on the above formula one can decide, in which $2$
+      dimensional constant curvature space realizes the tiling.}
   \end{itemize}
+  \mode<presentation>{\begin{minipage}[t]{0.45\textwidth}}
+    \begin{itemize}
+      \item Good orbifold criteria\mode<article>{: In the above mentioned
+	spherical tiling case, we have to exclude bad orbifolds. The following
+	options are excluded (given by both Convay's and Macbeath's notations):
+	\begin{align*}
+	  u=(+,0;[u];\{\}), & & 1<u;\\
+	  *u=(+,0;[];\{(u)\}), & & 1<u;\\
+	  uv=(+,0;[u,v];\{\}), & & 1<u<v;\\
+	  *uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
+	\end{align*}}
+      \item Visualization:
+	\mode<article>{The subsymbol corresponds to the $(3-1)$
+	dimensional tiling around the $i$-indexed vertice-class inducated by the
+	original D-symbol. So we have to get a spherical tiling around a real
+	simplex-vertice (see Fig. \ref{fig:spherical_ex}), or a Euclidean tiling
+	around an ideal simplex-vertex in the original tiling. We should not get
+	hyperbolic tilings around a simplex-vertex, because this would mean an
+	out-of-model vertex.}
+    \end{itemize}
+  \mode<presentation>{\end{minipage}
+  \begin{minipage}[t]{0.5\textwidth}}
+    \begin{figure}
+      \mode<article>{\caption{\label{fig:spherical_ex}Spherical tiling around
+      a simplex-vertex}
+      \center
+      \includegraphics[width=0.4\textwidth]{d3c3_2_vertice.pdf}}
+      \mode<presentation>{\includegraphics[width=0.8\textwidth]{d3c3_2_vertice.pdf}}
+    \end{figure}
+  \mode<presentation>{\end{minipage}}
 \end{frame}
 
 \begin{frame}
-  További követelmények a rész D-szimbólumok alapján:
+  Further constraints in $3$ dimensional D-symbols based on $2$ dimensional
+  subsymbols:
   \begin{enumerate}
-    \item $(\Sigma_I^1,\mathcal{D}^1,\mathcal{M}^1)$ és
-      $(\Sigma_I^2,\mathcal{D}^2,\mathcal{M}^2)$ esetén a
-      görbületi függvény pozitív és a jó orbifold feltétel
-      teljesül\mode<article>{. Élközépponthoz és lapközépponthoz tartozó
-      szimplex csúcs valódi csúcs kell legyen, ezért egy $S^2$-n megvalósuló
-      kövezést kell kapjunk.}
-    \item $(\Sigma_I^0,\mathcal{D}^0,\mathcal{M}^0)$ és
-      $(\Sigma_I^3,\mathcal{D}^3,\mathcal{M}^3)$ esetén a görbületi függvény
-      pozitív és a jó orbifold feltétel teljesül, vagy a görbületi függvény
-      $0$\mode<article>{. Csúcshoz és test-középponthoz tartozó szimplex csúcs
-      lehet valódi, ekkor egy $S^2$-n megvalósuló kövezést kell kapjunk; vagy
-      lehet ideális, ekkor $\mathbb{E}^2$-n megvalósuló kövezést kell kapjunk.
-      (Az ideális test-középpont esetét a dualitás miatt meghagyjuk; de
-      megjegyezzük, hogy a végtelen poliéderekkel történő kövezés nem igazán
-      érdekes (egy kisebb dimenziós felület kövezésének felel meg.))}
+    \item For $(\Sigma_I^1,\mathcal{D}^1,\mathcal{M}^1)$ and
+      $(\Sigma_I^2,\mathcal{D}^2,\mathcal{M}^2)$ the combinatorial curvature
+      function has to be positive and the tiling has to be good
+      orbifold\mode<article>{. Edge- and face-centered simplex-vertices has to
+      be real vertices, so the tiling around them has to be an $S^2$ tiling.}
+    \item For $(\Sigma_I^0,\mathcal{D}^0,\mathcal{M}^0)$ and
+      $(\Sigma_I^3,\mathcal{D}^3,\mathcal{M}^3)$ the combinatorial curvature 
+      function has to be non-negative, and if positive the tiling has to be good
+      orbifold\mode<article>{. Vertex- and body-centered simplex-vertices can be
+      real or ideal vertices, so the tiling around them can be an $S^2$ or an
+      $\mathbb{E}^2$ tiling. (We do not exclude ideal body-centers because of
+      the duality.)}
   \end{enumerate}
+  These constraints lead to an upper bound of the parameters \mode<article>{as a
+  system.}
 \end{frame}
 
+\section{2 dimensional subtilings II.}
 
-\section{D-szimbólumok felsorolása}
 \begin{frame}
-  D-szimbólumok felsorolása:
-  \begin{itemize}
-    \item Nagyravágyó terv\mode<article>{: Az összes $n$-dimenziós geometriában
-      az összes lehetséges véges alaptartományú kövezés felsorolásához
-      szeretnénk a D-szimbólumokat felhasználni.}
-    \item Alapvetően nem tűnik lehetetlennek\mode<article>{, mivel a
-      D-szimbólumokat minden olyan kövezésre értelmezhetjük, ahol tudunk
-      baricentrikus felbontást végezni.}
-    \item Nagyon sok lehetőség van\mode<article>{: a dimenzió és a D-diagram
-      elemszámának méretében is exponenciális}
-    \item Rendezés a D-diagramokon, algoritmus a felsorolásukra
-    \item Rendezés a mátrix-függvényeken, $3$-dimenziós esetben algoritmus a
-      lehetséges mátrix-függvények felsorolására \mode<article>{ az előző
-      fejezetben felsorolt feltételeknek megfelelően. A két kulcs a paraméteres
-      megadás és a rész D-szimbólum által indukált felső korlát (de a végtelen
-      láncokat kezelni kell.)}
-    \item A 12 elemszámú D-szimbólumokat tudjuk jelenleg felsorolni.
-  \end{itemize}
-\end{frame}
-
-\section{Éltranzitív kövezések}
-\begin{frame}
-  Éltranzitív kövezések kezelése D-szimbólummal
-  \begin{itemize}
-    \item Egyszerű új feltétel: a diagramban nem lehet 1-es színű (szaggatott)
-      él
-    \item A lehetséges diagramok végigpróbálgatása egyszerűbbé válik
-    \item 18-as elemszámig jutottunk, és ismert, hogy legfeljebb 24 elemszámú
-      ilyen diagramok lehetségesek.
-  \end{itemize}
-\end{frame}
-
-\section{Splitting probléma és a Thurston-sejtés (támadása)}
-\begin{frame}
+  Splitting probléma és a Thurston-sejtés (támadása)
   Thurston sejtés:
   \begin{itemize}
     \item Minden irányított, primitív, zárt 3-sokaság felvágható (splitting)
@@ -411,6 +352,41 @@ speciálisan a 3 dimenziós eset további követelményeit.
       bennük se $E^2$ se $S^2$ splitting. (Ha találunk köztük olyat, ami nem
       realizálható a 8-féle geometriában, akkor a Thurston-sejtést sikeresen
       támadtuk.)
+  \end{itemize}
+\end{frame}
+
+
+\section{Enumerating D-symbols}
+\begin{frame}
+  D-szimbólumok felsorolása:
+  \begin{itemize}
+    \item Nagyravágyó terv\mode<article>{: Az összes $n$-dimenziós geometriában
+      az összes lehetséges véges alaptartományú kövezés felsorolásához
+      szeretnénk a D-szimbólumokat felhasználni.}
+    \item Alapvetően nem tűnik lehetetlennek\mode<article>{, mivel a
+      D-szimbólumokat minden olyan kövezésre értelmezhetjük, ahol tudunk
+      baricentrikus felbontást végezni.}
+    \item Nagyon sok lehetőség van\mode<article>{: a dimenzió és a D-diagram
+      elemszámának méretében is exponenciális}
+    \item Rendezés a D-diagramokon, algoritmus a felsorolásukra
+    \item Rendezés a mátrix-függvényeken, $3$-dimenziós esetben algoritmus a
+      lehetséges mátrix-függvények felsorolására \mode<article>{ az előző
+      fejezetben felsorolt feltételeknek megfelelően. A két kulcs a paraméteres
+      megadás és a rész D-szimbólum által indukált felső korlát (de a végtelen
+      láncokat kezelni kell.)}
+    \item A 12 elemszámú D-szimbólumokat tudjuk jelenleg felsorolni.
+  \end{itemize}
+\end{frame}
+
+\subsection{Enumerating edge-transitive D-symbols}
+\begin{frame}
+  Éltranzitív kövezések kezelése D-szimbólummal
+  \begin{itemize}
+    \item Egyszerű új feltétel: a diagramban nem lehet 1-es színű (szaggatott)
+      él
+    \item A lehetséges diagramok végigpróbálgatása egyszerűbbé válik
+    \item 18-as elemszámig jutottunk, és ismert, hogy legfeljebb 24 elemszámú
+      ilyen diagramok lehetségesek.
   \end{itemize}
 \end{frame}
 
