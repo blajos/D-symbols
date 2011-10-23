@@ -4,13 +4,15 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{ae,aecompl}
+\usepackage{fix-cm}
 
 \usetheme{Goettingen}
 \beamertemplatenavigationsymbolsempty
+\beamertemplatetextbibitems
 
 \newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
 
-\title{3 dimensional D-symbols and the Thurston conjecture}
+\title{$3$-dimensional D-symbols and the Thurston conjecture}
 \author{Boróczki, Lajos}
 \date{October 25, 2011}
 
@@ -33,10 +35,10 @@
     \item Based on the baricentric subdivision of a tiling
     \item Structure:
       \begin{itemize}
-	\item D-diagram: $dim+1$ colored graph, which represents adjacencies of
+	\item D-diagram: $(dim+1)$ colored graph, which represents adjacencies of
 	  simplex-orbits
 	\item Matrix function on simplex orbits, which represents the number of
-	  simpleces (not orbits) around a $dim-2$ dimensional edge
+	  simpleces (not orbits) around a $(dim-2)$-dimensional edge
       \end{itemize}
     \item Constraints:
       \begin{itemize}
@@ -159,7 +161,7 @@ tiling.
 	    \sigma_i\sigma_i(D)=D 
 	  \end{align*}
 	  The degree of the uniformly colored edges in every vertice of the
-	  diagram is 1 or 2. It is 2 iff the edge is a loop.}
+	  diagram is $1$ or $2$. It is $2$ iff the edge is a loop.}
 	\item Using not neighbouring operation-pairs we get back to the starting
 	  vertice in at most $2$ steps\mode<article>{. \newline $\forall
 	  i,j\in I, \forall D\in \mathcal{D}$:
@@ -179,11 +181,11 @@ tiling.
       \begin{enumerate}
 	\item Every element of $\mathcal{R}$ has to divide the appropriate
 	  element of $\mathcal{M}$ (parameters)\mode<article>{. Because we have to get to the
-	  same simplex walking around a $d-2$ dimensional face (which is an edge
+	  same simplex walking around a $(d-2)$-dimensional face (which is an edge
 	  in $3$ dimensions,) which means we have to get to the same
 	  simplex-orbit too. The quotient of the elements of $\mathcal{M}$ and
-	  $\mathcal{R}$ shows the periodicity of the tiling around the $d-2$
-	  dimensional face.
+	  $\mathcal{R}$ shows the periodicity of the tiling around the
+	  $(d-2)$-dimensional face.
 	  \newline $\forall i,j\in I, \forall D\in \mathcal{D}$:
 	  $r_{ij}(D)|m_{ij}(D)$
 	  }
@@ -221,9 +223,9 @@ tiling.
   \end{itemize}
 \end{frame}
 
-\subsection{2 dimensional subtilings I.}
+\subsection{$2$-dimensional subtilings I.}
 \begin{frame}
-  From now on we only consider 3 dimensional D-symbols. \newline
+  From now on we only consider $3$-dimensional D-symbols. \newline
   D-subsymbol:
   \begin{itemize}
     \item The $i$-th D-subsymbol 
@@ -241,8 +243,8 @@ tiling.
 	  < & & H^2
 	\end{array}
       \end{align*}
-      \mode<article>{Based on the above formula one can decide, in which $2$
-      dimensional constant curvature space realizes the tiling.}
+      \mode<article>{Based on the above formula one can decide, in which
+      $2$-dimensional constant curvature space realizes the tiling.}
   \end{itemize}
   \mode<presentation>{\begin{minipage}[t]{0.45\textwidth}}
     \begin{itemize}
@@ -256,8 +258,8 @@ tiling.
 	  *uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
 	\end{align*}}
       \item Visualization:
-	\mode<article>{The subsymbol corresponds to the $(3-1)$
-	dimensional tiling around the $i$-indexed vertice-class inducated by the
+	\mode<article>{The subsymbol corresponds to the $(3-1)$-dimensional
+	tiling around the $i$-indexed vertice-class inducated by the
 	original D-symbol. So we have to get a spherical tiling around a real
 	simplex-vertice (see Fig. \ref{fig:spherical_ex}), or a Euclidean tiling
 	around an ideal simplex-vertex in the original tiling. We should not get
@@ -268,16 +270,15 @@ tiling.
   \begin{minipage}[t]{0.5\textwidth}}
     \begin{figure}
       \mode<article>{\caption{\label{fig:spherical_ex}Spherical tiling around
-      a simplex-vertex}
+      a simplex-vertex}}
       \center
-      \includegraphics[width=0.4\textwidth]{d3c3_2_vertice.pdf}}
-      \mode<presentation>{\includegraphics[width=0.8\textwidth]{d3c3_2_vertice.pdf}}
+      \includegraphics[height=2.5cm]{d3c3_2_vertice.pdf}
     \end{figure}
   \mode<presentation>{\end{minipage}}
 \end{frame}
 
 \begin{frame}
-  Further constraints in $3$ dimensional D-symbols based on $2$ dimensional
+  Further constraints in $3$-dimensional D-symbols based on $2$-dimensional
   subsymbols:
   \begin{enumerate}
     \item For $(\Sigma_I^1,\mathcal{D}^1,\mathcal{M}^1)$ and
@@ -297,97 +298,122 @@ tiling.
   system.}
 \end{frame}
 
-\section{2 dimensional subtilings II.}
+\subsection{$2$-dimensional subtilings II.}
 
 \begin{frame}
-  Splitting probléma és a Thurston-sejtés (támadása)
-  Thurston sejtés:
+  \frametitle{Splitting problem and the Thurston conjecture}
+  Thurston conjecture:
   \begin{itemize}
-    \item Minden irányított, primitív, zárt 3-sokaság felvágható (splitting)
-      tórusz ($E^2$) felületek mentén úgy, hogy a kapott sokaságok belsejének
-      geometriai struktúrája van, melynek véges a térfogata.
-    \item A következő 8 féle maximális modell-geometria létezik, amihez van
-      kompakt sokaság, ami az adott geometriában modellezhető: $S^3$, $E^3$,
+    \item Every oriented prime closed 3-manifold can be cut along tori, so that
+      the interior of each of the resulting manifolds has a geometric structure
+      with finite volume.
+    \item There are 8 possible geometric structures in 3 dimensions, which have
+      at least one compact manifold modelled on itself: $S^3$, $E^3$,
       $H^3$, $S^2\times R$, $H^2\times R$, $\widetilde{SL2R}$, Sol,
       Nil.
   \end{itemize}
-  Megjegyzések:
+  Remarks:
   \begin{itemize}
-    \item A nem irányítható eset kezelhető az ,,irányítható dupla fedés''
-      módszerrel, ami az M sokasághoz rendelt $M\times Z/2Z$ sokaság
-      (értelmes visszahúzó operációval). \mode<article>{Például Möbius szalaghoz
-      rendelhetünk egy dupla Möbius szalagot úgy, hogy felvágjuk valahol és
-      betoldunk mégegy Möbius szalagot. Ezzel egy gyűrű alakot kapunk.}
-    \item A 2 dimenziós analógia: minden határ nélküli felületnek (2-sokaságnak)
-      geometriai struktúrája van, konstans görbületű metrikával.
+    \item For non-orientable manifolds the "oriented double cover" method can be
+      used\mode<article>{. Which maps manifold $M$ to $M\times Z/2Z$ with an
+      appropriate pull-back operation. For example a Möbius-strip is mapped to a
+      "double Möbius-strip" which is a ring.}
+    \item In $2$ dimensions: every surface without boundary (2-manifold) has a
+      geometric structure consisting of a metric with constant curvature
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  Splitting keresése D-szimbólumban
+  Finding splittings in a D-symbol
   \begin{itemize}
-    \item $S^2$ jellegű splitting: Ponttá zsugorítható részlet a kövezésben,
-      ezáltal \mode<article>{kevesebb szimplex-csúcsból, így} kevesebb
-      szimplex-pályából álló kövezéssel ekvivalenset kapunk. (Rossz orbifold
-      probléma itt is felléphet.)
-      FIXME Rajz
-    \item $E^2$ splitting: A Thurston sejtés-beli splittingnek megfelelő dolog.
-      Végtelen távoli pontba tolható.
-      FIXME Rajz
+    \item $S^2$-type splitting: Indicates a detail in the tiling, which is
+      shrinkable to a single vertex, so we get a similar tiling \mode<article>{ with
+      less simplex-vertices, so} with less simplex-orbits. (Possible bad
+      orbifold problem.) \mode<article>{(See fig. \ref{fig:s2splitting}.)}
+      \begin{figure}
+	\mode<article>{\caption{\label{fig:s2splitting} $S^2$-type splitting}}
+	\center
+	\includegraphics[height=2.5cm]{d3c3_2_splitting1.pdf}
+      \end{figure}
+    \item $E^2$-type splitting: In Thurston-conjecture "cut along tori". This
+      indicates two parts in the tiling, in both parts the other part
+      can be seen as an ideal vertex. \mode<article>{There are at least 3
+      possible combinations, from which only the first one indicates a
+      splitting, the second one most likely indicates a fibration and the third one
+      is not possible, because inside the torus there is a full $2$-dimensional
+      plane. (See fig. \ref{fig:e2splitting}.)}
+      \begin{figure}
+	\mode<article>{\caption{\label{fig:e2splitting} $E^2$-type splittings}}
+	\center
+	\includegraphics[height=2.5cm]{d3c3_2_splitting2_alt1.pdf}
+	\hspace{0.1\textwidth}
+	\includegraphics[height=2.5cm]{d3c3_2_splitting2_alt2.pdf}
+	\hspace{0.1\textwidth}
+	\includegraphics[height=2.5cm]{d3c3_2_splitting2.pdf}
+      \end{figure}
   \end{itemize}
 \end{frame}
 
 \begin{frame}
-  További feltételek a Thurston sejtés-beli minimális 3-sokaságokra
+  Further constraints for tilings without splittings
   \begin{itemize}
-    \item Az ábrákon látszik, hogy a megfelelő 2 sokaságokra a kombinatorikus
-      görbület függvényt felírva alsó korlátot is kapunk a paramétereinkre.
-      FIXME Fontos kérdés, hogy ez elég-e.
-    \item A D-diagram alapján felírhatóak a szimplex csúcsok (rész D-diagram) és
-      a szimplex csúcsok közti élek is. Ezeket gráfnak tekintve az összes
-      lehetséges 2 (legalább 2 elemű) partícióra bontást meg kell vizsgálni.
-    \item Az így kapott "splitting-jelölt" helyet meg kell vizsgálni, hogy
-      megkapjuk az összes alsó korlátot a paraméterekre.
-    \item A kapott D-szimbólumok minimálisak abban az értelemben, hogy nincs
-      bennük se $E^2$ se $S^2$ splitting. (Ha találunk köztük olyat, ami nem
-      realizálható a 8-féle geometriában, akkor a Thurston-sejtést sikeresen
-      támadtuk.)
+    \item The above figures and remarks show that if we calculate the
+      combinatorial curvature function for the appropriate $2$-dimensional
+      tilings, we can get a lower bound for the parameters.
+    \item Based on the $3$-dimensional D-diagram, we can describe the tiling's
+      simplex-vertices and the edges between simplex-vertices. Take this system
+      as a graph, we have to examine every possible 2-partitions (where both
+      partitions have at least 2 vertices).
+    \item If we examine every such "splitting-candidates", we can get every
+      lower bound for the parameters.
+    \item Such D-symbols do not have $E^2$ nor $S^2$ splittings. (If we could
+      find one such that it's not realizable in any of the 8
+      Thurston-geometries, then this would be a counter-example of the Thurston
+      conjecture.)
   \end{itemize}
 \end{frame}
 
 
 \section{Enumerating D-symbols}
 \begin{frame}
-  D-szimbólumok felsorolása:
+  Enumerating D-symbols
   \begin{itemize}
-    \item Nagyravágyó terv\mode<article>{: Az összes $n$-dimenziós geometriában
-      az összes lehetséges véges alaptartományú kövezés felsorolásához
-      szeretnénk a D-szimbólumokat felhasználni.}
-    \item Alapvetően nem tűnik lehetetlennek\mode<article>{, mivel a
-      D-szimbólumokat minden olyan kövezésre értelmezhetjük, ahol tudunk
-      baricentrikus felbontást végezni.}
-    \item Nagyon sok lehetőség van\mode<article>{: a dimenzió és a D-diagram
-      elemszámának méretében is exponenciális}
-    \item Rendezés a D-diagramokon, algoritmus a felsorolásukra
-    \item Rendezés a mátrix-függvényeken, $3$-dimenziós esetben algoritmus a
-      lehetséges mátrix-függvények felsorolására \mode<article>{ az előző
-      fejezetben felsorolt feltételeknek megfelelően. A két kulcs a paraméteres
-      megadás és a rész D-szimbólum által indukált felső korlát (de a végtelen
-      láncokat kezelni kell.)}
-    \item A 12 elemszámú D-szimbólumokat tudjuk jelenleg felsorolni.
+    \item Ambitious goal\mode<article>{: Let's enumerate every possible
+      $n$-dimensional tiling with compact fundamental domain using D-symbols.}
+    \item It may be possible\mode<article>{, because we can define D-symbols for
+      every tiling that has "finite" baricentric subdivision.}
+    \item Too many cases\mode<article>{: the output is exponential both in the
+      dimension and the cardinality of the D-diagram.}
+    \item There is an ordering on D-diagrams, so they can be enumerated
+    \item There is an ordering on matrix-functions, we can enumerate them in $3$
+      dimensions\mode<article>{. Based on the previous sections there is an
+      upper bound on parameters (but one has to be cautious, because there are
+      infinite chains.) We do not use the lower bounds yet.}
+    \item Our algorithms could enumerate the $3$-dimensional D-symbols with
+      cardinality at most $12$.
   \end{itemize}
 \end{frame}
 
 \subsection{Enumerating edge-transitive D-symbols}
 \begin{frame}
-  Éltranzitív kövezések kezelése D-szimbólummal
+  How can we use the D-symbols for $3$-dimensional edge-transitive tilings?
   \begin{itemize}
-    \item Egyszerű új feltétel: a diagramban nem lehet 1-es színű (szaggatott)
-      él
-    \item A lehetséges diagramok végigpróbálgatása egyszerűbbé válik
-    \item 18-as elemszámig jutottunk, és ismert, hogy legfeljebb 24 elemszámú
-      ilyen diagramok lehetségesek.
+    \item Very simple new constraint: the D-diagram cannot "fall apart" if we
+      cancel it's $1$-colored (dashed) edges
+    \item Let's enumerate diagrams without $1$-colored edges, and put back them
+      in every possible (good) way
+    \item Enumerating diagrams becomes easier
+    \item Our algorithms could enumerate these D-symbols with cardinality at
+      most $18$, and it can be proved that the maximal cardinality of such
+      tilings is $24$
   \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \nocite{DHM93,D87,Du88,H93,LM90,Ma67,M94,T82,VS93,F94,F03}
+  \bibliographystyle{plain}
+  \mode<presentation>{\fontsize{5pt}}
+  \bibliography{dsym}
 \end{frame}
 
 \end{document}

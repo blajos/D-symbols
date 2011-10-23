@@ -11,6 +11,7 @@ LIST
 # 1-es szimplex (sotet piros)
 {
   appearance {
+    +face
     +edge
     shading constant
     +transparent
@@ -33,6 +34,7 @@ LIST
 # 2-es szimplex (sotet kek)
 {
   appearance {
+    +face
     +edge
     shading constant
     +transparent
@@ -55,6 +57,7 @@ LIST
 # 3-as szimplex (sotet zold)
 {
   appearance {
+    +face
     +edge
     shading constant
     +transparent
@@ -77,17 +80,30 @@ LIST
 
 #plane
 {
-    appearance {
-      -edge
-	shading constant
-	+transparent
-	material {
-	  alpha 0.3
+  appearance {
+    -edge
+      shading constant
+      +transparent
+      material {
+	alpha 0.3
 	  diffuse 0 1 1
-	}
-    }
-    MESH
-    2 2
-    2 2 0.5 2 -1 0.5
-    -1 2 0.5 -1 -1 0.5
+      }
+  }
+  OFF
+  7 6 0
+        0 0 0.2
+	0 1 0.2
+	1 1 0.2
+	-1 -1 0.2
+	2 2 0.2
+	2 -1 0.2
+	-1 2 0.2
+
+	3 3 4 5
+	3 0 1 2
+	3 0 1 3
+	3 1 3 6
+	3 1 2 4
+	3 1 4 6
+
 }
