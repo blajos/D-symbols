@@ -10,8 +10,8 @@
 \usepackage{amssymb}
 \usepackage{ae,aecompl}
 
-\hyphenpenalty=5000
-\tolerance=1000
+%\hyphenpenalty=5000
+%\tolerance=1000
 
 \begin{document}
 
@@ -21,20 +21,97 @@
 \maketitle
 
 \begin{abstract}
+  A térkitöltések kezelésének egy algebrai módszerével, a Delone-Delaney-Dress
+  szimbólumokkal (röviden D-szimbólum) foglalkozunk. A módszer (\cite{xy}
+  alapján) a térkitöltéseket egy több színű gráffal és a hozzá tartozó
+  mátrix-függvényekkel írja le.
+
+  Alapvető célunk a 3 dimenziós D-szimbólumok algoritmikus felsorolása, illetve
+  a hozzájuk tartozó lehetséges kövezések minél részletesebb jellemzése.
+  Végtelen sok D-szimbólum van rögzített dimenzióban is, ezért bemutatunk egy
+  olyan megszorítási lehetőséget is, ami garantálja a véges sok esetet, de
+  továbbra is érdekes. Általános esetben jelenleg legfeljebb 12, éltranzitív
+  esetben a 24-ből legfeljebb 18 elemű D-szimbólumokat tudjuk felsorolni.
+
+  A D-szimbólumok által leírt kövezések pontos geometriai jellemzőit egyelőre
+  nem tudjuk algoritmikusan leírni, ugyanis ez a Thurston-sejtés témaköréhez
+  vezet, aminek nem ismert konstruktív bizonyítása (\cite{xy}). Ezért
+  néhány esetben a kézzel történő jellemzést megmutatjuk.
 \end{abstract}
 
-\section{Bevezetés}
+\section{Bevezetés, jelölések}
 
-\section{FIXME Térkitöltésről általában}
+% jelolesek: Macbeath \cite{Ma67}
+
+%FIXME Térkitöltésről általában
 
 \section{D-szimbólum konstrukció adott térkitöltés alapján}
+\cite{xy} alapján
+
+Egy tetszőleges $d$-dimenziós geometriában adott kompakt fundamentális
+tartományú térkitöltésből ($\mathcal{T}$) a következőképpen konstruáljuk meg a
+D-szimbólumot:
+
+\begin{enumerate}
+  \item Bontsuk fel a fundamentális tartományt konvex részekre. (FIXME ez mindig
+    megtehető?, Kell-e?)
+  \item Vegyük a fundamentális tartomány konvex részeinek baricentrikus
+    felbontásával kapott szimplexeket. A szimplexek csúcsai a következők szerint
+    állnak elő: egy $d$-dimenziós konvex résztest belső pontja ($A_d$), ezen
+    résztest egy $d-1$-dimenziós lapjának belső pontja ($A_{d-1}$),\ldots, ezen
+    $2$-dimenziós lap egy $1$-dimenziós élének belső pontja ($A_1$) végül ezen
+    élnek egy $0$-dimenziós csúcsa ($A_0$).
+    Az így kapott szimpliciális felbontást jelöljük $\mathcal{C}$-vel; a
+    szimplexet $C_j\in\mathcal{C}$-vel, ahol $j$ az adott szimplex sorszáma.
+  \item Általában megkövetelhetjük, hogy a kövezésnek egy $\Gamma\leq
+    \mathrm{Aut}\mathcal{T}$ szimmetriacsoportja változatlanul hagyja a kövezés
+    kombinatorikus struktúráját, így a baricentrikus felbontást is.
+    Ezzel az eredeti térkitöltésből egy szimpliciális térkitöltést kapunk, ezt
+    szintén $\mathcal{C}$-vel jelöljük, illetve a szimpliciális térkitöltés
+    szimplexeit $C_j\in\mathcal{C}$-vel.
+  \item Bevezetünk szomszédsági operációkat az előbb előállított baricentrikus
+    szimplexekre, $d$-dimenzióban:
+    $\Sigma=\left\{\sigma_0,\sigma_1,\ldots,\sigma_d\right\}$. Az
+    operációk jelentése:
+    $\sigma_i(C)$ a $C\in\mathcal{C}$ szimplex azon szomszédja, amely az
+    $i$-lapja, azaz az $A_0,\ldots,A_{i-1},A_{i+1},\ldots,A_d$ lap mentén
+    szomszédos $C$-vel. Minden $\sigma_i$ operáció egy involúció a fent leírt
+    szimplexek $\mathcal{C}$ halmazán. A szomszédsági operációk egyértelműen
+    kiterjednek a szimpliciális térkitöltés szimplex-pályáira is.
+    
+    Az ábráinkon a következő konvenciót alkalmazzuk a legfeljebb 3 dimenziós
+    szomszédsági operációk jelölésére:
+
+    \setlength{\unitlength}{1cm}
+    $\sigma_0$:
+    \begin{picture}(1,0.2)
+      \multiput(0,0.1)(0.2,0){5}{\circle*{0.001}}
+    \end{picture},
+    $\sigma_1$:
+    \begin{picture}(1,0.2)
+      \multiput(0,0.1)(0.25,0){4}{\line(1,0){0.15}}
+    \end{picture},
+    $\sigma_2$:
+    \begin{picture}(1,0.2)
+      \put(0,0.1){\line(1,0){1}}
+    \end{picture},
+    $\sigma_3$:
+    \begin{picture}(1.5,0.2)
+      \multiput(0,0.1)(0.5,0){3}{\line(1,0){0.2}}
+      \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
+    \end{picture}
+
+  \item 
+\end{enumerate}
+
+\subsection{Példa}
+%négyzet alapú piramis (teljes szimmetriatöréssel) fund. tart.-u kocka kövezés
+
 \subsection{Általános feltételek}
 \subsubsection{Diagram}
 \subsubsection{Mátrix-függvény}
 \subsubsection{Alacsonyabb dimenziós komponensek}
 \subsection{További megszorítások él- illetve laptranzitív esetben}
-\subsection{Példa}
-%négyzet alapú piramis (teljes szimmetriatöréssel) fund. tart.-u kocka kövezés
 
 \section{D-szimbólumok algoritmikus felsorolása és részleges jellemzése}
 \subsection{D-diagramok felsorolása}
