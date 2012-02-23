@@ -10,6 +10,16 @@
 \usepackage{amssymb}
 \usepackage{ae,aecompl}
 
+\newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
+\newtheorem{thm}{Tétel}[section]
+\newtheorem{defn}[thm]{Definíció}
+\newtheorem{lem}[thm]{Lemma}
+\newtheorem{kov}[thm]{Következmény}
+\newtheorem{sej}[thm]{Sejtés}
+\newtheorem{alg}[thm]{Algoritmus}
+\newenvironment{biz}{Bizonyítás: }{Q.E.D.}
+
+
 %\hyphenpenalty=5000
 %\tolerance=1000
 
@@ -67,11 +77,11 @@ D-szimbólumot:
     \mathrm{Aut}\mathcal{T}$ szimmetriacsoportja változatlanul hagyja a kövezés
     kombinatorikus struktúráját, így a baricentrikus felbontást is.
     Ezzel az eredeti térkitöltésből egy szimpliciális térkitöltést kapunk, ezt
-    szintén $\mathcal{C}$-vel jelöljük, illetve a szimpliciális térkitöltés
-    szimplexeit $C_j\in\mathcal{C}$-vel.
+    $\mathcal{C}^\Gamma$-val jelöljük, illetve a szimpliciális térkitöltés
+    szimplexeit $C_j^\Gamma\in\mathcal{C}^\Gamma$-val.
   \item Bevezetünk szomszédsági operációkat az előbb előállított baricentrikus
-    szimplexekre, $d$-dimenzióban:
-    $\Sigma=\left\{\sigma_0,\sigma_1,\ldots,\sigma_d\right\}$. Az
+    szimplexekre, $d$-dimenzióban ($I=\{0,1,\ldots,d\}$ indexhalmaz):
+    $\Sigma_I=\left\{\sigma_0,\sigma_1,\ldots,\sigma_d\right\}$. Az
     operációk jelentése:
     $\sigma_i(C)$ a $C\in\mathcal{C}$ szimplex azon szomszédja, amely az
     $i$-lapja, azaz az $A_0,\ldots,A_{i-1},A_{i+1},\ldots,A_d$ lap mentén
@@ -101,17 +111,233 @@ D-szimbólumot:
       \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
     \end{picture}
 
-  \item 
+  \item Vizsgáljuk meg, hogy egy $(d-2)$-lap körül ($3$ dimenzióban él körül)
+    hány poliéder szerepel, illetve hány baricentrikus szimplex csatlakozik.
+    Tegyük fel, hogy minden $(d-2)$-lap körül véges sok poliéder van.  Ezt az
+    egyszerűbb kezelhetőség miatt érdemes megtenni, bár hiperbolikus esetekben
+    előfordulhatna végtelen sok is. Ez a következőt jelenti:
+    \begin{equation}
+      (\sigma_j\sigma_i)\cdots(\sigma_j\sigma_i)(C)=
+      (\sigma_j\sigma_i)^m(C) =C
+    \end{equation}
+    valamilyen $m$ természetes számra $m$-szer alkalmazva a $(\sigma_j\sigma_i)$
+    operációt. A legkisebb ilyen $m$ számot jelöljük $m_{ij}(C)=m_{ji}(C)$-vel
+    (az index szimmetria nyilvánvaló.)
+
+    Definiáljuk az $M$ mátrix-függvényt a következőképpen:
+    \begin{equation}
+      M:\;\mathcal{C}\rightarrow N_{I\times I},\quad
+      M(C)=\left[m_{ij}(C)\right]
+    \end{equation}
+
+    A térkitöltés szimmetriája nem változtatja meg a $(d-2)$-lap körüli
+    poliéderek, így a baricentrikus szimplexek számát sem, tehát az $M$
+    mátrix-függvény kiterjeszthető a szimmetria csoport szerinti
+    szimplex-pályákra is:
+    \begin{equation}
+      M:\;\mathcal{C}^\Gamma\rightarrow N_{I\times I},\quad
+      M(C^\Gamma)=\left[m_{ij}(C^\Gamma)\right]                                                          
+    \end{equation}
+
+  \item Vezessük be azt a mátrix-függvényt is, ami egy $(d-2)$-lap körül
+    csatlakozó szimplex-pályák számát mutatja meg:
+    \begin{equation}
+      $r_{ij}(C^\Gamma)=r_{ji}(C^\Gamma)=\mathrm{min}\left\{r\left|
+      \left((\sigma_j\sigma_i)\cdots(\sigma_j\sigma_i)(C^\Gamma)=\right)(\sigma_j\sigma_i)^r(C^\Gamma)=C^\Gamma
+      \right.\right\}
+    \end{equation}
+
+    Definiáljuk az $R$ mátrix-függvényt a következőképpen:
+    \begin{equation}
+      R:\;\mathcal{C}^\Gamma\rightarrow N_{I\times I},\quad
+      R(C^\Gamma)=\left[r_{ij}(C^\Gamma)\right]
+    \end{equation}
+
+    Azonnal látszik, hogy $\forall C^\Gamma\in\mathcal{C}^\Gamma,\,\forall
+    i,j\in I$ esetén az alábbi oszthatóság teljesül:
+    \begin{equation}
+      \left.r_{ij}(C^\Gamma)\right|m_{ij}(C)
+    \end{equation}
 \end{enumerate}
+
+Az így kapott $\mathcal{C}^\Gamma, \Sigma_I, M$ hármast nevezzük D-szimbólumnak. A
+$\mathcal{C}^\Gamma, \Sigma_I$ párt egy $d+1$ színű diagrammal ábrázoljuk; ahol
+minden csúcs (szimplex-pályák) minden szín szerinti foka 1 vagy 2, pontosan
+akkor 2, ha az adott él egy hurok.
+
+% dualis megemlitese
+% osszefuggoseg
 
 \subsection{Példa}
 %négyzet alapú piramis (teljes szimmetriatöréssel) fund. tart.-u kocka kövezés
 
 \subsection{Általános feltételek}
+A \ref{construct} részben leírt konstrukció és a tény, hogy ezzel egy
+térkitöltést írunk le, a következő feltételeket indukálja egy tetszőleges
+D-szimbólumra.
+
+Vegyünk egy tetszőleges $\mathcal{D}, \Sigma_I, M$ hármast. Ahol $\mathcal{D}$
+véges, $I$ a dimenzió szerinti index-halmaz ($I=\{0,1,\ldots,d\}$ $d$
+dimenzióban),
+$\Sigma_I=\left\{\sigma_i:\mathcal{D}\leftarrow\mathcal{D}\left|i\in
+I\right.\right\}$ permutációk halmaza és $M: \mathcal{D} \leftarrow gl(d+1)$
+mátrix-függvény $\mathcal{D}$ és $(d+1)\times(d+1)$-es mátrixok között.
+
+A következő pontokban felsorolt feltételek teljesülése esetén nevezzük
+D-szimbólumnak a fenti hármast:
 \subsubsection{Diagram}
+A $\mathcal{D}, \Sigma_I$ D-diagramra vonatkozó feltételek:
+\begin{enumerate}
+  \item A szimplex pályákon értelmezett szomszédsági operációk involutív
+    permutációk, vagyis $\forall i\in I, \sigma_i\in \Sigma_I, \forall D\in
+    \mathcal{D}$: $\sigma_i\sigma_i(D)=D$. A diagram minden csúcsában az azonos
+    színű élek foka 1 vagy 2. A fok pontosan akkor 2, ha az él egy hurok (kezdő
+    és végpontja azonos.)
+  \item A baricentrikus felbontással való kompatibilitás miatt, a nem szomszédos
+    operáció-párokat alkalmazva legfeljebb $2$ lépésből vissza kell jutnunk a
+    kiindulási csúcsba. $\forall i,j\in I, \forall D\in \mathcal{D}$: $|i-j|\geq
+    2 \Rightarrow (\sigma_j\sigma_i)^2(D)=D$
+\end{enumerate}
+
 \subsubsection{Mátrix-függvény}
-\subsubsection{Alacsonyabb dimenziós komponensek}
+A \ref{construct} részben leírt konstrukció szerinti $R$ mátrix-függvény
+felírható a D-diagram alapján. $\forall i,j\in I, \forall D\in \mathcal{D}$:
+$r_{ij}(D)=r_{ji}(D)=\mathrm{min}\left\{r\in
+\mathbb{N}^+|(\sigma_j\sigma_i)^r(D)=D\right\}$
+
+A D-diagram feltételei az $R$ mátrix-függvényre vetítve: $r_{ii}(D)=1$,
+illetve $|i-j|\geq 2 \Rightarrow r_{ij}(D)\leq2$.
+
+Feltételek a diagramhoz tartozó $M$ mátrix-függvényre:
+\begin{enumerate}
+  \item Az $R$ mátrix-függvény minden elemének osztania kell az $M$
+    mátrix-függvény megfelelő elemét. Csak így biztosítható, hogy egy $d-2$
+    dimenziós lap ($3$ dimenzióban él) teljes körüljárásakor azonos szimplex
+    pályába érkezünk; ami pedig szükséges ahhoz, hogy azonos szimplexbe
+    érkezhessünk. Az $M$ és $R$ mátrix-függvények értékeinek hányadosa a kövezés
+    periodicitását mutatja az adott él körül. $\forall i,j\in I, \forall D\in
+    \mathcal{D}$: $r_{ij}(D)|m_{ij}(D)$.
+  \item Pálya feltétel: Minden operáció-párhoz és kiindulási diagram-csúcshoz
+    definiálhatjuk a hozzá tartozó pályát: az összes diagram-csúcs, amit
+    érintünk miközben az operációkat elvégezzük. Az $M$ mátrix-függvény
+    értékeinek egy-egy pályán belül meg kell egyeznie, különben a kapott
+    kövezésben függne az él körüli szimplexek száma a kezdő szimplextől. A
+    pályát visszafelé bejárva is ugyanazt az utat kell megtennünk, ezért az $M$
+    mátrix-függvény mátrixai szimmetrikusak.
+    \begin{align*}                                                                             
+      &\forall i,j\in I, \forall D\in \mathcal{D} \\
+      &\mathcal{D}'=\left\{(\sigma_j\sigma_i)^k(D)|k\in
+      \mathbb{N}\right\}\cup\left\{\sigma_i(\sigma_j\sigma_i)^k(D)|k\in
+      \mathbb{N}\right\}\\
+      &\forall D_1,D_2 \in \mathcal{D}'\\
+      &m_{ij}(D_1)=m_{ij}(D_2)=m_{ji}(D_1)=m_{ji}(D_2)
+    \end{align*}
+  \item Az $M$ mátrix-függvény minden mátrixának főátlójában mindenhol $1$-esek
+    állnak, ez biztosítja, hogy a szomszédsági operációk involúciók a szimplexek
+    halmazán is.
+  \item A főátlótól $1$ távolságra lévő helyeken a mátrix-függvény érték legyen
+    legalább 2. Egyenlőség esetén degenerált, illetve mesterkélt esetekhez
+    jutunk, melyekben például digonok is lehetnek lapok. (Szép kövezés esetén
+    egy 3 dimenziós poliéder bármely csúcsában legalább 3 él és 3 lap
+    találkozik, minden lapnak legalább 3 oldaléle van, minden élnél legalább 3
+    test és 3 lap fut össze.)
+    $\forall i\in I-\{0\}, \forall D\in \mathcal{D} m_{i(i-1)}(D)\geq 2$
+  \item Az $M$ mátrix-függvény minden mátrixának főátlójától legalább 2
+    távolságra lévő helyeken $2$-esek állnak, különben nem kapjuk vissza a
+    baricentrikus felbontás kombinatorikus merőlegességeit.
+    $\forall i,j\in I, \forall D\in \mathcal{D} m_{ij}(D)=2$
+\end{enumerate}
+
+\subsubsection{Alacsonyabb dimenziós komponensek vizsgálata}
+Az eddigi megállapítások szükséges feltételek olyan $d$ dimenziós (nem
+feltétlenül euklideszi) térkitöltés létezésére (amelynek D-szimbóluma
+$\mathcal{D}, \Sigma_I, M$.) $3$ dimenziós esetben további követelményeket
+tudunk megfogalmazni.
+
+\begin{defn}
+  Rész D-szimbólum: Az $i$-edik involúció elhagyásával keletkező diagramok
+  halmaza $K$. Az $i$-edik komponens vagy rész D-szimbólumok:
+  $\left\{\leftexp{c}(\Sigma_I^i,\mathcal{D}^i,M^i)|c \in K\right\}$. Ahol
+  $\Sigma_I^i=\Sigma_I-{\sigma_i}$, $\mathcal{D}^i$ a $c$-edik komponensbeli
+  csúcsok halmaza, és $M^i$ a komponens csúcsain értelmezett mátrix-függvény,
+  amit $M$-ből a komponens csúcsaihoz tartozó mátrixok $i$-edik sorának és
+  oszlopának törlésével kapunk.
+\end{defn}
+
+A rész D-szimbólum vizuális jelentése egy az adott $i$-indexű csúcsosztálybeli
+csúcs körüli eggyel kisebb dimenziós felületen létrehozott ($3$-dimenzióban
+$2$-dimenziós) kövezés D-szimbóluma a csúcs stabilizátora szerint. Ezért
+$3$-dimenzióban egy $i$-indexű valódi szimplex-csúcs körüli rész D-szimbólum egy
+szférikus kövezéshez kell tartozzon, egy ideális szimplex-csúcs körül euklideszi
+kövezés alakul ki (pl. a hiperbolikus tér paraszféra (horoszféra) felületén;)
+végül a hiperbolikus síkkövezéseket kizárjuk, mert modellen kívüli (végtelennél
+távolabbi) pontot, mint $i$-csúcsot jellemezne.
+
+A rész D-szimbólum magasabb dimenzióban is értelmezhető megszorításokat
+jelentene, de mivel a térkitöltések teljes osztályozása csak $2$-dimenzióban
+ismert, ezért jelenleg csak a $3$-dimenziós D-szimbólumok esetén tudjuk a
+módszert jól használni.
+
+További megszorításaink alapja a kombinatorikus görbületi függvény számolása
+(\cite{Emil}). A rész D-szimbólum komponenseihez tartozó kövezésekben a
+D-szimbólum alapján felírható a kombinatorikus görbületi függvény:
+\begin{align*}
+  K(\leftexp{c}{\mathcal{D}}^i)=\sum_{D\in
+  \leftexp{c}{\mathcal{D}}^i}\left(-1+\sum_{\substack{0\le j<k\le d \\
+  j,k\ne i}}\frac{1}{m_{jk}(D)}\right)
+  \begin{array}{cccc}
+    > & & S^2 \\
+    = & 0 & \mathbb{E}^2 \\
+    < & & H^2
+  \end{array}
+\end{align*}
+Ez alapján eldönthető, hogy a rész D-szimbólum a 3 lehetséges $2$-dimenziós
+felület közül melyiken valósulhat meg.
+
+Szférikus síkon történő kövezésnek további feltétele, hogy az úgy nevezett
+rossz orbifoldokat kizárjuk, azaz a következő lehetőségek hibásak (Convay
+illetve Macbeath-féle jelöléseik alapján \cite{CM}):
+\begin{align*}
+  u=(+,0;[u];\{\}), & & 1<u;\\
+  *u=(+,0;[];\{(u)\}), & & 1<u;\\
+  uv=(+,0;[u,v];\{\}), & & 1<u<v;\\
+  *uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
+\end{align*}
+Ezek a csepp felületekre illetve az észak-déli póluson nem azonosan viselkedő
+gömb felületekre utalnak.
+
+További követelmények $3$-dimenziós D-szimbólumokra a rész D-szimbólumok alapján:
+\begin{enumerate}                                                                                    
+  \item $\leftexp{c}(\Sigma_I^1,\mathcal{D}^1,\mathcal{M}^1)$ és
+    $\leftexp{c}(\Sigma_I^2,\mathcal{D}^2,\mathcal{M}^2)$ esetén a görbületi
+    függvény pozitív és a jó orbifold feltétel teljesül minden komponensben.
+    Élközépponthoz és lapközépponthoz tartozó szimplex csúcs valódi csúcs kell
+    legyen, ezért egy $S^2$-n megvalósuló kövezést kell kapjunk.
+  \item $\leftexp{c}(\Sigma_I^0,\mathcal{D}^0,\mathcal{M}^0)$ és
+    $\leftexp{c}(\Sigma_I^3,\mathcal{D}^3,\mathcal{M}^3)$ esetén a görbületi függvény
+    pozitív és a jó orbifold feltétel teljesül, vagy a görbületi függvény
+    $0$ minden komponensben. Csúcshoz és test-középponthoz tartozó szimplex csúcs
+    lehet valódi, ekkor egy $S^2$-n megvalósuló kövezést kell kapjunk; illetve
+    eyekben az esetekben megengedjük hogy ideális pontok legyenek, ekkor
+    $\mathbb{E}^2$-n megvalósuló kövezést kell kapjunk. Az ideális
+    test-középpont esetét a dualitás miatt meghagyjuk; de megjegyezzük, hogy a
+    végtelen poliéderekkel történő kövezés nem igazán érdekes (egy kisebb
+    dimenziós felület kövezésének felel meg.)
+\end{enumerate}
+
 \subsection{További megszorítások él- illetve laptranzitív esetben}
+Módszerünkkel könnyen vizsgálhatók a $3$ dimenziós él- illetve laptranzitív
+kövezések egy egyszerű további feltétel bevezetésével. Az él- illetve
+laptranzitív kövezések esetén egyetlen él- illetve lap-osztályról beszélünk, ami
+D-szimbólumos terminológiában annyit jelent, hogy az $1$-es illetve a $2$-es
+involúciót elhagyva a D-diagram továbbra is összefüggő marad.
+
+Ezen esetek azért érdekesek, mert (\cite{aa} alapján) ismert, hogy legfeljebb
+$|\mathcal{D}|=24$ elemű D-szimbólumok fordulhatnak elő laptranzitív esetben,
+aminek duálisai az éltranzitív esetek, ezért ezesetben is legfeljebb
+$|\mathcal{D}|=24$ elemű D-szimbólumokról van szó. Az összes lehetséges ilyen
+D-szimbólum felsorolása a mostani számítástechnikai eszközökkel elérhető
+közelségben van.
 
 \section{D-szimbólumok algoritmikus felsorolása és részleges jellemzése}
 \subsection{D-diagramok felsorolása}
