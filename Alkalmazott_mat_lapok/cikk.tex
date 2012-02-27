@@ -60,7 +60,8 @@
 
 Egy tetszőleges $d$-dimenziós geometriában adott kompakt fundamentális
 tartományú térkitöltésből ($\mathcal{T}$) a következőképpen konstruáljuk meg a
-D-szimbólumot:
+D-szimbólumot (FIXME a fundamentális tartománynak véges sok belső szimmetriája
+lehet):
 
 \begin{enumerate}
   \item Bontsuk fel a fundamentális tartományt konvex részekre. (FIXME ez mindig
@@ -165,11 +166,21 @@ $\mathcal{C}^\Gamma, \Sigma_I$ párt egy $d+1$ színű diagrammal ábrázoljuk; 
 minden csúcs (szimplex-pályák) minden szín szerinti foka 1 vagy 2, pontosan
 akkor 2, ha az adott él egy hurok.
 
-% dualis megemlitese
-% osszefuggoseg
+\begin{defn}
+  Egy D-szimbólumot összefüggőnek nevezünk, ha a $\mathcal{C}^\Gamma, \Sigma_I$
+  diagram, mint gráf összefüggő.
+\end{defn}
+
+\begin{defn}
+  A $\mathcal{C}^\Gamma, \Sigma_I, M$ D-szimbólum duálisa az a D-szimbólum,
+  amiben az $i$-edik és a $d-i$-edik szomszédsági operációt, illetve a
+  megfelelő mátrix-függvény sorokat és oszlopokat felcseréljük. FIXME képlettel.
+\end{defn}
 
 \subsection{Példa}
 %négyzet alapú piramis (teljes szimmetriatöréssel) fund. tart.-u kocka kövezés
+Vegyük a \ref{pelda1} ábrán látható szimmetriatöréses kocka kövezést. Ennek
+D-szimbóluma a \ref{pelda1_D-sym} ábrán látható.
 
 \subsection{Általános feltételek}
 A \ref{construct} részben leírt konstrukció és a tény, hogy ezzel egy
