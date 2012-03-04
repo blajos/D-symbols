@@ -343,6 +343,11 @@ laptranzitív kövezések esetén egyetlen él- illetve lap-osztályról beszél
 D-szimbólumos terminológiában annyit jelent, hogy az $1$-es illetve a $2$-es
 involúciót elhagyva a D-diagram továbbra is összefüggő marad.
 
+FIXME Megszorítás a mátrix-függvényre: laptranzitív esetben a lapok legfeljebb
+6-szögek lehetnek, ezért a mátrix-függvény hozzá tartozó $m_{01}$ elemeinek
+értéke legfeljebb $12$. Hasonlóan éltranzitív esetben az $m_{23}$ elemeinek
+értéke legfeljebb $12$, mivel a megfelelő laptranzitív esetek duálisai.
+
 Ezen esetek azért érdekesek, mert (\cite{aa} alapján) ismert, hogy legfeljebb
 $|\mathcal{D}|=24$ elemű D-szimbólumok fordulhatnak elő laptranzitív esetben,
 aminek duálisai az éltranzitív esetek, ezért ezesetben is legfeljebb
@@ -351,10 +356,118 @@ D-szimbólum felsorolása a mostani számítástechnikai eszközökkel elérhet�
 közelségben van.
 
 \section{D-szimbólumok algoritmikus felsorolása és részleges jellemzése}
+Mutatunk egy lehetséges felsorolást összefüggő D-diagramokra, majd minden D-diagramra
+felsoroljuk a rajta lehetséges mátrix-függvényeket.
+
 \subsection{D-diagramok felsorolása}
-Mikor nevezzünk 2 diagramot külöbözőnek? Bevezethető egy lexikografikus rendezés.
-Összefüggő diagram "helyes" sorszámozása adott kezdőpont esetén.
-Korábbi feltételek!
+Az összefüggő diagramok felsorolásához érdemes bevezetni egy rendezést rajtuk,
+ami egyértelműen mutatja két diagram egyenlőségét; illetve ezzel megtartjuk a
+kapott lista stabilitását.
+
+Rendezés bevezetése a D-diagramokra \cite{Emil}:
+\begin{itemize}
+  \item Bevezetünk egy sorszámozást, ami minden adott kezdőcsúcsú, összefüggő
+    D-szimbólum csúcsainak sorszámát megadja.
+    Legyen $(\Sigma_I,\mathcal{D}(D_1))$ egy D-szimbólum diagramja $D_1$
+    kezdőcsúccsal. Számozzuk meg a csúcsokat $1,2,\ldots ,n$ sorszámokkal.
+    $D_1$ sorszáma 1. Tegyük fel, hogy megsorszámoztuk a $D_1,\ldots,D_r$
+    csúcsokat. A következő csúcs:
+    \begin{enumerate}
+      \item Vegyük sorban a $\sigma_0(D_r)$ és $\sigma_1(D_r)$ elmeket, az első,
+	amelyiket még nem sorszámoztuk meg, lesz a következő csúcs.
+      \item Ha már sorszámozottak, vegyük sorban
+	\begin{equation*}
+	  \sigma_0(D_{r-1}),\ldots,\sigma_0(D_1);\sigma_1(D_{r-1}),\ldots, \sigma_1(D_1)
+	\end{equation*}
+	csúcsokat, az első sorszám nélküli a következő.
+      \item Végül ha még mindig nincs meg a következő, vegyük az első
+	sorszámozatlant a következők közül:
+	\begin{equation*}
+	  \sigma_2(D_r),\ldots,\sigma_2(D_1); \ldots\ldots; \sigma_d(D_r),\ldots,\sigma_d(D_1)
+	\end{equation*}
+    \end{enumerate}
+
+    A diagram összefüggő, ezért minden csúcsát megsorszámozza az algoritmus.
+
+  \item A sorszámozás alapján veszünk egy távolságot. Bármely
+    két elem távolságát meghatározhatjuk úgy, hogy az egyik elemmel indított
+    sorszámozás szerint a másik elem sorszámánál 1-el kevesebbet veszünk.
+    $D_x$ és $D_y$ távolságának jelölése: $D_xD_y$. Fontos megjegyezni, hogy a
+    távolság nem szimmetrikus.
+  \item A csúcsok távolsága alapján veszünk egy rendezést adott kezdőcsúcsú
+    diagramok között. Legyenek $(\Sigma_I,\mathcal{D}(D_1))$ és
+    $(\Sigma'_{I'},\mathcal{D}'(D_{1'}))$ két D-szimbólum diagramjai,
+    kitüntetett kezdőcsúccsal. Azt mondjuk, hogy $\mathcal{D}<\mathcal{D}'$ a    
+    következő tulajdonságok alapján:
+    \begin{enumerate}
+      \item $|I|<|I'|$ (dimenzió)
+      \item Azonos dimenzió esetén: $|\mathcal{D}|<|\mathcal{D}'|$ (D-szimbólum elemszáma)
+      \item Azonos elemszám esetén: $\mathcal{D}$ és $\mathcal{D}'$ elemeinek
+	távolságait hasonlítjuk össze:
+	\begin{itemize}
+	  \item $D_1\sigma_d D_1<D_{1'}\sigma_d D_{1'};$ ha egyenlőség áll,
+	    $D_2\sigma_d D_2<D_{2'}\sigma_d D_{2'};\ldots;$ ha egyenlőség áll,
+	    $D_n\sigma_d D_n<D_{n'}\sigma_d D_{n'}$ ($n-1$-ig is elég menni);
+	  \item Egyenlőség esetén: $D_1\sigma_{d-1} D_1<D_{1'}\sigma_{d-1} D_{1'};
+	    \ldots;D_n\sigma_{d-1} D_n<D_{n'}\sigma_{d-1} D_{n'};$
+	    \begin{equation*}
+	      \vdots
+	    \end{equation*}
+	  \item Egyenlőség esetén: $D_1\sigma_0 D_1<D_{1'}\sigma_0 D_{1'};
+	    \ldots;D_n\sigma_0 D_n<D_{n'}\sigma_0 D_{n'}.$
+	\end{itemize}
+    \end{enumerate}
+    Ha végig egyenlőség állt, a két diagram izomorf.
+\end{itemize}
+
+Kihasználva a mai számítógépek kapacitását, egy mohó algoritmust használva
+felsoroljuk az összes lehetséges összefüggő $d+1$ színű diagramot; és közben
+kiszűrjük azokat, amik nem adhatnak a feltételeinknek megfelelő diagramot.
+Az összes lehetséges diagramot egy backtrack típusú algoritmussal soroljuk
+fel, aminek működése egy döntési fa teljes bejárásával mutatható be.
+
+A fa minden csúcsa egy aktuális állapotnak felel meg, ahol
+következő adatokat tároljuk:
+\begin{itemize}
+  \item Aktuális D-diagram-kezdemény
+  \item Vizsgált él adatai: forrásának sorszáma ($1\ldots\mathrm{elemszám}$),
+    operációjanak sorszáma ($1\ldots d+1$), céljának sorszáma
+    ($\mathrm{forrás}+1\ldots\mathrm{elemszám}$)
+\end{itemize}
+
+Minden csúcsból két irányba tudunk továbbmenni: hozzáadjuk a
+D-diagram-kezdeményhez a vizsgált élet, vagy nem; és vizsgáljuk a
+következő élet. (A következő élet lexikografikusan vesszük: forrás
+sorszám, operáció sorszám, cél sorszám alapján.) 
+
+A következő heurisztikákkal gyorsítjuk az algoritmust: Nem adunk hozzá olyan
+élet, ami az involúciót elrontaná. Ha a vizsgált él céljának foka $0$, akkor
+csak abban az esetben adjuk hozzá az élt a D-diagram-kezdeményhez, ha a cél
+sorszáma a legkisebb a $0$-adfokú csúcsok közül. Ez utóbbi lépéssel
+biztosítottuk az összefüggőséget is.
+
+A döntési fa levelein ellenőrizzük a diagram szempontjából szükséges
+feltételeket. Ha a forrás sorszáma egyenlő a diagram csúcsainak számával, akkor
+előállítjuk az első csúcsot kezdőcsúcsnak vett sorszámozást. Sorban előállítjuk
+a többi csúcs által generált sorszámozást is, és ha ezek közül bármelyik kisebb
+diagramot ad, akkor továbblépünk a döntési fa teljes bejárásában, mert a
+legkisebb sorszámozású diagram is előáll. Végül elkészítjük a diagram alapján az
+$\mathcal{R}$ mátrix-függvényt, és megvizsgáljuk, hogy a főátlótól legalább $2$
+távolságra levő mezőkben 1-es vagy 2-es szerepel-e (csak így lehet az
+$\mathcal{M}$ mátrix-függvény megfelelő helyein 2-es), ha valamelyikben nem az
+szerepelne, akkor szintén továbblépünk. Találtunk egy legkisebb sorszámozású
+D-diagramot, ezt beszúrjuk egy rendezett adatrendszerbe (az előbb definiált
+rendezés szerint.) Ha már szerepelne a rendszerben, ez azt jelenti, hogy
+szimmetrikus a diagram, és egyszer már szerepelt. Mivel a későbbiekben a teljes
+D-szimbólumra végzünk szimmetria ellenőrzést, ezért ezt az információ nem
+jegyezzük meg, csak továbblépünk a döntési fában.
+
+A felsorolt D-diagramoknak előállítjuk a duálisát is: a szomszédsági operációk
+sorrendjét megfordítjuk és az így kapott nem feltétlenül helyes sorszámozású
+duálisnak is megkeressük az optimális sorszámozását. Ezenkívül előállítjuk a
+$d-1$-dimenziós rész D-szimbólumokat, amiknek hatását $d=3$ esetben a \ref{mxfv}
+fejezetben tárgyaljuk.
+
 \subsection{Mátrix-függvények felsorolása}
 %Alsó korlát: splitting
 %Felső korlát: Alacsonyabb dimenziós komponensek
