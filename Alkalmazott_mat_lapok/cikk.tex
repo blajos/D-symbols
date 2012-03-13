@@ -46,7 +46,7 @@
   A D-szimbólumok által leírt kövezések pontos geometriai jellemzőit egyelőre
   nem tudjuk algoritmikusan leírni, ugyanis ez a Thurston-sejtés témaköréhez
   vezet, aminek nem ismert konstruktív bizonyítása (\cite{xy}). Ezért
-  néhány esetben a kézzel történő jellemzést megmutatjuk.
+  egy példán keresztül a kézzel történő jellemzést megmutatjuk.
 \end{abstract}
 
 \section{Bevezetés, jelölések}
@@ -469,10 +469,64 @@ $d-1$-dimenziós rész D-szimbólumokat, amiknek hatását $d=3$ esetben a \ref{
 fejezetben tárgyaljuk.
 
 \subsection{Mátrix-függvények felsorolása}
-%Alsó korlát: splitting
-%Felső korlát: Alacsonyabb dimenziós komponensek
+\label{mxfv}
+
+A lehetséges $\mathcal{M}$ mátrix-függvények felsorolásához először paraméteresen
+előállítjuk a mátrix-függvény értékeket. Azonos pályához tartozó szimplex-pár
+esetén az $\mathcal{M}$ mátrix-függvény megfelelő értékei meg kell egyezzenek a
+kövezés kombinatorikus struktúrája miatt (különben a szimplexekre és a szimplex
+pályákra ható operációk inkompatibilisek lesznek.) Tudjuk továbbá, hogy az
+$\mathcal{R}$ mátrix-függvény elemeinek osztania kell az $\mathcal{M}$
+mátrix-függvény elemeit, illetve a nem szomszédos operációk esetén az
+$\mathcal{M}$ mátrix-függvény értéke 2. Így szomszédos operációkhoz tartozó
+pályánként vehetünk egy-egy paramétert, amit a megfelelő $\mathcal{R}$
+mátrix-függvény elemmel szorozva a megfelelő $\mathcal{M}$ mátrix-függvény
+elemet kapjuk. A paraméterek minimális értékeit beállíthatjuk úgy, hogy legalább
+$3$ legyen minden mellékátló-beli $\mathcal{M}$ mátrix-függvény elem.
+
+$3$-dimenziós esetben az alacsonzabb dimenziós komponensek vizsgálatával
+(\ref{kdim} fejezet) tudunk egyrészt felső korlátot mondani a
+paraméter-rendszerekre, illetve a szférikus kövezések miatt bizonyos
+paramétereket egyformának kell választanunk. Azokat a paraméter értékeket
+tartjuk meg, melyek minden rész D-szimbólum esetén megfelelő kombinatorikus
+görbület-függvényt indukálnak (csúcs és testközéppont esetén szférikus vagy
+euklideszi, lap- és élközéppont esetén szférikus.) A paraméterek növelésével a
+görbület-függvény csökken; így ha eljutottunk pl. egy hiperbolikus állapothoz,
+nem fogunk a paraméterek növelésével se euklideszi se szférikus állapotot kapni.
+
+A szférikus esetekhez vezető kombinatorikus görbületi függvény esetén
+felléphetnek a rossz orbifold esetek, ezeket a megfelelő paraméter értékek
+azonosnak választásával küszöbölhetjük ki. Ebben az esetben minden operáció párt
+meg kell vizsgálnunk, nem csak a szomszédosakat.
+
+FIXME \cite{abc} Az így felsorolt D-szimbólumokban egy további jelenség a
+splitting is megfigyelhető. Splitting segítségével a D-szimbólum legalább két
+független (akár különböző geometriában megvalósuló) kövezést is leírhat. Fontos
+észrevétel, hogy egy splitting mindig kisebb elemszámú D-szimbólumokra bontja az
+eredetit; illetve a splitting nemlétezése alsó korlátot jelent a paraméterek
+értékeire.
+
+Ha az összes splitting nélküli D-szimbólumot akarjuk előállítani, akkor
+figyelembe kell vennünk a paraméter rendszerek alsó- és felső korlátait is, de
+előfordulhatnak végtelen láncok.
+
+Végül, hogy rendezett adathalmazt kapjunk, veszünk egy lexikografikus rendezést
+a paraméter rendszereken.
 \subsection{További megszorítások él- illetve laptranzitív esetben}
-%Bizonyítható végesség
+Él- illetve laptranzitív esetben bizonyíthatóan véges sok esetet kell csak
+vizsgálni. A két eset egymás duálisa, így elég megmutatni, hogy az állítás igaz
+laptranzitív esetben. Laptranzitív kövezés esetén legfeljebb $6$-szög lapjaink
+lehetnek (lásd \cite{xy}), és ezekből $1$ osztály van a kövezésben. Egy
+$6$-szöghöz legfeljebb $2*2*6=24$ különböző baricentrikus szimplex osztály
+tartozhat. A laptranzitivitás miatt ennél nem lehet több szimplex-pálya a
+kövezésben. Tehát legfeljebb $24$ elemű D-szimbólumokkal leírható az összes
+ilyen kövezés.
+
+Az $\mathcal{M}$ mátrix-függvény megfelelő értékeire való legfejebb 12-es korlát
+egy esetleg szűkebb felső korlátot adhat a megfelelő paraméterekre (ez a
+valóságban mindig $1$ paraméter, ugyanis legfeljebb $2$ paraméter lehetne,
+amiket viszont a rossz orbifold feltétel mindig egyesít.)
+
 \subsection{Jellemzés}
 \subsection{Példa}
 %Előző példa ügyesen visszafelé...
