@@ -1,0 +1,187 @@
+LIST
+{
+  appearance {
+    -face
+    +edge
+  }
+  BBOX
+	-1 -1 -1
+	1 1 1
+}
+# emlekzteto: fix csucsok: 0 0 0, 1 0.3 0.6
+# 1-es szimplex (sotet piros)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 0 1
+	1 1 1
+
+	3 0 1 2 0.5 0 0
+	3 0 1 3 0.5 0 0
+	3 0 2 3 0.5 0 0
+	3 1 2 3 0.5 0 0
+}
+# 2-es szimplex (sotet zold)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 1 0
+	1 1 1
+
+	3 0 1 2 0 0.5 0
+	3 0 1 3 0 0.5 0
+	3 0 2 3 0 0.5 0
+	3 1 2 3 0 0.5 0
+}
+# 3-es szimplex (sotet kek)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 1 0
+	1 1 -1
+
+	3 0 1 2 0 0 0.5
+	3 0 1 3 0 0 0.5
+	3 0 2 3 0 0 0.5
+	3 1 2 3 0 0 0.5
+}
+# 4-es szimplex (sotet lila)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 0 -1
+	1 1 -1
+
+	3 0 1 2 0.5 0 0.5
+	3 0 1 3 0.5 0 0.5
+	3 0 2 3 0.5 0 0.5
+	3 1 2 3 0.5 0 0.5
+}
+# 5-es szimplex (sotet cian)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 0 -1
+	1 -1 -1
+
+	3 0 1 2 0 0.5 0.5
+	3 0 1 3 0 0.5 0.5
+	3 0 2 3 0 0.5 0.5
+	3 1 2 3 0 0.5 0.5
+}
+# 6-es szimplex (sotet sarga)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 -1 0
+	1 -1 -1
+
+	3 0 1 2 0.5 0.5 0
+	3 0 1 3 0.5 0.5 0
+	3 0 2 3 0.5 0.5 0
+	3 1 2 3 0.5 0.5 0
+}
+# 7-es szimplex (piros)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 -1 0
+	1 -1 1
+
+	3 0 1 2 1 0 0
+	3 0 1 3 1 0 0
+	3 0 2 3 1 0 0
+	3 1 2 3 1 0 0
+}
+# 8-es szimplex (zold)
+{
+  appearance {
+    +edge
+    shading constant
+    +transparent
+    material {
+      alpha 0.3
+    }
+  }
+  OFF
+  4 4 0
+	0 0 0
+	1 0.3 0.6
+	1 0 1
+	1 -1 1
+
+	3 0 1 2 0 1 0
+	3 0 1 3 0 1 0
+	3 0 2 3 0 1 0
+	3 1 2 3 0 1 0
+}
