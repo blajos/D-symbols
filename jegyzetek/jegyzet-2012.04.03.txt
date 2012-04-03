@@ -1,0 +1,12 @@
+Otlet multitaskolasra:
+- db adatbazisban taroljuk  a diagramokat
+- forkoljunk egyet, ha van szabad processzor (ezt c++-ban meg nem tudom, hogyan
+  lehet)
+- adatbazis olvasas barmikor mehet
+- olvasas-nem-letezes utani beszurashoz: lock, ujra olvas, ha tovabbra sincs,
+  beszur, unlock
+
+informacio gyujtes:
+- ha elkezdunk foglalkozni egy elemmel, akkor lockoljuk az adatbazist, beirjuk,
+  hogy mar foglalkozunk vele, unlock
+- itt is lehet szepen sorban az osszes procit hasznalni, ha van szabad
