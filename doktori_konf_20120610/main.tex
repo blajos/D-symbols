@@ -113,74 +113,255 @@ innen max. 7 slide-om lehet, de inkabb 6
 
 \section{D-symbols}
 \begin{frame}
-  D-symbols:
+  \frametitle{D-symbol, an algebraic way to describe tilings}
   \begin{itemize}
-    \item Based on the baricentric subdivision of a tiling
+    \item Based on the baricentric subdivision of an $n$-dimensional tiling and its fundamental
+      domain \mode<article>{one can define the placement of the consisting
+      simplices. In a baricentric subdivision the vertices can be indexed with
+      the dimension of its facet. Our definition of a fundamental domain allows
+      inner symmetries.}
     \item Structure:
       \begin{itemize}
-	\item D-diagram: $dim+1$ colored graph, which represents adjacencies of
-	  simplex-orbits
-	\item Matrix function on simplex orbits, which represents the number of
-	  simpleces (not orbits) around a $dim-2$ dimensional edge.
+        \item D-diagram: $(n+1)$ colored graph, which represents adjacencies of
+          simplex-orbits
+        \item Matrix function on simplex orbits, which represents the number of
+          simplices (not orbits) around a $(n-2)$-dimensional edge
       \end{itemize}
     \item Constraints:
       \begin{itemize}
-	\item Compatibility between the diagram and the matrix function.
-	\item Compatibility with baricentric subdivision
+        \item Compatibility between the diagram and the matrix function
+        \item Compatibility with baricentric subdivision
+        \item Lower dimensional constraints
       \end{itemize}
+    \item Every "nice" tiling has a corresponding D-symbol which is unambigous
+      up to permutation \mode<article>{"Nice" tilings are the ones, whose
+      baricentric subdivision has finitely many simplex-orbits and does not have
+      ideal simplex-vertices except for 0-center or 3-center vertices.}
   \end{itemize}
 \end{frame}
 
-\section{Finding D-diagrams}
+\subsection{Face/edge transitivity}
 \begin{frame}
-  Simple algorithm for finding D-diagrams:
+  \frametitle{Face and edge transitive D-symbols, duality}
+  \mode<article>{Only in 3 dimensions.}
   \begin{itemize}
-    \item Fixed dimension and cardinality
-    \item Take a fixed number of graph vertices and $dim+1$ number of colors
-    \item Enumerate every possible edge-combinations and drop the "bad" and
-      duplicate combinations.
-    \item The algorithm can find the possible edge-transitive diagrams with a
-      little perturbation.
+    \item A face transitive tiling has a fundamental domain with only $1$ orbit
+      of faces
+    \item An edge transitive tiling has a fundamental domain with only $1$ orbit
+      of edges
+    \item Duality between face and edge transitive tilings\mode<article>{If we
+      switch the $k$th color with the $n-k$th color, and switch the matrix
+      function's rows and columns respectively we get the dual D-symbol. Same
+      tiling, dual fundamental domain.}
+    \item A face/edge transitive D-diagram remains connected if we cancel the
+      $2$nd/$1$st color \mode<article>{respectively.}
+    \item A face transitive tiling's faces can be at most hexagons limiting
+      possible simplex-orbits to at most $24$ \mode<article>{on both types of
+      tilings. That means there can only be finitely many D-diagrams, so we can
+      enumerate them.} 
+  \end{itemize}
+\end{frame}
+
+\subsection{Example}
+\begin{frame}
+  \frametitle{Example}
+  Simple example based on the symmetry breaking of the cube tiling of
+  $\mathbb{E}^3$:
+  \mode<article>{figure \ref{abra:example1}. As adjacency relations are defined
+  for every simplex orbit, we can skip showing the loops which map the orbits
+  mirroring to a plane.}
+  \begin{figure}
+    FIXME example
+    \mode<article>{\caption{\label{abra:hasab_bari} Red:1, blue:2, green:3}}
+    \center
+    \includegraphics[width=0.4\textwidth]{hasab_bari.pdf}
+    \includegraphics[width=0.35\textwidth]{hasab_D-graf.pdf}                                                       
+  \end{figure}
+  Notation:\\<all>
+  \setlength{\unitlength}{1cm}
+  $\sigma_0$:
+  \begin{picture}(1,0.2)
+    \multiput(0,0.1)(0.2,0){5}{\circle*{0.001}}
+  \end{picture},
+  $\sigma_1$:
+  \begin{picture}(1,0.2)
+    \multiput(0,0.1)(0.25,0){4}{\line(1,0){0.15}}
+  \end{picture},
+  $\sigma_2$:
+  \begin{picture}(1,0.2)
+    \put(0,0.1){\line(1,0){1}}
+  \end{picture},
+  $\sigma_3$:
+  \begin{picture}(1.5,0.2)
+    \multiput(0,0.1)(0.5,0){3}{\line(1,0){0.2}}
+    \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
+  \end{picture}
+  FIXME ide kell ferjen az M mx fv.
+\end{frame}
+
+\section{Constraints}
+\begin{frame}
+  \frametitle{D-symbol, an algebraic way to describe tilings}
+  \begin{itemize}
+    \item Based on the baricentric subdivision of a tiling and its fundamental
+      domain \mode<article>{one can define the placement of the consisting
+      simplices. In a baricentric subdivision the vertices can be indexed with
+      the dimension of its facet. Our definition of a fundamental domain allows
+      inner symmetries.}
+    \item Structure:
+      \begin{itemize}
+        \item D-diagram: $(n+1)$ colored graph, which represents adjacencies of
+          simplex-orbits
+        \item Matrix function on simplex orbits, which represents the number of
+          simplices (not orbits) around a $(n-2)$-dimensional edge
+      \end{itemize}
     \item Constraints:
       \begin{itemize}
-	\item Rank of vertices
-	\item Patterns which makes the diagram incompatible with baricentric
-	  subdivision
-	\item Is the diagram connected?
-	\item Permutation of vertices (ordering of diagrams)
+        \item {\textbf Compatibility between the diagram and the matrix
+	  function}
+	\item {\textbf Compatibility with baricentric subdivision}
+        \item Lower dimensional constraints
       \end{itemize}
+    \item Every "nice" tiling has a corresponding D-symbol which is unambigous
+      up to permutation \mode<article>{"Nice" tilings are the ones, whose
+      baricentric subdivision has finitely many simplex-orbits and does not have
+      ideal simplex-vertices except for 0-center or 3-center vertices.}
   \end{itemize}
 \end{frame}
 
-\section{Finding matrix-functions}
 \begin{frame}
-  Algorithm for finding possible matrix-functions of a D-diagram in
-  $3$-dimensions:
+  \frametitle{Lower dimensional constraints}
+  From now on we only consider $3$-dimensional D-symbols. \newline
+  D-subsymbol:
   \begin{itemize}
-    \item Parametric matrix function, minimal values
-    \item $2$-dimensional subsymbols of 3 colors (simplex point stabilizers):
-      \begin{itemize}
-	\item Based on combinatorial curvature (decreases if we increase the
-	  parameter values)
-	  \begin{align*}
-	    K(\leftexp{c}{\mathcal{D}}^i)=\sum_{D\in
-	    \leftexp{c}{\mathcal{D}}^i}\left(-1+\sum_{\substack{0\le j<k\le 3 \\
-	    j,k\ne i}}\frac{1}{m_{jk}(D)}\right)
-	    \begin{array}{cccc}
-	      > & & S^2 \\
-	      = & 0 & \mathbb{E}^2 \\
-	      < & & H^2
-	    \end{array}
-	  \end{align*}
-	\item Only spherical or euclidean
-	\item If spherical we have to exclude bad orbifolds
-      \end{itemize}
-    \item Increase every parameter one by one and manage infinite series
+    \item The $i$-th D-subsymbol
+      $(\Sigma_I^i,\mathcal{D}^i,\mathcal{M}^i)$\mode<article>{ can be got by
+      eliminating the $i$-th operation from the diagram and the rows and columns
+      of the matrix functions.}
+    \item We can calculate the combinatorial curvature function of the subsymbol:
+      \begin{align*}
+        K(\leftexp{c}{\mathcal{D}}^i)=\sum_{D\in
+        \leftexp{c}{\mathcal{D}}^i}\left(-1+\sum_{\substack{0\le j<k\le d \\
+        j,k\ne i}}\frac{1}{m_{jk}(D)}\right)
+        \begin{array}{cccc}
+          > & & S^2 \\
+          = & 0 & \mathbb{E}^2 \\
+          < & & H^2
+        \end{array}
+      \end{align*}
+      \mode<article>{Based on the above formula one can decide, in which
+      $2$-dimensional constant curvature space realizes the tiling.}
   \end{itemize}
-  Some easy to answer questions:
+  \mode<presentation>{\begin{minipage}[t]{0.45\textwidth}}
+    \begin{itemize}
+      \item Good orbifold criteria\mode<article>{: In the above mentioned
+        spherical tiling case, we have to exclude bad orbifolds. The following
+options are excluded (given by both Convay's and Macbeath's notations):
+        \begin{align*}
+          u=(+,0;[u];\{\}), & & 1<u;\\
+          *u=(+,0;[];\{(u)\}), & & 1<u;\\
+          uv=(+,0;[u,v];\{\}), & & 1<u<v;\\
+          *uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
+        \end{align*}}
+      \item Visualization:
+        \mode<article>{The subsymbol corresponds to the $(3-1)$-dimensional
+        tiling around the $i$-indexed vertice-class induced by the
+        original D-symbol. So we have to get a spherical tiling around a real
+        simplex-vertice (see Fig. \ref{fig:spherical_ex}), or a Euclidean tiling
+        around an ideal simplex-vertex in the original tiling. We should not get
+        hyperbolic tilings around a simplex-vertex, because this would mean an
+        out-of-model vertex.}
+    \end{itemize}
+  \mode<presentation>{\end{minipage}
+  \begin{minipage}[t]{0.5\textwidth}}
+    \begin{figure}
+      \mode<article>{\caption{\label{fig:spherical_ex}Spherical tiling around
+      a simplex-vertex}}
+      \center
+      \includegraphics[height=2.5cm]{d3c3_2_vertice.pdf}
+    \end{figure}
+  \mode<presentation>{\end{minipage}}
+\end{frame}
+
+\section{Enumerating D-symbols}
+\begin{frame}
+  Enumerating face and edge transitive D-symbols
   \begin{itemize}
-    \item Does the D-symbol have proper inner symmetry (diagram and matrix function)?
-    \item Does the tiling have ideal point for a given D-symbol?
+    \item Ambitious goal\mode<article>{: Let's enumerate every possible
+      $n$-dimensional tiling with compact fundamental domain using D-symbols.}
+    \item The simpler problem seems possible\mode<article>{, because there are
+      only finitely many face and edge transitive D-symbols.}
+    \item Too many cases\mode<article>{: the output is exponential both in the
+      dimension and the cardinality of the D-diagram.}
+    \item There is an ordering on D-diagrams, so they can be enumerated                                            
+    \item There is an ordering on matrix-functions, we can enumerate them in $3$
+      dimensions\mode<article>{. Based on the previous sections there is an
+      upper bound on parameters (but one has to be cautious, because there are
+      infinite chains.) There's another upper bound on one type of parameters
+      based on the face or edge transitivity.}
+    \item Our algorithms could enumerate the $3$-dimensional edge transitive
+      D-symbols with cardinality at most $18$\mode<article>{. Right now we have
+      some problem with memory consumption, but after implementing a nice
+      solution the other problem would be time.}
   \end{itemize}
 \end{frame}
+
+\section{Thurston conjecture}
+\begin{frame}
+  \frametitle{Splitting problem and the Thurston conjecture}
+  Thurston conjecture:
+  \begin{itemize}
+    \item Every oriented prime closed 3-manifold can be cut along tori, so that
+      the interior of each of the resulting manifolds has a geometric structure
+      with finite volume.
+    \item There are 8 possible geometric structures in 3 dimensions, which have
+      at least one compact manifold modelled on itself: $S^3$, $E^3$,
+      $H^3$, $S^2\times R$, $H^2\times R$, $\widetilde{SL2R}$, Sol,
+      Nil.
+  \end{itemize}
+  Remarks:
+  \begin{itemize}
+    \item For non-orientable manifolds the "oriented double cover" method can be
+      used\mode<article>{. Which maps manifold $M$ to $M\times Z/2Z$ with an
+      appropriate pull-back operation. For example a Möbius-strip is mapped to a
+      "double Möbius-strip" which is a ring.}
+    \item In $2$ dimensions: every surface without boundary (2-manifold) has a
+      geometric structure consisting of a metric with constant curvature
+    \item There exists at least 4 proof\mode<article>{, let's try to find a
+      constructive one or a counter example...}
+  \end{itemize}
+\end{frame}
+
+\section{TODO}
+\begin{frame}
+  \frametitle{TODO list}
+  \begin{itemize}
+    \item Find splittings:
+      \begin{itemize}
+	\item Lower constraints of parameters
+	\item $S^2$-type splitting\mode<article>{: Indicates a detail in the tiling, which is
+	  shrinkable to a single vertex, so we get a similar tiling with less
+	  simplex-orbits. (Possible bad orbifold problem.)}
+	\item $E^2$-type splitting: \mode<presentation>{"cut along tori"}
+	  \mode<article>{In Thurston-conjecture "cut along tori". This indicates
+	  two parts in the tiling, in both parts the other part can be seen as
+	  an ideal vertex.}
+      \end{itemize}
+    \item Find out the signature of the projective space\mode<article>{ with a
+      nice large library of articles.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \nocite{DHM93,D87,Du88,H93,LM90,Ma67,M94,T82,VS93,F94,F03}
+  \bibliographystyle{plain}
+  \mode<presentation>{\fontsize{5pt}{0}}
+  \bibliography{dsym}
+\end{frame}
+
+\begin{frame}
+  \frametitle{Questions?}
+  \center\large Questions?
+\end{frame}
+
 \end{document}
