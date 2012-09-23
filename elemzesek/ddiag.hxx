@@ -46,8 +46,8 @@ class Ddiag : public Base {
        We use <Base.car> different Simplex* pointers for vertices/simplex
        orbits. 
        
-       There are <Base.car>+1 different numberings (unsorted, and of
-       revery vertex we have a numbering started at that vertex.) For every
+       There are <Base.car>+1 different numberings (unsorted, and for
+       every vertex we have a numbering started at that vertex.) For every
        numbering we need a <Base.car> sized array consisting of Simplex*
        pointers.
        */
