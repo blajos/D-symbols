@@ -45,15 +45,15 @@ class Mxfunction : public Base {
     ~Mxfunction(void);
 
     /* Funcs: Simple functions
-       get() - Get the matrix element *x*,*y* from *orbit*'s matrix.
-       set() - Set the matrix element *x*,*y* to *z* in *orbit*'s matrix.
+       get(orbit,x,y) - Get the matrix element *x*,*y* from *orbit*'s matrix.
+       set(orbit,x,y,z) - Set the matrix element *x*,*y* to *z* in *orbit*'s matrix.
        */
     int get(Simplex* orbit,int x,int y);
     int set(Simplex* orbit,int x,int y,int z);
 
     /* Funcs: Simple functions
-       get() - Get the matrix element *x*,*y* from the *k*th matrix.
-       set() - Set the matrix element *x*,*y* to *z* in the *k*th matrix.
+       get(k,x,y) - Get the matrix element *x*,*y* from the *k*th matrix.
+       set(k,x,y,z) - Set the matrix element *x*,*y* to *z* in the *k*th matrix.
        */
     int get(int k,int x,int y);
     int set(int k,int x,int y,int z);
