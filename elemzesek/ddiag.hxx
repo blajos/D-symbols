@@ -63,7 +63,8 @@ class Ddiag : public Base {
 	-1 - Error (ex. the dimension is not 3)
        */
     int filter_bad_orbifolds(list<Param*>*);
-    //int filter_bad_orbifolds03(void); Szerintem nem kell kulon...
+    //int filter_bad_orbifolds03(void); Szerintem nem kell kulon... Pontosabban
+    //nem itt kell
   public:
     /*
       Constructor: Ddiag
