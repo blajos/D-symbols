@@ -18,6 +18,9 @@ Base::Base(istream* in){
   *in >> dim >> car;
 }
 
+Base::~Base(){
+}
+
 int Base::dump(ostream* out){
   *out << dim << " " << car;
   return 0;

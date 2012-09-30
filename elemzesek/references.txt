@@ -1,0 +1,39 @@
+Title: References
+
+[1] O. Delgado-Friedrichs. Euclidicity Criteria for Three-Dimensional Branched
+Triangulations. PhD thesis, University of Bielefeld, 1994.
+
+[2] O. Delgado-Friedrichs. Data structures and algorithms for tilings i.  Theor.
+Comput. Sci., 303(2-3):431-445, 2003.
+
+[3] A. W. M. Dress. Presentation of discrete groups acting on simply connected
+manifolds in terms of parametrized systems of Coxeter matrices.  Advances in
+Math, 63:196-212, 1987.
+
+[4] A. W. M. Dress, D. H. Huson, and E. Molnar. The classifications of
+face-transitive periodic three-dimensional tilings. Acta Crystallographica,
+A(49):806-817, 1993.
+
+[5] W. D. Dunbar. Geometric orbifolds. Revista Mat. Univ. Complutense de Madrid,
+1(1,2,3):67-99, 1988.
+
+[6] D. H. Huson. The generation and classification of tile-k-transitive tilings
+of the Euclidean plane, the sphere and the hyperbolic plane. Geometriae
+Dedicata, 47:269-296, 1993.
+
+[7] Z. Lucic and E. Molnar. Combinatorial classification of fundamental domains
+of finite area for planar discontinous isometry groups. Arch. Math., 54:511-520,
+1990.
+
+[8] A. M. Macbeath. The classification of non-Euclidean plane crystallographic
+groups. Canadian J. Math., 19:1192-1205, 1967.
+
+[9] E. Molnar. Symmetry breaking of the cube tiling and the spatials chess board
+by D-symbols. Beitr. Alg. Geom (Contributions to Algebra and Geometry),
+35(2):205-238, 1994.
+
+[10] W. P. Thurston. Three-dimensional manifolds, Kleinian groups and hyperbolic
+geometry. Bull. Amer. Math. Soc., 6:367-382, 1982.
+
+[11] E. B. Vinberg and O. V. Shvartsman. Discrete transformation groups of
+spaces of constant curvature. Encyclopedia of Math, 29, 1993. Geometry II.

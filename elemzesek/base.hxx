@@ -42,7 +42,7 @@ class Base {
       Virtual destructor of Base object, so destructor works fine if used for
       virtual objects.
     */
-    virtual ~Base(void)=0;
+    virtual ~Base(void);
     /* 
       Func: dump()
       Dump data to ostream in computer readable format.

@@ -21,8 +21,8 @@ class Param {
        belong to? (We define the smaller operation from the adjacency operation
        pair.)
      */
-  int coeff,min,val;
   char letter;
+  int coeff,min,val;
   bool changeable;
   bool orientable;
   list<pair<Simplex*,int> > simplex_operations;

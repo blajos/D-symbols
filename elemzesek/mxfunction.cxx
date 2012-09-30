@@ -94,5 +94,6 @@ int Mxfunction::print_html(ostream* out){
     *out << "</table></td>";
   }
   *out << "</tr></table>";
+  return 0;
 }
 

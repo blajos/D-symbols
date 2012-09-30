@@ -42,16 +42,16 @@ class Svg : public Base{
   /* Func: create_circle()
      Create the *n*'th circle.
      */
-  void create_circle(int n);
+  void create_circle(int n,ostream* out);
   /* Func: create_numtext()
      Create the *n*'th circle's label.
      */
-  void create_numtext(int n);
+  void create_numtext(int n,ostream* out);
   /* Func: create_line()
      Create a line between the *n0*'th and the *n1*'th circle using pattern
      *color*.
    */
-  void create_line(int n0,int n1,int color);
+  void create_line(int n0,int n1,int color,ostream* out);
   int add_line(int n0,int n1,int color);
   int print_html(ostream*);
 };

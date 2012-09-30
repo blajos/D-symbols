@@ -14,19 +14,19 @@ Svg::Svg(int dimin,int carin):
   }
 }
 
-void Svg::create_circle(int n) {
+void Svg::create_circle(int n,ostream* out) {
   *out << "<svg:circle cx=\"" << koordx[n] << "\" cy=\"" << koordy[n] <<
     "\" r=\"" << rad << "\" fill=\"white\" stroke=\"black\" stroke-width=\"1\"/>"<<endl;
 }
 
-void Svg::create_numtext(int n) {
+void Svg::create_numtext(int n,ostream* out) {
   *out << "<svg:text x=\"" << koordx[n] << "\" y=\"" <<
     koordy[n]+round(2/3*fontsize/2) << "\" font-size=\""<< fontsize <<
     "\" text-anchor=\"middle\" dominant-baseline=\"mathematical\">" << n+1 <<
     "</svg:text>"<<endl;
 }
 
-void Svg::create_line(int n0,int n1,int szin) {
+void Svg::create_line(int n0,int n1,int szin,ostream* out) {
   int diff=(szin*2*rad/dim-rad)*3/4;
   float length=sqrt(pow(koordx[n1]-koordx[n0],2)+pow(koordy[n1]-koordy[n0],2));
   int diffy=(koordx[n1]-koordx[n0])*diff/(int)length;
@@ -66,12 +66,12 @@ int Svg::print_html(ostream* out){
   *out << "<svg:svg viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" << 
     size << "px\" height=\""<<size<<"px\" version=\"1.1\">" <<endl;
 
-  for(list<vector<int> >::iterator it=lines.begin();it!=lines.end();it++){
-    create_line((*it)[0],(*it)[1],(*it)[2]);
+  for(list<vector<int> >::iterator it=lines.begin();it!=lines.end();it++)
+    create_line((*it)[0],(*it)[1],(*it)[2],out);
 
   for(int i=0;i<car;i++){
-    create_circle(i);
-    create_numtext(i);
+    create_circle(i,out);
+    create_numtext(i,out);
   }
   *out << "</svg:svg>" <<endl;
   return 0;
@@ -82,6 +82,6 @@ int Svg::add_line(int n0,int n1,int szin){
   a->push_back(n0);
   a->push_back(n1);
   a->push_back(szin);
-  lines.push_back(&a);
+  lines.push_back(*a);
   return 0;
 }

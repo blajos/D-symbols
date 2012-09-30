@@ -1,7 +1,8 @@
 CC=g++
-CFLAGS=-c -Wall
-LDFLAGS=
-SOURCES=base.cxx ddiag.cxx dsym.cxx mxfunction.cxx param.cxx simplex.cxx svg.cxx main.cxx
+CFLAGS=-c -Wall -g
+LDFLAGS=-ldb_cxx
+SOURCES=base.cxx ddiag.cxx dsym.cxx mxfunction.cxx param.cxx simplex.cxx \
+  svg.cxx dlist.cxx test.cxx main.cxx
 OBJECTS=$(SOURCES:.cxx=.o)
 EXECUTABLE=a.out
 

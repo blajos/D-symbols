@@ -26,6 +26,6 @@ int Simplex::dump(ostream*){
   return 0;
 }
 
-int print_html(ostream*){
+int Simplex::print_html(ostream*){
   return 0;
 }

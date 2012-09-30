@@ -119,7 +119,7 @@ void Ddiag::create_numbering(Simplex* first){
   // still the 0th.
   int i=first->sorszam[0]+1; // Number of first in the base numbering
   first->sorszam[i]=r++;
-  while (D.size() < car){
+  while ((int)D.size() < car){
     // (*D.rbegin()) is a Simplex*
     if (find(D.begin(),D.end(),(*D.rbegin())->szomszed[0]) == D.end()) {
       D.push_back((*D.rbegin())->szomszed[0]);
@@ -307,7 +307,7 @@ int Ddiag::is_bigraph(void) {
 	curr_sim!=curr_comp->end(); curr_sim++)
       for(int i=0;i<dim+1;i++)
 	// For every simplex in the component we check, if any of the operations
-	// points to an other simplex in the same component; if so we don't have
+	// points to another simplex in the same component we don't have
 	// a bipartite graph.
 	if((*curr_sim)->szomszed[i]!=*curr_sim){
 	  if(find(curr_comp->begin(),curr_comp->end(),(*curr_sim)->szomszed[i])
@@ -329,6 +329,7 @@ int Ddiag::is_bigraph(void) {
     curr_comp=other_comp;
     other_comp=temp;
   }
+  return 1;
 }
 
 int Ddiag::is_smaller_diag(int thisindex,Ddiag* other,int otherindex){
