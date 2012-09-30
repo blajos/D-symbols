@@ -193,7 +193,7 @@ class Ddiag : public Base {
     int is_bigraph(void);
 
     /*
-       Func: is_smaller_diag()
+       Func: is_smaller()
        Is this D-diagram with first vertice *i* smaller than the other D-diagram
        with first vertice *j*?
 
@@ -207,7 +207,7 @@ class Ddiag : public Base {
        Remarks:
        FIXME The used numberings should be generated beforehand.
        */
-    int is_smaller_diag(int i,Ddiag* other,int j);
+    int is_smaller(int i,Ddiag* other,int j);
 
     /* Func: params()
        Generate parameters based on the simplex orbits, and filter bad orbifolds

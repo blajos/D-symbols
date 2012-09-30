@@ -252,13 +252,13 @@ list<Ddiag*> *Ddiag::cancel_operation_diag(int cancel_op) {
 }
 
 int Ddiag::check_dual(void){
-  return -is_smaller_diag(1,dual_diag(),1);
+  return -is_smaller(1,dual_diag(),1);
 }
 
 int Ddiag::check_numberings(void){
   buf_symmetries=1;
   for (int i=2;i<car+1;i++){
-    int ret=is_smaller_diag(1,this,i);
+    int ret=is_smaller(1,this,i);
     if (ret == -1){
       return -1;
     }
@@ -332,7 +332,7 @@ int Ddiag::is_bigraph(void) {
   return 1;
 }
 
-int Ddiag::is_smaller_diag(int thisindex,Ddiag* other,int otherindex){
+int Ddiag::is_smaller(int thisindex,Ddiag* other,int otherindex){
   if (dim > other->dim)
     return -1;
   if (dim < other->dim)

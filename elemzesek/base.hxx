@@ -10,7 +10,7 @@ using namespace std;
 
   The base of every class. It contains some basic information: dimension and
   cardinality. And it has the basic funcions that should be defined in every
-  class: <dump>, <restore>, <print_html>
+  class: <dump>, <print_html>
 */
 class Base {
   protected:

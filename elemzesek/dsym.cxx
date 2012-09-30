@@ -59,13 +59,13 @@ Dsym* Dsym::dual_sym(void){
 }
 
 int Dsym::check_dual(void){
-  return -is_smaller_sym(1,dual_sym(),1);
+  return -is_smaller(1,dual_sym(),1);
 }
 
 int Dsym::check_numberings(void){
   buf_symmetries=1;
   for (int i=2;i<car+1;i++){
-    int ret=is_smaller_sym(1,this,i);
+    int ret=is_smaller(1,this,i);
     if (ret == -1){
       return -1;
     }
@@ -115,7 +115,7 @@ list<Dsym*>* Dsym::cancel_operation_sym(int cancel_op){
   return buf_cancel_operation_sym[cancel_op];
 }
 
-int Dsym::is_smaller_sym(int thisindex,Dsym* other,int otherindex){
+int Dsym::is_smaller(int thisindex,Dsym* other,int otherindex){
   if(is_smaller_diag(thisindex,(Ddiag*)other,otherindex))
     return is_smaller_diag(thisindex,(Ddiag*)other,otherindex);
   else {

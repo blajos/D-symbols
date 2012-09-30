@@ -112,7 +112,7 @@ class Dsym : public Ddiag{
     list<Dsym*> *cancel_operation_sym(int);
 
     /*
-       Func: is_smaller_sym()
+       Func: is_smaller()
        Is this D-symbol with first vertice *i* smaller than the other D-symbol
        with first vertice *j*?
 
@@ -126,7 +126,7 @@ class Dsym : public Ddiag{
        Remarks:
        FIXME The used numberings should be generated beforehand.
        */
-    int is_smaller_sym(int i,Dsym* other,int j);
+    int is_smaller(int i,Dsym* other,int j);
 
     /* Func: check_simplex_vertices()
        Check that tilings around barycentric-simplex vertices give us spherical
