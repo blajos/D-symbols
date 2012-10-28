@@ -22,10 +22,8 @@ Simplex::~Simplex(void) {
   delete[] szomszed;
 }
 
-int Simplex::dump(ostream*){
-  return 0;
-}
-
-int Simplex::print_html(ostream*){
+int Simplex::dump(ostream* out) {
+  Base::dump(out);
+  *out << " " << sorszam[0];
   return 0;
 }

@@ -49,12 +49,12 @@ class Base {
 
       Output format is like "3 6", dimension and cardinality.
     */
-    int dump(ostream*);
+    virtual int dump(ostream*);
     /* 
       Func: print_html()
       Pretty print the class in xhtml format.
     */
-    virtual int print_html(ostream*)=0;
+    virtual int print_html(ostream*);
 };
 
 #endif /* __base_h */

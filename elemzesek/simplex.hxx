@@ -40,14 +40,9 @@ class Simplex : public Base {
     ~Simplex(void);
 
     /* Func: dump()
-       FIXME
+       Save simplex data.
        */
     int dump(ostream*);
-
-    /* Func: print_html()
-       FIXME
-       */
-    int print_html(ostream*);
 };
 
 #endif /* __simplex_h */

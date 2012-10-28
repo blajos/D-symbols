@@ -15,9 +15,9 @@ Mxfunction::Mxfunction(int dim,int car):
 }
 
 Mxfunction::Mxfunction(Mxfunction* oldmx):
-  Base(oldmx->dim,oldmx->car)
+  Mxfunction(oldmx->dim,oldmx->car)
 {
-  Mxfunction(dim,car);
+  //Mxfunction(dim,car);
   for(int i=0;i<car;i++)
     for(int j=0;j<dim+1;j++)
       for(int k=0;k<dim+1;k++)
@@ -59,24 +59,31 @@ int Mxfunction::dump(ostream *out){
 	*out << " " << mx[i][j][k];
     }
   }
-  //*out << endl; //FIXME Kell?
   return 0;
 }
 
 int Mxfunction::get(Simplex* orbit,int x,int y){
+  if ( x > dim || y > dim)
+    throw 42;
   return mx[orbit->sorszam[0]][x][y];
 }
 
 int Mxfunction::set(Simplex* orbit,int x,int y,int z){
+  if ( x > dim || y > dim)
+    throw 42;
   mx[orbit->sorszam[0]][x][y]=z;
   return 0;
 }
 
 int Mxfunction::get(int k,int x,int y){
+  if ( k > car-1 || x > dim || y > dim)
+    throw 42;
   return mx[k][x][y];
 }
 
 int Mxfunction::set(int k,int x,int y,int z){
+  if ( k > car-1 || x > dim || y > dim)
+    throw 42;
   mx[k][x][y]=z;
   return 0;
 }

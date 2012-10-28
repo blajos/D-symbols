@@ -1,6 +1,10 @@
 #include "dlist.hxx"
 
-template <class D> Dlist::Dlist(string fn):
+template <class D> Dlist<D>::Dlist(void){
+  Dlist<D>::Dlist(string("example"));
+}
+
+template <class D> Dlist<D>::Dlist(string fn):
   filename_base(fn),
   fastdb(NULL,0),
   sorteddb(NULL,0),
@@ -10,17 +14,17 @@ template <class D> Dlist::Dlist(string fn):
 {
   sorteddb.set_bt_compare(compare_d);
 
-  fastdb.open(NULL, filename_base + "_fast.db", NULL, DB_HASH, DB_CREATE, 0);
-  sorteddb.open(NULL, filename_base + "_sort.db", NULL, DB_BTREE, DB_CREATE, 0);
+  fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
+  sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
 }
 
-template <class D> Dlist::~Dlist(){
+template <class D> Dlist<D>::~Dlist(){
   current->close();
   fastdb.close(0);
   sorteddb.close(0);
 }
 
-template <class D> int Dlist::compare_d(Db *dbp, const Dbt *a, const Dbt *b){
+template <class D> int Dlist<D>::compare_d(Db *dbp, const Dbt *a, const Dbt *b){
   D* dobj1,dobj2;
   char* dstr1=new char[a->get_size()];
   char* dstr2=new char[b->get_size()];
@@ -28,7 +32,7 @@ template <class D> int Dlist::compare_d(Db *dbp, const Dbt *a, const Dbt *b){
   memcpy(&dstr1, a->get_data(), a->get_size()); 
   memcpy(&dstr2, b->get_data(), b->get_size()); 
 
-  sstream dsstr1,dsstr2;
+  stringstream dsstr1,dsstr2;
   dsstr1 << dstr1;
   dsstr2 << dstr2;
 
@@ -38,12 +42,12 @@ template <class D> int Dlist::compare_d(Db *dbp, const Dbt *a, const Dbt *b){
   return dobj2->is_smaller(0,dobj1,0);
 }
 
-template <class D> int Dlist::count(void){
+template <class D> int Dlist<D>::getcount(void){
   return count;
 }
 
-template <class D> void Dlist::append(D* new_element){
-  sstream dumpstr;
+template <class D> void Dlist<D>::append(D* new_element){
+  stringstream dumpstr;
   new_element->dump(&dumpstr);
   bool a=true;
 
@@ -60,9 +64,9 @@ template <class D> void Dlist::append(D* new_element){
   //}
 }
 
-template <class D> int Dlist::check(D* element){
-  sstream dumpstr;
-  new_element->dump(&dumpstr);
+template <class D> int Dlist<D>::check(D* element){
+  stringstream dumpstr;
+  element->dump(&dumpstr);
   bool a;
 
   Dbt key((void*)&dumpstr.str().c_str(), dumpstr.str().size() + 1);
@@ -75,11 +79,11 @@ template <class D> int Dlist::check(D* element){
     return 1;
 }
 
-template <class D> D* Dlist::getnextsorted(void){
+template <class D> D* Dlist<D>::getnextsorted(void){
   if (current == 0)
     reset_cursor();
 
-  sstream dumpstr;
+  stringstream dumpstr;
   bool a;
   char* str;
   int ret;
@@ -122,6 +126,6 @@ template <class D> D* Dlist::getnextsorted(void){
   return output;
 }
 
-template <class D> void Dlist::reset_cursor(void){
+template <class D> void Dlist<D>::reset_cursor(void){
   sorteddb.cursor(0,&current,DB_CURSOR_BULK);
 }

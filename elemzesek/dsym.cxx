@@ -116,8 +116,8 @@ list<Dsym*>* Dsym::cancel_operation_sym(int cancel_op){
 }
 
 int Dsym::is_smaller(int thisindex,Dsym* other,int otherindex){
-  if(is_smaller_diag(thisindex,(Ddiag*)other,otherindex))
-    return is_smaller_diag(thisindex,(Ddiag*)other,otherindex);
+  if(Ddiag::is_smaller(thisindex,(Ddiag*)other,otherindex))
+    return Ddiag::is_smaller(thisindex,(Ddiag*)other,otherindex);
   else {
     for(int i=0;i<dim+1;i++)
       for(int j=0;j<dim+1;j++)

@@ -3,6 +3,7 @@
 
 #include<db_cxx.h>
 #include<sstream>
+#include<string.h>
 
 using namespace std;
 
@@ -25,12 +26,15 @@ template <class D> class Dlist {
     int count;
     int keylength;
   public:
-    int count(void); //Db::stat()
+    int getcount(void); //Db::stat()
     Dlist(void);
+    Dlist(string);
     ~Dlist(void);
-    int append(D* new_element);
+    void append(D* new_element);
     int check(D* element);
     D* getnextsorted(void);
     void reset_cursor(void);
     int compare_d(Db *, const Dbt *, const Dbt *);
 };
+
+#endif //__dlist_h

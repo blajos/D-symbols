@@ -15,15 +15,15 @@ Svg::Svg(int dimin,int carin):
 }
 
 void Svg::create_circle(int n,ostream* out) {
-  *out << "<svg:circle cx=\"" << koordx[n] << "\" cy=\"" << koordy[n] <<
-    "\" r=\"" << rad << "\" fill=\"white\" stroke=\"black\" stroke-width=\"1\"/>"<<endl;
+  *out << "<circle cx=\"" << koordx[n] << "\" cy=\"" << koordy[n] <<
+    "\" r=\"" << rad << "\" fill=\"white\" stroke=\"black\" stroke-width=\"1\"/>";
 }
 
 void Svg::create_numtext(int n,ostream* out) {
-  *out << "<svg:text x=\"" << koordx[n] << "\" y=\"" <<
-    koordy[n]+round(2/3*fontsize/2) << "\" font-size=\""<< fontsize <<
+  *out << "<text x=\"" << koordx[n] << "\" y=\"" <<
+    (koordy[n]+round(fontsize/3)) << "\" font-size=\""<< fontsize <<
     "\" text-anchor=\"middle\" dominant-baseline=\"mathematical\">" << n+1 <<
-    "</svg:text>"<<endl;
+    "</text>";
 }
 
 void Svg::create_line(int n0,int n1,int szin,ostream* out) {
@@ -49,12 +49,12 @@ void Svg::create_line(int n0,int n1,int szin,ostream* out) {
       style="stroke-dasharray:8,8,2,10";
       for (int i=3;i<szin;i++) style+=",2,10";
   }
-  *out << "<svg:line style=\"" << style << 
+  *out << "<line style=\"" << style << 
     "\" x1=\"" << koordx[n0]+diffx << 
     "\" y1=\"" << koordy[n0]+diffy << 
     "\" x2=\"" << koordx[n1]+diffx << 
     "\" y2=\"" << koordy[n1]+diffy << 
-    "\" stroke=\"black\" stroke-width=\"1\"/>" << endl;
+    "\" stroke=\"black\" stroke-width=\"1\"/>";
 }
 
 Svg::~Svg(void) {
@@ -63,8 +63,8 @@ Svg::~Svg(void) {
 }
 
 int Svg::print_html(ostream* out){
-  *out << "<svg:svg viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" << 
-    size << "px\" height=\""<<size<<"px\" version=\"1.1\">" <<endl;
+  *out << "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" << 
+    size << "px\" height=\""<<size<<"px\" version=\"1.1\">";
 
   for(list<vector<int> >::iterator it=lines.begin();it!=lines.end();it++)
     create_line((*it)[0],(*it)[1],(*it)[2],out);
@@ -73,7 +73,7 @@ int Svg::print_html(ostream* out){
     create_circle(i,out);
     create_numtext(i,out);
   }
-  *out << "</svg:svg>" <<endl;
+  *out << "</svg>";
   return 0;
 }
 

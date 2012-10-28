@@ -1,3 +1,11 @@
+#include "test.hxx"
+
 int main(){
-  return 0;
+  Test tester;
+  try{
+    return tester.all();
+  }
+  catch (int a){
+    return a;
+  }
 }

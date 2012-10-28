@@ -19,9 +19,14 @@ Base::Base(istream* in){
 }
 
 Base::~Base(){
+  return;
 }
 
 int Base::dump(ostream* out){
   *out << dim << " " << car;
+  return 0;
+}
+
+int Base::print_html(ostream*){
   return 0;
 }
