@@ -218,7 +218,7 @@ class Ddiag : public Base {
        */
     list<Param*> *params(void);
 
-    /* Func: dump
+    /* Func: dump()
        Dump Ddiag in machine readable format. 
        
        Output looks like this: 3 6 ((1,2)(3)(4)(5)(6)) ((1,4)(2,3)(5)(6))
@@ -228,7 +228,7 @@ class Ddiag : public Base {
        */
     virtual int dump(ostream*);
     
-    /* Func: print_html
+    /* Func: print_html()
        Pretty print Ddiag.
        */
     virtual int print_html(ostream*);

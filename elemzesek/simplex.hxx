@@ -48,7 +48,6 @@ class Simplex : public Base {
        FIXME
        */
     int print_html(ostream*);
-
 };
 
 #endif /* __simplex_h */

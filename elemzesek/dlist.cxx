@@ -50,8 +50,14 @@ template <class D> void Dlist::append(D* new_element){
   Dbt key((void*)&dumpstr.str().c_str(), dumpstr.str().size() + 1);
   Dbt data(&a, sizeof(a));
 
-  fastdb.put(NULL, &key, &data, 0);
-  count++;
+  int ret = fastdb.put(NULL, &key, &data, DB_NOOVERWRITE);
+  if (ret == 0) {
+    count++;
+    sorteddb.put(NULL, &key, &data, DB_NOOVERWRITE);
+  }
+  // Else: do nothing...
+  //else if (ret == DB_KEYEXIST) {
+  //}
 }
 
 template <class D> int Dlist::check(D* element){
@@ -87,18 +93,26 @@ template <class D> D* Dlist::getnextsorted(void){
   key.set_ulen(keylength);
   key.set_flags(DB_DBT_USERMEM);
 
-  ret = current->get(&key, &data, DB_NEXT);
-
-  if (ret = DB_BUFFER_SMALL) {
-    keylength=2*key.get_size();
-    delete[] str;
-
-    str=new char[keylength];
-    key.set_data(str);
-    key.set_ulen(keylength);
-    key.set_flags(DB_DBT_USERMEM);
+  try {
     ret = current->get(&key, &data, DB_NEXT);
   }
+  catch (DbMemoryException& e){
+    if (e.get_errno() == DB_BUFFER_SMALL) {
+      keylength=2*key.get_size();
+      delete[] str;
+
+      str=new char[keylength];
+      key.set_data(str);
+      key.set_ulen(keylength);
+      key.set_flags(DB_DBT_USERMEM);
+      ret = current->get(&key, &data, DB_NEXT);
+    }
+    else {
+      throw 1;
+    }
+  }
+  if (ret == DB_NOTFOUND)
+    return NULL;
 
   dumpstr << *str;
   D* output(dumpstr);
