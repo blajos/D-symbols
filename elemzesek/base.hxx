@@ -13,7 +13,7 @@ using namespace std;
   class: <dump>, <print_html>
 */
 class Base {
-  protected:
+  public:
     /*
       Variables: Base variables
 
@@ -21,7 +21,6 @@ class Base {
       car - Cardinality
     */
     int dim,car;
-  public:
     /*
       Constructor: Base
       Initialize Base object without parameters. It should be filled later.

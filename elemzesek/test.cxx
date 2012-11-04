@@ -92,7 +92,26 @@ int Test::svg(void){
 }
 
 int Test::ddiag(void){
-  //FIXME
+  stringstream str1,str2,str3;
+  cerr << "Testing Ddiag module: ";
+  Ddiag tester(3,6);
+  tester.create_edge(0,0,1);
+  tester.create_edge(1,1,2);
+  tester.create_edge(0,2,3);
+  tester.create_edge(1,3,4);
+  tester.create_edge(0,4,5);
+
+  tester.dump(&str1);
+  if (str1.str() != "3 6 ((0,1)(2,3)(4,5))((0)(1,2)(3,4)(5))((0)(1)(2)(3)(4)(5))((0)(1)(2)(3)(4)(5))"){
+    cerr << str1.str() << endl;
+    return 1;
+  }
+
+  tester.print_html(&str2);
+  if (str2.str() != ""){
+    cerr << " " << str2.str() << endl;
+    return 1;
+  }
   return 0;
 }
 

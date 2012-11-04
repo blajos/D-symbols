@@ -6,6 +6,7 @@ Ddiag::Ddiag(int dim,int car):
 {
   buf_dual_diag=0;
   buf_Rmx=0;
+  buf_params=0;
   simplex_orbits=new Simplex**[car+1];
   for (int k=0;k<car+1;k++) simplex_orbits[k]=new Simplex*[car];
   for (int i=0;i<car;i++) simplex_orbits[0][i]=new Simplex(dim,car,i);
@@ -69,21 +70,26 @@ Ddiag::~Ddiag(void){
   delete buf_dual_diag;
   delete buf_Rmx;
 
-  for(list<Param*>::iterator it1=buf_params->begin();it1!=buf_params->end();
-      ++it1){
-    // it1 is a pointer to Param* elements, so *it1 is a Param* element
-    delete *it1;
+  if (buf_params){
+    for(list<Param*>::iterator it1=buf_params->begin();it1!=buf_params->end();
+	++it1){
+      // it1 is a pointer to Param* elements, so *it1 is a Param* element
+      delete *it1;
+    }
+    delete buf_params;
   }
-  delete buf_params;
 
   for(vector<list<Ddiag*> *>::iterator it1=buf_cancel_operation_diag.begin();
       it1!=buf_cancel_operation_diag.end(); ++it1){
     // it1 is a pointer to list<Ddiag*> * elements
-    for(list<Ddiag*>::iterator it2=(*it1)->begin(); it2!=(*it1)->end(); ++it2){
-      // it2 is a pointer to Ddiag* elements, so *it1 is a Ddiag* element
-      delete *it2;
+    if(*it1){
+      for(list<Ddiag*>::iterator it2=(*it1)->begin(); it2!=(*it1)->end(); ++it2){
+	// it2 is a pointer to Ddiag* elements, so *it1 is a Ddiag* element
+	if (*it2)
+	  delete *it2;
+      }
+      delete *it1;
     }
-    delete *it1;
   }
 }
 
@@ -193,11 +199,14 @@ list<Ddiag*> *Ddiag::cancel_operation_diag(int cancel_op) {
 
     list<int> unreachable;
    
-    for(int i=0;i<car;i++) unreachable.push_back(i);    //fill unreachable
+    for(int i=0;i<car;i++) 
+      unreachable.push_back(i);    //fill unreachable
     while (!unreachable.empty()) {
       list<int> current_component;
       list<int> new_elements;
-      new_elements.push_back(*unreachable.begin());
+      list<int>::iterator b = unreachable.begin();
+      new_elements.push_back(*b);
+      unreachable.erase(b);
       while (!new_elements.empty()) {
 	list<int> previous_elements;
         for ( list<int>::iterator p = new_elements.begin(); p !=
@@ -211,8 +220,7 @@ list<Ddiag*> *Ddiag::cancel_operation_diag(int cancel_op) {
           //utolso szomszedai metszet nemelerheto->uj
           for (int j=0;j<dim+1;j++) {                                                                    
 	    if ( j!=cancel_op ){
-	      list<int>::iterator new_unreachable=find(unreachable.begin(),
-		  unreachable.end(),simplex_orbits[0][*r]->szomszed[j]->sorszam[0]);
+	      list<int>::iterator new_unreachable=find(unreachable.begin(),unreachable.end(),simplex_orbits[0][*r]->szomszed[j]->sorszam[0]);
 	      if (new_unreachable != unreachable.end() ) {
 		new_elements.push_back(*new_unreachable);
 		unreachable.erase(new_unreachable);    //talalt nemelerhetoek torlese
@@ -235,9 +243,14 @@ list<Ddiag*> *Ddiag::cancel_operation_diag(int cancel_op) {
 
       for ( list<int>::iterator r = current_component.begin();
 	  r!=current_component.end();r++){
-	for ( int j=0;j<dim+1;j++){
+	for ( int orig_j=0;orig_j<dim+1;orig_j++){
+	  int j=orig_j;
+	  if (orig_j > cancel_op)
+	    j--;
+	  else if (orig_j == cancel_op)
+	    continue;
 	  // helper=index of the j-th adjacent simplex in the original diagram.
-	  int helper = simplex_orbits[0][indexes[num]]->szomszed[j]->sorszam[0];
+	  int helper = simplex_orbits[0][indexes[num]]->szomszed[orig_j]->sorszam[0];
 
 	  // helper1= index of the j-th adjacent simplex in the component
 	  vector<int>::iterator helper1 = find(indexes.begin(),indexes.end(),helper);
@@ -359,25 +372,43 @@ int Ddiag::is_smaller(int thisindex,Ddiag* other,int otherindex){
 
 list<Param*> *Ddiag::params(void){
   if (!buf_params){
-    char my_character='m';
-    for(int op0=0;op0<dim;op0++){
-      int op1=op0+1;
-      list<Simplex*> unreached;
-      for(int i=0;i<car;i++) unreached.push_back(simplex_orbits[0][i]);
-      while (!unreached.empty()){
-	int coeff;
-	bool orientable;
-	list<Simplex*> reached;
-	list<Simplex*>::iterator unreached_it;
-	reached.push_back(*unreached.begin());
-	Simplex* starting_point=*unreached.begin();
-	unreached.erase(unreached.begin());
-	while((*reached.rbegin())->szomszed[op0]->szomszed[op1] !=
-	    starting_point) {
-	  // We don't reach the end in 1 pair of steps
-	  // Add every simplex on the route to reached
-	  unreached_it=find(unreached.begin(), unreached.end(),
-	      (*reached.rbegin())->szomszed[op0]);
+    buf_params = new list<Param*>;
+    char my_character='a';
+    for(int op0=0;op0<dim;op0++)
+      for(int op1=op0+1;op1<dim+1;op1++){
+	list<Simplex*> unreached;
+	for(int i=0;i<car;i++) unreached.push_back(simplex_orbits[0][i]);
+	while (!unreached.empty()){
+	  int coeff;
+	  bool orientable;
+	  list<Simplex*> reached;
+	  list<Simplex*>::iterator unreached_it;
+	  reached.push_back(*unreached.begin());
+	  Simplex* starting_point = *unreached.begin();
+	  Simplex* reached_point = starting_point;
+	  unreached.erase(unreached.begin());
+	  while(reached_point->szomszed[op0]->szomszed[op1] != starting_point) {
+	    // We don't reach the end in 1 pair of steps
+	    // Add every simplex on the route to reached
+	    reached_point = reached_point->szomszed[op0]->szomszed[op1];
+	    unreached_it=find(unreached.begin(), unreached.end(), reached_point->szomszed[op0]);
+	    if(unreached_it!=unreached.end()){
+	      reached.push_back(*unreached_it);
+	      unreached.erase(unreached_it);
+	    }
+	    else 
+	      orientable=false;
+
+	    unreached_it=find(unreached.begin(), unreached.end(), reached_point->szomszed[op0]->szomszed[op1]);
+	    if(unreached_it!=unreached.end()){
+	      reached.push_back(*unreached_it);
+	      unreached.erase(unreached_it);
+	    }
+	    else 
+	      orientable=false;
+	  }
+	  // There can be one more step with operation op0
+	  unreached_it=find(unreached.begin(), unreached.end(), (*reached.rbegin())->szomszed[op0]);
 	  if(unreached_it!=unreached.end()){
 	    reached.push_back(*unreached_it);
 	    unreached.erase(unreached_it);
@@ -385,41 +416,43 @@ list<Param*> *Ddiag::params(void){
 	  else 
 	    orientable=false;
 
-	  unreached_it=find(unreached.begin(), unreached.end(),
-	      (*reached.rbegin())->szomszed[op0]->szomszed[op1]);
-	  if(unreached_it!=unreached.end()){
-	    reached.push_back(*unreached_it);
-	    unreached.erase(unreached_it);
+	  coeff=Rmx()->get(starting_point,op0,op1);
+
+	  Param* curr_param=0;
+	  if (op1-op0==1){
+	    curr_param=new Param(my_character++,coeff,orientable,true);
+	    if (my_character=='z'+1)
+	      my_character='A';
+	  } 
+	  else{
+	    curr_param=new Param(0,coeff,orientable,false);
+	    curr_param->val=2/coeff;
+	    curr_param->changeable=false;
 	  }
-	  else 
-	    orientable=false;
-	}
-	// There can be one more step with operation op0
-	unreached_it=find(unreached.begin(), unreached.end(),
-	    (*reached.rbegin())->szomszed[op0]);
-	if(unreached_it!=unreached.end()){
-	  reached.push_back(*unreached_it);
-	  unreached.erase(unreached_it);
-	}
-	else 
-	  orientable=false;
 
-	coeff=Rmx()->get(starting_point,op0,op1);
+	  for(list<Simplex*>::iterator reached_it=reached.begin();
+	      reached_it!=reached.end(); reached_it++){
+	    Param::sop tmp;
+	    tmp.simplex=*reached_it;
+	    tmp.op1=op0;
+	    tmp.op2=op1;
+	    curr_param->simplex_operations.push_back(tmp);
 
-	Param* curr_param=new Param(my_character++,coeff,orientable);
-	for(list<Simplex*>::iterator reached_it=reached.begin();
-	    reached_it!=reached.end(); reached_it++)
-	  curr_param->simplex_operations.push_back(pair<Simplex*,int>(*reached_it,op0));
-	buf_params->push_back(curr_param);
+	    (*reached_it)->params[op0][op1]=curr_param;
+	    (*reached_it)->params[op1][op0]=curr_param;
+	  }
+	  buf_params->push_back(curr_param);
+	}
       }
-    }
+    int a=filter_bad_orbifolds(buf_params);
+    if (a<0)
+      cerr << "filter_bad_orbifolds(buf_params)="<< a << endl;
   }
-  filter_bad_orbifolds(buf_params);
   return buf_params;
 }
 
 int Ddiag::dump(ostream* out){
-  *out << dim << car;
+  *out << dim << " " << car << " ";
   for(int i=0;i<dim+1;i++){
     *out << '(';
     list<int> simplex_indexes;
@@ -451,35 +484,175 @@ int Ddiag::print_html(ostream* out){
   for(int i=0;i<car;i++)
     for(int j=0;j<dim+1;j++){
       int other=simplex_orbits[0][i]->szomszed[j]->sorszam[0];
-      if(other!=i)
-        my_svg.add_line(i,other,j);
+      if(other > i)
+	my_svg.add_line(i,other,j);
     }
   my_svg.print_html(out);
 
   *out << "</td>" << endl;
   *out << "      <td><table>" << endl;
-  *out << "        <tr><td>";
+  *out << "        <tr><td>R matrix function:<br/>";
   Rmx()->print_html(out);
   *out << "</td></tr>" << endl;
+
+  *out << "        <tr><td>Parametrized M matrix function:<br/>";
+  *out << "<table border=\"1\"><tr>";
+  params();
+  for(int i=0;i<car;i++){
+    *out << "<td><table cellpadding=\"3\">";
+    for(int j=0;j<dim+1;j++){
+      *out << "<tr>";
+      for(int k=0;k<dim+1;k++){
+	if (j==k){
+	  *out << "<td align=\"center\">";
+	  *out << "1";
+	}
+	else if (simplex_orbits[0][i]->params[j][k]->changeable &&
+	    simplex_orbits[0][i]->params[j][k]->letter!=0){
+	  *out << "<td align=\"center\" bgcolor=\"#00FF00\">";
+	  *out << simplex_orbits[0][i]->params[j][k]->coeff <<
+	    simplex_orbits[0][i]->params[j][k]->letter;
+	}
+	else{
+	  *out << "<td align=\"center\">";
+	  *out << simplex_orbits[0][i]->params[j][k]->coeff*simplex_orbits[0][i]->params[j][k]->val;
+	}
+	*out << "</td>";
+      }
+      *out << "</tr>";
+    }
+    *out << "</table></td>";
+  }
+  *out << "</tr></table>";
+  *out << "</td></tr>" << endl;
+
   *out << "        <tr><td colspan=\"" << car << "\">Number of " << dim-1 << 
     " dimensional components: (" << cancel_operation_diag(0)->size();
   for (int j=1;j<dim+1;j++)
     *out << "," << cancel_operation_diag(j)->size();
   *out << ")</td></tr>" << endl;
   *out << "        <tr><td colspan=\"" << car << "\">Parameters:";
-  for (list<Param*>::iterator it=params()->begin();it!=params()->end();it++)
-    *out << " " << (*it)->coeff << (*it)->letter << ((*it)->orientable ? "+" : "");
+  params();
+  for (list<Param*>::iterator it=params()->begin();it!=params()->end();it++){
+    if ((*it)->letter!=0 && (*it)->changeable){
+      *out << "<br/>" << (*it)->coeff << (*it)->letter << 
+	((*it)->orientable ? "+" : "") << "&lt;";
+      //curr_param->simplex_operations.push_back(pair<Simplex*,int>(*reached_it,op0));
+      for (list<Param::sop>::iterator it1=(*it)->simplex_operations.begin();
+	  it1!=(*it)->simplex_operations.end(); it1++){
+	if ( it1 != (*it)->simplex_operations.begin())
+	  *out << ",";
+	*out << "[" << it1->simplex->sorszam[0] << " (" << it1->op1 << "," <<
+	  it1->op2 << ")]";
+      }
+      *out << "&gt;";
+    }
+  }
   *out << "</td></tr>" << endl;
   *out << "      </table></td></tr>" << endl;
   *out << "    </table>" << endl;
-  //*out << "  </body>" << endl;
-  //*out << "</html>" << endl;
   return 0;
 }
 
-int Ddiag::filter_bad_orbifolds(list<Param*>*){
-  // Let's ignore this for now, because it's possible to have a Euclidean
-  // tiling, which doesn't suffer from the bad orbifold problem.
-  return 0;
+int Ddiag::filter_bad_orbifolds(list<Param*>* params){
+  // Only for the cases, where adjacency operation 1 or 2 is eliminated
+  if(dim!=3) return -1;
+
+  int ret=0;
+  for(int elhagy=1;elhagy<3;elhagy++)
+    //Waaaa FIXME ezt hogyan tudom normalisan visszavezetni az eredeti
+    //parameterekre?
+    for(list<Ddiag*>::iterator komp=cancel_operation_diag(elhagy)->begin();
+	komp!=cancel_operation_diag(elhagy)->end();komp++){
+      (*komp)->params();
+      Param* egyik=0;
+      Param* masik=0;
+      Param* harmadik=0; //ha mar harman vannak az jo
+      for(int i=0;i < (*komp)->car;i++)
+	for (int op1=0;op1<dim-1;op1++)
+	  for (int op2=op1+1;op2<dim;op2++){
+	    Param* current_param=(*komp)->simplex_orbits[0][i]->params[op1][op2];
+	    if( egyik==0 )
+	      egyik=current_param;
+	    else if (egyik==current_param) 
+	      ;
+	    else if (masik==0)
+	      masik=current_param;
+	    else if (masik==current_param) 
+	      ;
+	    else {
+	      harmadik=current_param;
+	      break;
+	    }
+	  }
+
+      // That's the only interesting part, 
+      if (harmadik == 0){
+	// Only for same orientability
+	if(masik!=0){
+	  if(egyik->orientable == masik->orientable){
+	    ret=1;
+	    if(egyik->coeff != masik->coeff)
+	      cerr<<"Hm";
+	    int lcm=boost::math::lcm(egyik->coeff,masik->coeff);
+
+	    if (egyik->changeable && masik->changeable){
+	      // egyik parameterrel kezeljuk a masikat is
+	      ;
+	    }
+	    else if (not egyik->changeable){
+	      // Egyik parameterrel kezeljuk a masikat is, ha a coeff nem
+	      // valtozik, kulonben nem tud jo lenni. Ha masik sem valtoztathato,
+	      // akkor az o coeff-je sem valtozhat
+	      if (egyik->coeff == lcm){
+		if (not masik->changeable && masik->coeff != lcm){
+		  return -2;
+		}
+	      }
+	      else{
+		return -2;
+	      }
+	    }
+	    else if (not masik->changeable){
+	      // Masik parameterrel kezeljuk az egyiket is, ha a coeff nem
+	      // valtozik, kulonben nem tud jo lenni.
+	      if (masik->coeff == lcm){
+		Param* tmp=masik;
+		masik=egyik;
+		egyik=tmp;
+	      }
+	      else{
+		return -2;
+	      }
+	    }
+
+	    // Ezen a ponton "egyik"-be migraljuk masik parametereit 
+	    egyik->coeff=lcm;
+
+	    for(list<Param::sop>::iterator szit=masik->simplex_operations.begin();
+		szit!=masik->simplex_operations.end();szit++){
+	      szit->simplex->params[szit->op1][szit->op2]=egyik;
+	      szit->simplex->params[szit->op2][szit->op1]=egyik;
+	    }
+
+	    egyik->simplex_operations.splice(egyik->simplex_operations.end(),masik->simplex_operations);
+
+	    params->remove(masik);
+	  }
+	}
+	else {
+	  //egyik!=0 && masik==0
+	  // This setup means another type of bad orbifold, the "drop shape"
+	  egyik->check_min();
+	  if (egyik->min == 1){
+	    egyik->set_param(1);
+	    egyik->changeable=false;
+	  }
+	  else
+	    return -2;
+	}
+      }
+    }
+  return ret;
 }
 

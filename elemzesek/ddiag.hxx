@@ -12,7 +12,7 @@
 #include <vector>
 #include <algorithm>
 //#include <set>
-//#include <boost/math/common_factor.hpp>
+#include <boost/math/common_factor.hpp>
 #include <math.h>
 //#include <sstream>
 //#define PI 3.14159265
@@ -61,6 +61,7 @@ class Ddiag : public Base {
 	1 - Parameters were equalized or set to a fixed value
 	0 - Nothing has happened
 	-1 - Error (ex. the dimension is not 3)
+	-2 - Impossible to filter bad orbifolds
        */
     int filter_bad_orbifolds(list<Param*>*);
     //int filter_bad_orbifolds03(void); Szerintem nem kell kulon... Pontosabban

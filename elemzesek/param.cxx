@@ -1,13 +1,12 @@
 #include "param.hxx"
 
-Param::Param(char letter, int coeff, bool orientable):
+Param::Param(char letter, int coeff, bool orientable, bool changeable):
   letter(letter),
   coeff(coeff),
-  orientable(orientable)
+  orientable(orientable),
+  changeable(changeable)
 {
-  min=0;
-  while (coeff*min<2)
-    min++;
+  check_min();
 }
 
 Param::~Param(void){
@@ -16,16 +15,11 @@ Param::~Param(void){
 }
 
 void Param::set_param(int i){
-  val=i;
-  /* felesleges?
-  for(list<simplex*>::iterator szim=currparam->szek.begin();
-      szim!=currparam->szek.end();szim++){
-    int op0=currparam->op;
-    int op1=op0+1;
-    (*szim)->mx[op0][op1]=abs(currparam->eh)*currparam->ertek;
-    (*szim)->mx[op1][op0]=abs(currparam->eh)*currparam->ertek;
+  if (changeable){
+    val=i;
+    if (! check_min())
+      val=min;
   }
-  */
 }
 
 void Param::change_param(int i){
@@ -38,4 +32,14 @@ void Param::increase_param(){
 
 void Param::decrease_param(){
   change_param(-1);
+}
+
+int Param::check_min(){
+  min=0;
+  while (coeff*min<2)
+    min++;
+  if (val >= min)
+    return 1;
+  else
+    return 0;
 }

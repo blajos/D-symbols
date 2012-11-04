@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-c -Wall -g
+CFLAGS=-c -Wall -g -std=gnu++11
 LDFLAGS=-ldb_cxx
 SOURCES=base.cxx ddiag.cxx dsym.cxx mxfunction.cxx param.cxx simplex.cxx \
   svg.cxx dlist.cxx test.cxx main.cxx

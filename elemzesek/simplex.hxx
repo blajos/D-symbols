@@ -2,6 +2,8 @@
 #define __simplex_h
 
 #include "base.hxx"
+#include "param.hxx"
+class Param;
 
 using namespace std;
 
@@ -28,6 +30,11 @@ class Simplex : public Base {
        numberings.
        */
     int* sorszam;
+    /* Variable: params
+       Parameters belonging to the simplex. Params[i][j] means the parameter of
+       (i,j) adjacency operation pairs.
+       */
+    Param*** params;
     /* Constructor: Simplex
        Initialize Simplex object with <Base.dimension>, <Base.cardinality> and the index
        in the first (not necessarily a good) numbering. Every adjacency
