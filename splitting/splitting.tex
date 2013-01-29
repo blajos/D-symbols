@@ -1,0 +1,101 @@
+\documentclass[12pt,magyar,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{ae,aecompl}
+\usepackage{fix-cm}
+
+\newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
+
+\title{Splitting keresése D-szimbólumokban}
+\author{Boróczki, Lajos}
+\date{2013. január 29.}
+
+\begin{document}
+\maketitle
+\tableofcontents
+
+\section{Áttekintés}
+3 dimenziós baricentrikus szimplexekkel történő kövezések esetén korábban már
+megvizsgáltuk, hogy milyen 2 dimenziós kövezést indukál a D-szimbólum egy-egy
+szimplex-csúcs osztály egy kis környezetében és ezek mit jelentenek az eredeti 3
+dimenziós kövezésre nézve (ez volt a rész D-szimbólum eset, ahol csak a
+szférikus, illetve 0,3 esetben az euklideszi kövezést tartottuk meg, mint
+érdekes esetet.) A vizsgálatot eredetileg a rész D-szimbólumok irányából
+indítottuk, de a gondolat a másik irányból is adja magát.
+
+A kérdés a következőképpen általánosítható: Milyen 2 dimenziós kövezést indukál
+az összefüggő D-szimbólum a szimplex-csúcs osztályok egy olyan 2-partícióján,
+ahol mindkét partíció összefüggő? (2-partíció: két összefüggő szimplex-csúcs
+osztály halmaz, melyek metszete üres és uniója a teljes szimplex-csúcs osztály
+halmaz.)
+
+Splittinget ($S^2$ vagy $\mathbb{E}^2$) akkor találunk, ha a 2-partíció egyik partíciója sem
+1 elemű és nem hiperbolikus kövezést találunk rajta. Fontos megjegyezeni, hogy
+előfordulhat olyan eset is, hogy a talált $\mathbb{E}^2$ kövezés nem egy végtelen távoli
+pontot jelez, hanem egy henger/tórusz/fibrum jellegű alakzatot, ezzel a
+kérdéssel egyelőre csak észrevétel szinten foglalkoztam. Ezenkívül
+előfordulhatnak $S^2$ esetben rossz orbifoldok.
+
+
+\section{A lehetséges 2-partíciók felsorolása}
+Ez egy "egyszerű" gráfelméleti feladat, ahol a csúcsok a szimplex-csúcs
+osztályok, az élek a szimplex-él osztályok (itt nem lényeges, hogy milyen
+színűek az élek): Ha tudjuk, hogy a gráf összefüggő, akkor annyi a feladatunk,
+hogy felsoroljuk az összes összefüggő részgráfot, amiben egy adott csúcs
+szerepel (ez a kiindulási csúcs.) Majd ellenőrizzük, hogy az összefüggő részgráf
+komplementere összefüggő-e, ha igen, találtunk egy 2-partíciót. Az előbbi összes
+összefüggő részgráfot egy mélységi bejárással meg lehet találni, míg az utóbbi
+összefüggőséget egy szélességi bejárással lehet ellenőrizni. Az algoritmus
+a csúcsok száma szerint $n^3$ időben fut (a mélységi bejárás $n$, a szélességi
+átlagosan $(n/2)^2$).
+
+
+\section{Adott 2-partíción indukált kövezés}
+A két partíció között kialakuló 2 dimenziós kövezésre szeretnénk felírni a
+kombinatorikus görbület függvényt, amivel egyszerűen meg tudjuk állapítani,
+milyen kövezéssel állunk szemben. Ehhez szükségünk van a generátorokra és
+relációkra.
+
+Vezessük be az eredeti térkitöltéshez (vagy D-szimbólumhoz) és az adott
+2-partícióhoz értelmezett "elvágott szimplex-él osztályok" fogalmát: Azokat a
+szimplex-él osztályokat nevezzük így, melyek egyik vége az egyik, másik vége a
+másik partícióban szerepel. (Pontosan fogalmazva egyik illetve másik "hozzá
+tartozó szimplex-csúcs osztályt" kéne említeni.)
+
+Az indukált 2 dimenziós kövezésben az elvágott szimplex-él osztályok fogják a
+csúcsokat jelenteni, az eredeti kövezésben körülöttük lévő forgatás vagy
+tükrözés jelenti az indukált kövezés generátorait, végül az eredeti kövezésben
+ezek relációi jelentik az indukált kövezésben a relációkat.
+
+Az eredeti kövezésben a szimplex-lap osztályoknak két fajtája van, vagy nincs
+benne elvágott szimplex-él osztály, vagy pontosan 2 van benne. Az előbbi az
+indukált kövezés szempontjából nem érdekes, mert teljes egészében 1 partícióban
+van, az utóbbiak számunkra érdekesek, mert az indukált kövezés éleit fogják
+adni.
+
+Hasonlóan megvizsgálva az eredeti kövezés szimplex osztályait, ezeknek 3 fajtája
+van: vagy nincs benne elvágott szimplex-él osztály, vagy 3 elvágott szimplex-él
+osztály van, vagy 4 elvágott szimplex-él osztály van. Az elvágott szimplex-él
+osztály nélküliek nem fontosak, a 3 elvágott szimplex-él osztállyal rendelkezők
+háromszögeket adnak az indukált kövezésben, végül a 4 elvágott szimplex-él
+osztállyal rendelkezők négyszögeket adnak az indukált kövezésben.
+
+A kombinatorikus görbület függvényt kicsit módosítanunk kell, ugyanis az
+háromszögelésre vonatkozik; de szerencsére a négyszögeket tudjuk egyszerűen
+háromszögelni, ez esetben a képletben a négyszög komponensekre a
+$-2+1/m_{01}+1/m_{12}+1/m_{23}+1/m_{30}$ képletet lehet alkalmazni a
+$-1+1/m_{01}+1/m_{12}+1/m_{20}$ helyett:
+
+\begin{align*}
+  K=\sum_{\mathrm{triangles}}-1+\frac{1}{m_{01}}+\frac{1}{m_{12}}+\frac{1}{m_{20}} + 
+  \sum_{\mathrm{quadrangles}}-2+\frac{1}{m_{01}}+\frac{1}{m_{12}}+\frac{1}{m_{23}}+\frac{1}{m_{30}}
+  \begin{array}{cccc}
+    > & & S^2 \\
+    = & 0 & \mathbb{E}^2 \\
+    < & & H^2
+  \end{array}
+\end{align*}
+\end{document}
