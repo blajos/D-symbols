@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <set>
 
-#define THRESH 0.0000001
+#define THRESH 0.00001
 #define DEGENERATION_LIMIT 3
 
 using namespace std;
@@ -196,7 +196,8 @@ class Dsym {
 	pointlist,list<kisebbdim*> part1list, list<kisebbdim*> notpart1list,
 	list<pair<kisebbdim*,kisebbdim*> > outbound_edges);
     void print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
-	outbound_edges, list<kisebbdim*> part1list);
+	outbound_edges, list<kisebbdim*> part1list, list<kisebbdim*> rest);
+    int is_connected(list<kisebbdim*>*);
 };
 
 bool operator == (Dsym::param,Dsym::param);
