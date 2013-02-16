@@ -1,0 +1,6 @@
+Mi is itt az otlet?
+
+Ha a backtrack algoritmussal eloallitottunk egy allapotot, majd az onnan
+elerheto osszes tovabbi allapotot; akkor ha ujra elerjuk ezt az allapotot mas
+permutacioval, mar nem fogunk uj eredmenyeket kapni, ugyhogy nem is megyunk
+tovabb.

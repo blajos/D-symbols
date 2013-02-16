@@ -112,6 +112,22 @@ int Dsym::dump(std::ostream *out){
   return 0;
 }
 
+int Dsym::dump(std::ostream *out, int first){
+  *out<<dim<<" "<<car;
+  for(int j=0;j<dim+1;j++){
+    *out<<" (";
+    for(int i=0;i<car;i++){
+      int icsucsjszomszedja=csucsok[first][i]->szomszed[j]->sorszam[first];
+      if (icsucsjszomszedja == i)
+	*out<<"("<<i+1<<")";
+      else if (i < icsucsjszomszedja)
+	*out<<"("<<i+1<<","<<icsucsjszomszedja+1<<")";
+    }
+    *out<<")";
+  }
+  return 0;
+}
+
 //Dsym destruktor: memoria felszabaditasa
 Dsym::~Dsym(void) {
   if(dual!=0) delete dual;
@@ -236,6 +252,49 @@ void Dsym::atsorszamoz(int i) {
   }
   for (r=0;r<car;r++) {
     csucsok[i][r]=D[r];
+  }
+  delete[] D;
+}
+
+//Trukk: A felsorolo algoritmusunk szerint, ha az i. az elso olyan szimplex
+//osztaly, akinek nincs ele, akkor a nala kisebbek osszefuggoek, a nagyobbaknak
+//pedig szinten nincs ele.
+void Dsym::atsorszamoz(int i, int max) {
+  int r=0;
+  simplex** D;
+  D=new simplex*[car];
+  //azert i-1, mert a masodik koord 0..car-1, az elso pedig 0..car:
+  D[0]=csucsok[0][i-1];
+  D[0]->sorszam[i]=0;
+  while (r<max){
+    r++;
+    D[r]=NULL;
+    if (my_find(D[r-1]->szomszed[0],r,D) == 0) {
+      D[r]=D[r-1]->szomszed[0];
+    }                
+    else if (my_find(D[r-1]->szomszed[1],r,D) == 0) {
+      D[r]=D[r-1]->szomszed[1];
+    }                
+    else             
+      for (int j=0;j<dim+1;j++) {
+	for (int k=r-1;k>=0;k--) {
+	  if (my_find(D[k]->szomszed[j],r,D) == 0) {
+	    D[r]=D[k]->szomszed[j];
+	    break;    
+	  }           
+	}             
+	if (D[r] != NULL) {
+	  break;      
+	}             
+      }              
+    D[r]->sorszam[i]=r;
+  }
+  for (r=0;r<=max;r++) {
+    csucsok[i][r]=D[r];
+  }
+  for(r=max+1;r<car;r++){
+    csucsok[i][r]=csucsok[0][r];
+    csucsok[i][r]->sorszam[i]=r;
   }
   delete[] D;
 }
@@ -1186,6 +1245,7 @@ bool operator == (Dsym::param a,Dsym::param b) {
 int bt;
 int bt1;
 long long bt0;
+stringdb* already_seen;
 void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current_largest) {
   int car=D->car;
   int dim=D->dim;
@@ -1214,60 +1274,77 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
     return;
   }
 
-  // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni
+  // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni, a nala 1-el kisebb
+  // csucs kell nem ures legyen, kiveve 0-1 kozti elso elet.
   bool ures=true;
   for(int j=0;j<dim+1;j++)
-    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova])
+    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova]){
       ures=false;
+      break;
+    }
 
   bool erdemes=true;
-  if ( ures )
-    for (int i=1;i<hova;i++){ // A 0-adik csucs uressege nem szamit
-      bool ures1=true;
-      for(int j=0;j<dim+1;j++)
-	if (D->csucsok[0][i]->szomszed[j] != D->csucsok[0][i]){
-	  ures1=false;
-	  break;
-	}
-      if (ures1){
-	erdemes=false;
+  if ( ures && hova >= 2 ){
+    bool ures1=true;
+    for(int j=0;j<dim+1;j++)
+      if (D->csucsok[0][hova-1]->szomszed[j] != D->csucsok[0][hova-1]){
+	ures1=false;
 	break;
       }
+    if (ures1){
+      erdemes=false;
     }
+  }
+
 
   //ha erdemes elt hozzaadni, ujra meghivjuk onmagunkat
   if (erdemes && D->elhozzaad(szin,honnan,hova)){
     int largest=current_largest;
     if (hova > largest)
       largest=hova;
+
+    // szereplunk-e mar a vizsgalt szimbolumok kozott esetleg mas
+    // sorszamozassal?
+    /* debug */
+    std::ostringstream dumpsstr1;
+    D->dump(&dumpsstr1);
+    std::cerr <<std::endl<< dumpsstr1.str() << std::endl;
+    for(int i=1;i<=largest;i++){
+      D->atsorszamoz(i,largest);
+      std::ostringstream dumpsstr;
+      D->dump(&dumpsstr,i);
+      std::string dumpstr=dumpsstr.str();
+      if(already_seen->check(dumpstr)){
+	std::cerr << "Volt mar:" <<dumpstr <<std::endl;
+	return;
+      }
+    }
+    std::ostringstream dumpsstr;
+    D->dump(&dumpsstr,1);
+    already_seen->append(dumpsstr.str());
+    std::cerr << "Uj:" << dumpsstr.str() << std::endl;
+
     backtrack(D,saved,szin,honnan,hova,largest);
     D->eltorol(szin,honnan,hova);
   }
 
-  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1,current_largest);
-  else if(szin+1<dim+1 && szin==0) backtrack(D,saved,szin+2,honnan,honnan+1,current_largest);
+  if(szin==0) backtrack(D,saved,2,honnan,honnan+1,current_largest); //FIXME Ez miez? Igy hagyjuk ki az el szerinti operatorokat.
   else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1,current_largest);
+  else if(hova+1<car) 
+    backtrack(D,saved,szin,honnan,hova+1,current_largest);
   else {
-    int szukseges_fok=0;
     int fok=0;
-    //Heurisztika: az elso csucs fokszamanal nem veszunk nagyobb fokszamu esetet
-    //(lexikografikusan: szinek szerint)
+    //Akkor megyunk tovabb honnan+1-re a forrassal, ha tovabbra is osszefuggo
+    //marad az eddigi rendszer.
 
     for(int j=0;j<dim+1;j++) 
-      if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
-	fok+=1 << j;
-    if (honnan > 0){
-      for(int j=0;j<dim+1;j++)
-	if (D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
-	  szukseges_fok+=1 << j;
-      if(fok <= szukseges_fok &&
-	  fok >= 1 &&
-	  current_largest >= honnan+1 &&
-	  not backtrack_breaks_uvw(D,honnan))
-	backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
-    }
-    else if(fok>=1)  // current largest ekkor egyertelmu
+      if(D->csucsok[0][honnan+1]->szomszed[j] != D->csucsok[0][honnan+1]){
+	fok=1;
+	break;
+      }
+    if(fok>=1 /*and not backtrack_breaks_uvw(D,honnan)*/){
       backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
+    }
   }
 }
 
@@ -1710,6 +1787,52 @@ void Dsymlista::print_html(void){
 
 }
 
+//Simple string hash database
+stringdb::stringdb(std::string filename):
+  filename_base(filename),
+  db(NULL,0),
+  keylength(2048)
+{
+  try {
+    Db a(NULL,0);
+    a.remove((filename + "_temp.db").c_str(), NULL, 0);
+  }
+  catch (DbException& e){
+    ;
+  }
+
+  db.set_cachesize(1,500*1024*1024,1);
+
+  db.open(NULL, (filename + "_temp.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
+}
+
+stringdb::~stringdb(void){
+  db.close(0);
+}
+
+void stringdb::append(std::string what){
+  int a=0;
+
+  Dbt key((void*)what.c_str(), what.size() + 1);
+  Dbt data(&a, sizeof(a));
+
+  db.put(NULL, &key, &data, DB_NOOVERWRITE);
+}
+
+bool stringdb::check(std::string what){
+  int a;
+
+  Dbt key((void*)what.c_str(), what.size() + 1);
+  Dbt data(&a, sizeof(a));
+
+  int ret=db.get(NULL, &key, &data, 0);
+  if (ret == 0)
+    return true;
+  else
+    return false;
+};
+
+
 //xfig konstruktor: feltoltjuk a valtozokat, es rajzolunk egy el nelkuli
 //multigrafot. rad a korok sugara, koordx illetve koordy pedig a korok x es y
 //koordinatainak listaja.
@@ -1813,6 +1936,7 @@ int main(int,char**,char**){
   bt=0;
   bt1=0;
   bt0=0;
+  already_seen=new stringdb("temp");
   backtrack(D,saved,0,0,1,0);
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;

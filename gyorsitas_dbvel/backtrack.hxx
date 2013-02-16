@@ -146,10 +146,12 @@ class Dsym {
     ~Dsym(void);
     Dsym* save(void);
     Dsym* save_with_start(int);
+    int dump(std::ostream*, int);
     int dump(std::ostream*);
     int elhozzaad(int,int,int);
     void eltorol(int,int,int);
     void atsorszamoz(int);
+    void atsorszamoz(int,int);
 
     int osszefuggo(int);
     int dualis(void);
@@ -272,7 +274,7 @@ class stringdb {
     ~stringdb(void);
     void append(std::string);
 
-    int check(std::string);
+    bool check(std::string);
 };
 
 

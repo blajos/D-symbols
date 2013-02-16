@@ -1214,26 +1214,27 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
     return;
   }
 
-  // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni
+  // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni, a nala 1-el kisebb
+  // csucs kell nem ures legyen, kiveve 0-1 kozti elso elet.
   bool ures=true;
   for(int j=0;j<dim+1;j++)
-    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova])
+    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova]){
       ures=false;
+      break;
+    }
 
   bool erdemes=true;
-  if ( ures )
-    for (int i=1;i<hova;i++){ // A 0-adik csucs uressege nem szamit
-      bool ures1=true;
-      for(int j=0;j<dim+1;j++)
-	if (D->csucsok[0][i]->szomszed[j] != D->csucsok[0][i]){
-	  ures1=false;
-	  break;
-	}
-      if (ures1){
-	erdemes=false;
+  if ( ures && hova >= 2 ){
+    bool ures1=true;
+    for(int j=0;j<dim+1;j++)
+      if (D->csucsok[0][hova-1]->szomszed[j] != D->csucsok[0][hova-1]){
+	ures1=false;
 	break;
       }
+    if (ures1){
+      erdemes=false;
     }
+  }
 
   //ha erdemes elt hozzaadni, ujra meghivjuk onmagunkat
   if (erdemes && D->elhozzaad(szin,honnan,hova)){
