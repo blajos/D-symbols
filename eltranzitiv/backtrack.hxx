@@ -6,6 +6,8 @@
 #include<db_cxx.h>
 #include<sstream>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 
 #define THRESH 0.000001
@@ -63,7 +65,7 @@ class simplex {
 //   kisebb, nem osszefuggo, vagy a nem szomszedos operaciok elrontjak.)
 // 
 // Kiiratasok:
-//  write_xfig: A string-kent megadott nevu fajlba irja multigrafot kirajzolo
+//  write_xfig: A std::string-kent megadott nevu fajlba irja multigrafot kirajzolo
 //   fig-kodot.
 //
 //  involucio: A grafot involuciokent egy 3 melysegu szam listakent
@@ -138,12 +140,13 @@ class Dsym {
     simplex*** csucsok;
     Dsym*  dual;
 
+    void create(void); //real constructor
     Dsym(int,int);
-    Dsym(istream*);
+    Dsym(std::istream*);
     ~Dsym(void);
     Dsym* save(void);
     Dsym* save_with_start(int);
-    int dump(ostream*);
+    int dump(std::ostream*);
     int elhozzaad(int,int,int);
     void eltorol(int,int,int);
     void atsorszamoz(int);
@@ -154,7 +157,7 @@ class Dsym {
     int uvw(void);
     int ellenoriz(void);
 
-    void write_xfig(string);
+    void write_xfig(std::string);
 
     int*** involucio;
     void invol_create(int);
@@ -164,36 +167,36 @@ class Dsym {
     struct param {
       int eh,min_ertek,ertek,op;
       char kar;
-      list<simplex*> szek;
+      std::list<simplex*> szek;
     };
-    list<param> plist;
+    std::list<param> plist;
     struct kisebbdim {
-      list<simplex*> szek;
+      std::list<simplex*> szek;
       bool iranyitott;
     };
-    list<kisebbdim> *klist;
+    std::list<kisebbdim> *klist;
     int mxnum;
-    list<param>::iterator** params;
+    std::list<param>::iterator** params;
 
     void create_kdim(void);
     void create_params(void);
     void filter_bad_orbifolds(void);
-    void change_param(list<param>::iterator,int);
-    void increase_param(list<param>::iterator);
-    void decrease_param(list<param>::iterator);
+    void change_param(std::list<param>::iterator,int);
+    void increase_param(std::list<param>::iterator);
+    void decrease_param(std::list<param>::iterator);
 
-    int kdimsf(list<param>::iterator);
+    int kdimsf(std::list<param>::iterator);
     int min(void);
-    list<int> osszevlist;
+    std::list<int> osszevlist;
 
-    void print_param_mx(ostream*);
-    int print_possible_params(list<param>::iterator,ostream*);
+    void print_param_mx(std::ostream*);
+    int print_possible_params(std::list<param>::iterator,std::ostream*);
     int pmaxertek;  //a maximalis veges parametererteknel eggyel nagyobb
-    int print_possible_infs(int,list<param>::iterator,ostream*);
-    int filter_bad_orbifolds03(ostringstream*); //0 es 3 esetben rossz orb
+    int print_possible_infs(int,std::list<param>::iterator,std::ostream*);
+    int filter_bad_orbifolds03(std::ostringstream*); //0 es 3 esetben rossz orb
     int idcs;	//segedvaltozo idealis csucsok detektalasahoz
-    void print_possible_mxes(list<param>::iterator,ostream*);
-    void print_params(int,ostream*);
+    void print_possible_mxes(std::list<param>::iterator,std::ostream*);
+    void print_params(int,std::ostream*);
 };
 
 bool operator == (Dsym::param,Dsym::param);
@@ -230,7 +233,7 @@ struct Dsymlinklist {
 class Dsymlista {
   private:
     int dim,car;
-    string filename_base;
+    std::string filename_base;
     Db fastdb,sorteddb;
     Dbc *current;
     int keylength;
@@ -239,7 +242,7 @@ class Dsymlista {
     int count;
 
     Dsymlista(int,int);
-    Dsymlista(int,int,string);
+    Dsymlista(int,int,std::string);
     ~Dsymlista(void);
     void append(Dsym* uj_elem);
 
@@ -247,7 +250,7 @@ class Dsymlista {
     int check_with_start(Dsym*,int);
     int check_sorted(Dsym*,int);
 
-    Dsym* getnextsorted(void);
+    std::pair<Dsym*, int> getnextsorted(void);
     void reset_cursor(void);
     void generate_ordered_numbering(void);
 
@@ -297,10 +300,10 @@ int my_find(simplex* mit,int hossz,simplex** hol);
 //  iranyba eltolva, az atfedesek megakadalyozasa miatt.)
 // destruktor: fajl bezarasa, memoria felszabaditasa.
 class xfig {
-  ofstream outfile;
+  std::ofstream outfile;
   int *koordx,*koordy,rad,dim,car;
   public:
-  xfig(string filename,int dim,int car);
+  xfig(std::string filename,int dim,int car);
   void create_circle(int n);		//az n-edik kor megrajzolasa
   void create_numtext(int n);		//az n-edik kor szama
   void create_line(int n0,int n1,int szin);	//osszekotjuk a ket kort

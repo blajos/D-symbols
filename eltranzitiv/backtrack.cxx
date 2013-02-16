@@ -8,6 +8,8 @@
 #include <math.h>
 #include <sstream>
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #define PI 3.14159265
 
 //simplex konstruktor: megadjuk a dimenziot, az elemszamot, lefoglaljuk a
@@ -43,27 +45,31 @@ simplex::~simplex(void) {
 //sorszama+1, mert a 0-adikat szinte veletlenszeruen toltjuk ki; a masodik koord
 //az adott kezdopont szerinti sorszama a megfelelo szimplexnek.)
 //Megfelelo memoriacimek lefoglalasa.
-Dsym::Dsym(int dimin, int carin):
-  dim(dimin),
-  car(carin),
-  involucio(0),
-  mxnum(0),
-  pmaxertek(4)		//kisebbre nem választhatjuk, es majd megnõ
-{
+void Dsym::create(void){
+  involucio=0;
+  mxnum=0;
+  pmaxertek=4;		//kisebbre nem választhatjuk, es majd megnõ
   //az eredetivel egyutt az atsorszamozasok szama
   csucsok=new simplex**[car+1];	
   for (int k=0;k<car+1;k++) csucsok[k]=new simplex*[car];
   for (int i=0;i<car;i++) csucsok[0][i]=new simplex(dim,car,i);
-  params=new list<param>::iterator*[car];
-  for (int i=0;i<car;i++) params[i]=new list<param>::iterator[dim];
+  params=new std::list<param>::iterator*[car];
+  for (int i=0;i<car;i++) params[i]=new std::list<param>::iterator[dim];
   dual=0;
-  klist=new list<kisebbdim>[dim+1];
+  klist=new std::list<kisebbdim>[dim+1];
+}
+
+Dsym::Dsym(int dimin, int carin):
+  dim(dimin),
+  car(carin)
+{
+  create();
 }
 
 // Restore Dsym from a dump
-Dsym::Dsym(istream* in){
+Dsym::Dsym(std::istream* in){
   *in >> dim >> car;
-  Dsym(dim,car);
+  create();
   char level_control;
   for(int i=0;i<dim+1;i++){
     *in >> level_control;
@@ -77,7 +83,7 @@ Dsym::Dsym(istream* in){
           *in >> second;
           *in >> level_control;
           // Set adjacency: i is the operation, first and second are the orbits
-          elhozzaad(i,first,second);
+          elhozzaad(i,first-1,second-1);
         }
         if (level_control != ')')
           throw 1;  //Something's wrong
@@ -90,16 +96,16 @@ Dsym::Dsym(istream* in){
   }
 }
 
-int Dsym::dump(ostream *out){
+int Dsym::dump(std::ostream *out){
   *out<<dim<<" "<<car;
   for(int j=0;j<dim+1;j++){
     *out<<" (";
     for(int i=0;i<car;i++){
       int icsucsjszomszedja=csucsok[0][i]->szomszed[j]->sorszam[0];
       if (icsucsjszomszedja == i)
-	*out<<i+1;
+	*out<<"("<<i+1<<")";
       else if (i < icsucsjszomszedja)
-	*out<<"("<<i+1<<icsucsjszomszedja+1<<")";
+	*out<<"("<<i+1<<","<<icsucsjszomszedja+1<<")";
     }
     *out<<")";
   }
@@ -314,8 +320,8 @@ int Dsym::sorszamozas(void) {
 //veszunk egy uj elso elemet, noveljuk eggyel a komponensek szamat, es kezdjuk
 //elolrol, amig nem ures a nemelerheto lista.
 int Dsym::osszefuggo(int elhagy) {
-  list<int> nemelerheto,utolso,uj;
-  list<int>::iterator hanyadik;
+  std::list<int> nemelerheto,utolso,uj;
+  std::list<int>::iterator hanyadik;
   int hanydarab=0;
 
   for(int i=0;i<car;i++) nemelerheto.push_back(i);	//nemelerheto feltoltese
@@ -325,10 +331,10 @@ int Dsym::osszefuggo(int elhagy) {
     hanydarab++;
     while (!uj.empty()) {
       utolso.clear();
-      for ( list<int>::iterator p = uj.begin(); p != uj.end(); ++p ) 
+      for ( std::list<int>::iterator p = uj.begin(); p != uj.end(); ++p ) 
 	utolso.push_back(*p);	//uj->utolso
       uj.clear();
-      for (list<int>::iterator r = utolso.begin(  ); r != utolso.end(  ); ++r ){
+      for (std::list<int>::iterator r = utolso.begin(  ); r != utolso.end(  ); ++r ){
 	//utolso szomszedai metszet nemelerheto->uj
 	for (int j=0;j<dim+1;j++) {
 	  if ( j!=elhagy ){
@@ -384,13 +390,13 @@ int Dsym::uvw(void) {
 //Dsym::ellenoriz: Az elobb definialt ellenorzesek lefuttatasa.
 int Dsym::ellenoriz(void) {
   if (osszefuggo(-1) > 1){
-    //cout << "Nem osszefuggo" <<endl;
+    //std::cout << "Nem osszefuggo" <<std::endl;
     return 1; //csak az osszefuggoek erdekesek
   }
   sorszamozas();
   //if (sor==1) return 1; 
   if (!uvw()){
-    //cout << "Nem uvw0" <<endl;
+    //std::cout << "Nem uvw0" <<std::endl;
     //print(0);
     return 1;
   }
@@ -405,7 +411,7 @@ int Dsym::elhozzaad(int szin, int honnan, int hova) {
     return 0;
   if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][honnan] ||
       csucsok[0][hova]->szomszed[szin] != csucsok[0][hova]) {
-    //cout << "Nem tudok elt hozzaadni, mert nincs torolve az elozo" << endl;
+    //std::cout << "Nem tudok elt hozzaadni, mert nincs torolve az elozo" << std::endl;
     return 0;
   }
   csucsok[0][honnan]->szomszed[szin]=csucsok[0][hova];
@@ -418,8 +424,8 @@ void Dsym::eltorol(int szin, int honnan, int hova) {
   if (szin<0 || szin>dim || honnan<0 || honnan >=car || hova<0 || hova>=car ) 
     return;
   if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][hova]) {
-    cerr << "Nincs el (szin, honnan, hova): " <<szin<<" "<<honnan<<" "<<hova
-      << endl;
+    std::cerr << "Nincs el (szin, honnan, hova): " <<szin<<" "<<honnan<<" "<<hova
+      << std::endl;
     return;
   }
   csucsok[0][honnan]->szomszed[szin]=csucsok[0][honnan];
@@ -468,23 +474,23 @@ void Dsym::invol_create(int var) {
 //elhagyasaval hany darabra esik a multigraf.
 void Dsym::print(int var) {
   invol_create(var);
-  cout << "=========================" << endl;
+  std::cout << "=========================" << std::endl;
   for (int j=0;j<dim+1;j++) {
     for(int k=0;k<*involucio[j][car];k++){
-      cout << "[" << involucio[j][k][0]+1 << "," << involucio[j][k][1]+1 <<"] ";
+      std::cout << "[" << involucio[j][k][0]+1 << "," << involucio[j][k][1]+1 <<"] ";
     }
-    cout << endl;
+    std::cout << std::endl;
   }
-  cout << "Number of " << dim-1 << " dimensional components: ";
-  cout << "("<<osszefuggo(0);
-  for (int i=1;i<dim+1;i++) cout <<","<<osszefuggo(i);
-  cout << ")"<<endl;
+  std::cout << "Number of " << dim-1 << " dimensional components: ";
+  std::cout << "("<<osszefuggo(0);
+  for (int i=1;i<dim+1;i++) std::cout <<","<<osszefuggo(i);
+  std::cout << ")"<<std::endl;
 }
 
 //Dsym::print_params: Kiirja az op0 es az op0+1 operaciokhoz tartozo
 //parametereket, letter1 betuvel kezdve az out kimenetre.
-void Dsym::print_params(int op0,ostream* out) {
-  for (list<param>::iterator currparam=plist.begin();currparam!=plist.end();
+void Dsym::print_params(int op0,std::ostream* out) {
+  for (std::list<param>::iterator currparam=plist.begin();currparam!=plist.end();
       currparam++)
     if(op0==currparam->op){
       *out << abs(currparam->eh) << currparam->kar;
@@ -498,7 +504,7 @@ void Dsym::print_params(int op0,ostream* out) {
 //berajzolni, mert minden mas megegyezik az azonos dimenzioju es elemszamu
 //multigrafok kozott, es minden elt csak egy iranyba szabad megrajzolni,
 //kulonben a mintak fedesbe kerulhetnek.)
-void Dsym::write_xfig(string file) {
+void Dsym::write_xfig(std::string file) {
   xfig out(file,dim,car);
   for(int i=0;i<car-1;i++) 
     for(int j=0;j<dim+1;j++)
@@ -518,8 +524,8 @@ void Dsym::create_kdim(void) {
   for (int elhagy=0;elhagy<dim+1;elhagy++){
     int currkis=elhagy;
 
-    list<int> nemelerheto,utolso,uj;
-    list<int>::iterator hanyadik;
+    std::list<int> nemelerheto,utolso,uj;
+    std::list<int>::iterator hanyadik;
 
     for(int i=0;i<car;i++) nemelerheto.push_back(i);	//nemelerheto feltoltese
     while (!nemelerheto.empty()) {
@@ -528,10 +534,10 @@ void Dsym::create_kdim(void) {
       uj.push_back(*nemelerheto.begin());
       while (!uj.empty()) {
 	utolso.clear();
-	for ( list<int>::iterator p = uj.begin(); p != uj.end(); ++p ) 
+	for ( std::list<int>::iterator p = uj.begin(); p != uj.end(); ++p ) 
 	  utolso.push_back(*p);//uj->utolso
 	uj.clear();
-	for ( list<int>::iterator r = utolso.begin(); r!=utolso.end(); ++r ){
+	for ( std::list<int>::iterator r = utolso.begin(); r!=utolso.end(); ++r ){
 	  //utolso szomszedai metszet nemelerheto->uj
 	  for (int j=0;j<dim+1;j++) {
 	    if ( j!=elhagy ){
@@ -549,8 +555,8 @@ void Dsym::create_kdim(void) {
 
       //Megnezzuk, hogy iranyitott-e a 2 dimenzios felulet, azaz nincs 
       //keresztsapka. Ha a graf paros, akkor iranyitott, ha nem, akkor nem.
-      list<simplex*> egyik, masik, *akt,*nemakt,nemfelsorolt;
-      for(list<simplex*>::iterator szit=curr.szek.begin();
+      std::list<simplex*> egyik, masik, *akt,*nemakt,nemfelsorolt;
+      for(std::list<simplex*>::iterator szit=curr.szek.begin();
 	  szit!=curr.szek.end();szit++) 
 	if(szit==curr.szek.begin())
 	  egyik.push_back(*szit);
@@ -561,14 +567,14 @@ void Dsym::create_kdim(void) {
       nemakt=&masik;
       curr.iranyitott=true;
       while( ! nemfelsorolt.empty()){
-	for(list<simplex*>::iterator szit=akt->begin();
+	for(std::list<simplex*>::iterator szit=akt->begin();
 	    szit!=akt->end();szit++)
 	  for(int i=0;i<dim+1;i++)
 	    if(i!=elhagy && (*szit)->szomszed[i]!=(*szit)){
 	      if(find(akt->begin(),akt->end(),(*szit)->szomszed[i])!=
 		  akt->end())
 		curr.iranyitott=false;
-	      list<simplex*>::iterator hanyadik=find(nemfelsorolt.begin(),
+	      std::list<simplex*>::iterator hanyadik=find(nemfelsorolt.begin(),
 		  nemfelsorolt.end(),(*szit)->szomszed[i]);
 	      if(hanyadik!=nemfelsorolt.end()){
 		nemakt->push_back(*hanyadik);
@@ -579,14 +585,14 @@ void Dsym::create_kdim(void) {
 	  break;
 	}
 	//most felcsereljuk aktot, nemakttal
-	list<simplex*> *temp;
+	std::list<simplex*> *temp;
 	temp=akt;
 	akt=nemakt;
 	nemakt=temp;
       }
       //Vegul ujra atfutjuk, mert az utolso lepesnel keletkezhettek elek
       //nemakt-ban, ami most akt.
-      for(list<simplex*>::iterator szit=akt->begin();
+      for(std::list<simplex*>::iterator szit=akt->begin();
 	  szit!=akt->end();szit++)
 	for(int i=0;i<dim+1;i++)
 	  if(i!=elhagy && (*szit)->szomszed[i]!=(*szit)){
@@ -606,15 +612,15 @@ void Dsym::create_kdim(void) {
 //negativ, akkor igaz az allitas. Mivel lebegopontos szamitasokat vegzunk, nem
 //vizsgalhatunk ==0-t.
 //Kisebb dimenzios reszek szferikusak: 1, van Euk: 0, van hip:-1
-int Dsym::kdimsf(list<param>::iterator inf_param){
+int Dsym::kdimsf(std::list<param>::iterator inf_param){
   if (dim!=3) return -100;
   int ret=1;
   for (int elhagy=0;elhagy<dim+1;elhagy+=dim){
     int currkis=elhagy;
-    for(list<kisebbdim>::iterator curr=klist[currkis].begin();
+    for(std::list<kisebbdim>::iterator curr=klist[currkis].begin();
 	curr!=klist[currkis].end();curr++){
       float sum=0;
-      for(list<simplex*>::iterator currszim=curr->szek.begin();
+      for(std::list<simplex*>::iterator currszim=curr->szek.begin();
 	  currszim!=curr->szek.end();currszim++){
 	for(int j=0;j<dim;j++){
 	  if(!((elhagy==0 && j==0) || (elhagy==dim && j==dim-1))){
@@ -691,8 +697,8 @@ void Dsym::create_params(void){
   char karakter='a';
   for(int op0=0;op0<dim;op0++){ 
     int op1=op0+1;
-    list<int> nemelerheto;
-    list<int>::iterator hanyadik;
+    std::list<int> nemelerheto;
+    std::list<int>::iterator hanyadik;
 
     for(int i=0;i<car;i++) nemelerheto.push_back(i);	//nemelerheto feltoltese
     while (!nemelerheto.empty()) {
@@ -729,14 +735,14 @@ void Dsym::create_params(void){
 	  currparam.min_ertek++);
       if ( ir!=1 ) currparam.eh=-currparam.eh;
       plist.push_back(currparam);
-      list<param>::iterator lastp=plist.end();
+      std::list<param>::iterator lastp=plist.end();
       lastp--;
-      for(list<simplex*>::iterator szit=currparam.szek.begin();
+      for(std::list<simplex*>::iterator szit=currparam.szek.begin();
 	  szit!=currparam.szek.end();szit++)
 	params[(*szit)->sorszam[1]][op0]=lastp;
     }
   }
-  for(list<param>::iterator currparam=plist.begin();currparam!=plist.end();
+  for(std::list<param>::iterator currparam=plist.begin();currparam!=plist.end();
       currparam++){
     currparam->ertek=currparam->min_ertek;
     change_param(currparam,0); //mx-fuggveny frissitese
@@ -751,19 +757,19 @@ void Dsym::filter_bad_orbifolds(void){
   if(dim!=3) return;
 
   for(int elhagy=1;elhagy<3;elhagy++)
-    for(list<kisebbdim>::iterator komp=klist[elhagy].begin();
+    for(std::list<kisebbdim>::iterator komp=klist[elhagy].begin();
 	komp!=klist[elhagy].end();komp++){
       int op;
       switch (elhagy){
 	case 1: op=2;break;
 	case 2: op=0;break;
-	default: cerr<<"Nem jo"<<endl;
+	default: std::cerr<<"Nem jo"<<std::endl;
       }
-      list<param>::iterator egyik,masik,harmadik; //ha mar harman vannak az jo
+      std::list<param>::iterator egyik,masik,harmadik; //ha mar harman vannak az jo
       egyik=plist.end();
       masik=plist.end();
       harmadik=plist.end();
-      for(list<simplex*>::iterator szit=komp->szek.begin();
+      for(std::list<simplex*>::iterator szit=komp->szek.begin();
 	  szit!=komp->szek.end();szit++)
 	if( egyik==plist.end() ) 
 	  egyik=params[(*szit)->sorszam[1]][op];
@@ -778,14 +784,14 @@ void Dsym::filter_bad_orbifolds(void){
 	}
       if(masik!=plist.end() && harmadik==plist.end()){
 	if(egyik->eh != masik->eh)
-	  cerr<<"Hm";
+	  std::cerr<<"Hm";
 	egyik->eh=(egyik->eh<0 ? -1 : 1 ) *
 	  boost::math::lcm(egyik->eh,masik->eh);
 
 	for(egyik->min_ertek=0;abs(egyik->eh)*egyik->min_ertek < DEGENERATION_LIMIT;
 	    egyik->min_ertek++);
 
-	for(list<simplex*>::iterator szit=masik->szek.begin();
+	for(std::list<simplex*>::iterator szit=masik->szek.begin();
 	    szit!=masik->szek.end();szit++)
 	  params[(*szit)->sorszam[1]][op]=egyik;
 
@@ -801,9 +807,9 @@ void Dsym::filter_bad_orbifolds(void){
 //pointer altal mutatott parametert i-vel noveljuk (vagy csokkentjuk, ha i
 //negativ,) es azon szimplexek matrixait megvaltoztatjuk, amelyekre hatassal van
 //a parameter.
-void Dsym::change_param(list<param>::iterator currparam,int i){
+void Dsym::change_param(std::list<param>::iterator currparam,int i){
   currparam->ertek+=i;
-  for(list<simplex*>::iterator szim=currparam->szek.begin();
+  for(std::list<simplex*>::iterator szim=currparam->szek.begin();
       szim!=currparam->szek.end();szim++){
     int op0=currparam->op;
     int op1=op0+1;
@@ -813,14 +819,14 @@ void Dsym::change_param(list<param>::iterator currparam,int i){
 }
 
 //A kovetkezo ket fuggveny csak az elnevezest segiti.
-void Dsym::increase_param(list<param>::iterator currparam){ 
+void Dsym::increase_param(std::list<param>::iterator currparam){ 
   if (currparam->ertek>100000)
     change_param(currparam,-currparam->ertek+currparam->min_ertek);
   else
     change_param(currparam,1);
 }
 
-void Dsym::decrease_param(list<param>::iterator currparam){
+void Dsym::decrease_param(std::list<param>::iterator currparam){
   if (currparam->ertek==currparam->min_ertek)
     change_param(currparam,inf++);
   else
@@ -838,7 +844,7 @@ void Dsym::decrease_param(list<param>::iterator currparam){
 //vizsgalt sorszamot noveljuk, majd a parameter erteket.
 //Mivel semmi sem garantalja, hogy nem letezhetnek vegtelen sorok, ezert a
 //parametereknek adunk egy ertelmes felso korlatot (ez most 10.)
-void Dsym::print_possible_mxes(list<param>::iterator currparam,ostream *out){
+void Dsym::print_possible_mxes(std::list<param>::iterator currparam,std::ostream *out){
   if(currparam->ertek==10) return;	//A vegtelen sorokat nem szeretjuk...
   if(kdimsf(plist.end())<0) return;
   else{
@@ -858,11 +864,11 @@ void Dsym::print_possible_mxes(list<param>::iterator currparam,ostream *out){
 	}
 	*out<<"</table></td>";
       }
-      *out<<"</tr>"<<endl;
+      *out<<"</tr>"<<std::endl;
     }
   }
   if(currparam!=plist.end()){
-    list<param>::iterator curr1=currparam;	//curr1=currparam+1
+    std::list<param>::iterator curr1=currparam;	//curr1=currparam+1
     curr1++;
     print_possible_mxes(curr1,out);
     increase_param(currparam);
@@ -882,7 +888,7 @@ void Dsym::print_possible_mxes(list<param>::iterator currparam,ostream *out){
 //Mivel semmi sem garantalja, hogy nem letezhetnek vegtelen sorok, ezert a
 //parametereknek adunk egy ertelmes felso korlatot (ezt dinamikusan noveljuk,
 //ahogy szukseges)
-int Dsym::print_possible_params(list<param>::iterator currparam,ostream *out){
+int Dsym::print_possible_params(std::list<param>::iterator currparam,std::ostream *out){
   //A vegtelen sorokat nem szeretjuk...  
   if(currparam->ertek==pmaxertek && currparam!=plist.end() ) return 0;
   if(kdimsf(plist.end())<0) return 0;
@@ -890,7 +896,7 @@ int Dsym::print_possible_params(list<param>::iterator currparam,ostream *out){
     if(currparam==plist.end()) 
       return print_possible_infs(1,plist.begin(),out);
     else {
-      list<param>::iterator curr1=currparam;	//curr1=currparam+1
+      std::list<param>::iterator curr1=currparam;	//curr1=currparam+1
       curr1++;
       int curr_mxnum=print_possible_params(curr1,out);
       increase_param(currparam);
@@ -906,8 +912,8 @@ int Dsym::print_possible_params(list<param>::iterator currparam,ostream *out){
 //lehetseges modon behelyettesitunk a minimalis erteku parameterekbe vegtelent.
 //Masodik korben ellenorizzuk, hogy lehetne-e meg vegtelent behelyettesiteni, ha
 //nem akkor kiirjuk.
-int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
-    ostream* out) {
+int Dsym::print_possible_infs(int pass,std::list<param>::iterator currparam,
+    std::ostream* out) {
   if(pass==1){
     if(currparam==plist.end()){
       if(kdimsf(plist.end())==0)
@@ -918,7 +924,7 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
     }
     else{
       int ret=0;
-      list<param>::iterator curr1=currparam;
+      std::list<param>::iterator curr1=currparam;
       curr1++;
       ret+=print_possible_infs(1,curr1,out);
       if(kdimsf(currparam)>=0 && currparam->ertek==currparam->min_ertek){
@@ -931,14 +937,14 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
     }
   }
   else if(pass==2){
-    ostringstream badorb;
+    std::ostringstream badorb;
     int m=min();
     if(currparam==plist.end())
       if(kdimsf(plist.end())<0 || m==-1)
 	return 0;
       else{
 	*out<<"<tr>";
-	for(list<param>::iterator pit=plist.begin();pit!=plist.end();pit++){
+	for(std::list<param>::iterator pit=plist.begin();pit!=plist.end();pit++){
 	  if(pit->ertek>=100000)
 	    *out<<"<td>&infin;</td>";
 	  else{
@@ -950,7 +956,7 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
 	*out<<"<td>";
 	if(m==-2){
 	  *out<<"No (1";
-	  for(list<int>::iterator it=osszevlist.begin();it!=osszevlist.end();
+	  for(std::list<int>::iterator it=osszevlist.begin();it!=osszevlist.end();
 	      it++)
 	    *out<<"="<<*it;
 	  *out<<")";
@@ -982,15 +988,15 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
 	  }
 	  *out<<")";
 	}
-	for(list<param>::iterator pit=plist.begin();pit!=plist.end();pit++){
+	for(std::list<param>::iterator pit=plist.begin();pit!=plist.end();pit++){
 	  *out<<" "<<pit->ertek;
 	}
 	*out<<"</td>";
-	*out<<"</tr>"<<endl;
+	*out<<"</tr>"<<std::endl;
 	return 1;
       }
     else{
-      list<param>::iterator curr1=currparam;
+      std::list<param>::iterator curr1=currparam;
       curr1++;
       //Ha meg egy valtozo helyere tudnank vegtelent irni, visszaterunk
       if(kdimsf(currparam)>=0 && currparam->ertek<=100000){
@@ -1015,17 +1021,17 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
 //akkor megnezzuk, hogy a (mindket) centrum pontosan egyszeresen szerepel-e, ha
 //igen es csak 1 van, akkor rossz orbifold, kulonben egyenlo kell legyen a 
 //rendjuk.
-int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
+int Dsym::filter_bad_orbifolds03(std::ostringstream *badorb){
   if(dim!=3) return -100;
 
   int ret=1;
   for(int op=0;op<dim+1;op+=dim)
-    for(list<kisebbdim>::iterator komp=klist[op].begin();komp!=klist[op].end();
+    for(std::list<kisebbdim>::iterator komp=klist[op].begin();komp!=klist[op].end();
 	komp++){
       if(! komp->iranyitott) continue; //mert a gomb iranyitott
       //Euklideszi esetekre figyelni kell:
       float sum=0;
-      for(list<simplex*>::iterator currszim=komp->szek.begin();
+      for(std::list<simplex*>::iterator currszim=komp->szek.begin();
 	  currszim!=komp->szek.end();currszim++){
 	for(int j=0;j<dim;j++)
 	  if(!((op==0 && j==0) || (op==dim && j==dim-1)))
@@ -1038,11 +1044,11 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 
       int peremek=0;
       int forgatasok=0;
-      list<param> parperemek,parforgatasok;
+      std::list<param> parperemek,parforgatasok;
       //nem parameteres polusok (itt iranyitott 2-es: semmi nincs, iranyitatlan
       //2-es: siktukrozes; iranyitatlan 1-es: 2-odrendu perem,iranyitott 1-es:
       //masodrendu forgas, amik erdekesek):
-      for(list<simplex*>::iterator szit=komp->szek.begin();
+      for(std::list<simplex*>::iterator szit=komp->szek.begin();
 	  szit!=komp->szek.end();szit++)
 	for(int i=0;i<dim-1;i++)
 	  if(i!=op)
@@ -1062,7 +1068,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
       if(op==dim)
 	noop=dim-1;
 
-      for(list<simplex*>::iterator szit=komp->szek.begin();
+      for(std::list<simplex*>::iterator szit=komp->szek.begin();
 	  szit!=komp->szek.end();szit++)
 	for(int i=0;i<dim;i++)
 	  if(noop!=i && params[(*szit)->sorszam[1]][i]->ertek>1){
@@ -1085,7 +1091,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 	     forgatasok+parforgatasok.size()<=2) ) &&
 	  parperemek.size()+parforgatasok.size()>0)
       {
-	list<param> parek;	//parameterek
+	std::list<param> parek;	//parameterek
 	parek.splice(parek.end(),parperemek);
 	parek.splice(parek.end(),parforgatasok);
 
@@ -1094,9 +1100,9 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 	//parameter, mint az egyutthatoja siktukrozes esetben, illetve ketszer
 	//annyihoz forgatas esetben.
 	int jo_orb=0;
-	for(list<param>::iterator pit=parek.begin();pit!=parek.end();pit++){
+	for(std::list<param>::iterator pit=parek.begin();pit!=parek.end();pit++){
 	  int count=0;
-	  for(list<simplex*>::iterator szit=pit->szek.begin();
+	  for(std::list<simplex*>::iterator szit=pit->szek.begin();
 	      szit!=pit->szek.end();szit++)
 	    if(find(komp->szek.begin(),komp->szek.end(),*szit)!=
 		komp->szek.end())
@@ -1117,7 +1123,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 	  }
 	  else
 	    if(peremek!=1 && forgatasok!=1){
-	      list<param>::iterator egyik,masik;
+	      std::list<param>::iterator egyik,masik;
 	      egyik=parek.begin();
 	      masik=parek.begin();
 	      masik++;
@@ -1137,7 +1143,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 }
 
 //Dsym::print_param_mx: Kiiratjuk a parameteres matrix-fuggvenyt (html-kodkent.)
-void Dsym::print_param_mx(ostream *out){
+void Dsym::print_param_mx(std::ostream *out){
   *out<<"<tr>";
   for(int j=0;j<car;j++){
     *out<<"<td><table cellpadding=\"3\">";
@@ -1146,7 +1152,7 @@ void Dsym::print_param_mx(ostream *out){
       for(int k=0;k<dim+1;k++){
 	*out<<"<td align=\"center\">";
 	if (abs(i-k)==1) {
-	  list<param>::iterator cp=params[j][(i<k) ? i : k];
+	  std::list<param>::iterator cp=params[j][(i<k) ? i : k];
 	  if(abs(cp->eh)>1) *out<<abs(cp->eh);
 	  *out<<cp->kar;
 	}
@@ -1158,7 +1164,7 @@ void Dsym::print_param_mx(ostream *out){
     }
     *out<<"</table></td>";
   }
-  *out<<"</tr>"<<endl;
+  *out<<"</tr>"<<std::endl;
 }
 
 bool operator == (Dsym::param a,Dsym::param b) {
@@ -1197,7 +1203,7 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
 	if(kisebb(D,i+1,D,start)==1)
 	  start=i+1;
       }
-      //cout << " " << bt1 << " " << start << endl;
+      //std::cout << " " << bt1 << " " << start << std::endl;
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
 	//saved->append(ujD);
@@ -1284,7 +1290,7 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
 	if(kisebb(D,i+1,D,start)==1)
 	  start=i+1;
       }
-      //cout << " " << bt1 << " " << start << endl;
+      //std::cout << " " << bt1 << " " << start << std::endl;
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
 	saved->append(ujD);
@@ -1324,7 +1330,7 @@ bool backtrack_breaks_uvw(Dsym* D,int honnan){
 	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
 	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
 	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] == csucsok[0][r]->szomszed[i1]->szomszed[i]){
-	  //cout << "Nem uvw1" <<endl;
+	  //std::cout << "Nem uvw1" <<std::endl;
 	  //D->print(0);
 	  return true;
 	}
@@ -1339,7 +1345,7 @@ bool backtrack_breaks_uvw(Dsym* D,int honnan){
 	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] != csucsok[0][r]->szomszed[i1]->szomszed[i] &&
 	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->sorszam[0] <= max &&
 	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->szomszed[i] != csucsok[0][r]){
-	  //cout << "Nem uvw2" <<endl;
+	  //std::cout << "Nem uvw2" <<std::endl;
 	  //D->print(0);
 	  return true;
 	}
@@ -1349,11 +1355,12 @@ bool backtrack_breaks_uvw(Dsym* D,int honnan){
 
 //Dsymlista::check: Az adott elem szerepel-e mar a listainkban?
 int Dsymlista::check(Dsym* element){
-  stringstream dumpstr;
-  element->dump(&dumpstr);
+  std::ostringstream dumpsstr;
+  element->dump(&dumpsstr);
+  std::string dumpstr=dumpsstr.str();
   int a;
 
-  Dbt key((void*)dumpstr.str().c_str(), dumpstr.str().size() + 1);
+  Dbt key((void*)dumpstr.c_str(), dumpstr.size() + 1);
   Dbt data(&a, sizeof(a));
 
   int ret=fastdb.get(NULL, &key, &data, 0);
@@ -1373,14 +1380,15 @@ int Dsymlista::check_with_start(Dsym* element,int start){
 
 //Dsymlista::check_sorted: Az adott elem hanyadik a rendezett listaban
 int Dsymlista::check_sorted(Dsym* element,int start){
-  stringstream dumpstr;
+  std::ostringstream dumpsstr;
   Dsym* ujD=element->save_with_start(start);
   int ret=-3;
   if (check(ujD)){
-    ujD->dump(&dumpstr);
+    ujD->dump(&dumpsstr);
+    std::string dumpstr=dumpsstr.str();
     int a;
 
-    Dbt key((void*)dumpstr.str().c_str(), dumpstr.str().size() + 1);
+    Dbt key((void*)dumpstr.c_str(), dumpstr.size() + 1);
     Dbt data(&a, sizeof(a));
 
     int ret=sorteddb.get(NULL, &key, &data, 0);
@@ -1401,20 +1409,21 @@ int Dsymlista::check_sorted(Dsym* element,int start){
 
 //Dsymlista::append: az uj elemet beszurjuk az adatbazisokba. (Ha a fastdb-ben mar szerepel, akkor nem.)
 void Dsymlista::append(Dsym* new_element){
-  stringstream dumpstr;
-  new_element->dump(&dumpstr);
+  std::ostringstream dumpsstr;
+  new_element->dump(&dumpsstr);
+  std::string dumpstr=dumpsstr.str();
   int a=0;
 
-  Dbt key((void*)dumpstr.str().c_str(), dumpstr.str().size() + 1);
+  Dbt key((void*)dumpstr.c_str(), dumpstr.size() + 1);
   Dbt data(&a, sizeof(a));
 
   int ret = fastdb.put(NULL, &key, &data, DB_NOOVERWRITE);
   if (ret == 0) {
-    cerr<<"\r"<<count++;
+    std::cerr<<"\r"<<count++;
     sorteddb.put(NULL, &key, &data, DB_NOOVERWRITE);
 
-    if ((int)dumpstr.str().size() + 1 > keylength)
-      keylength=2*dumpstr.str().size();
+    if ((int)dumpstr.size() + 1 > keylength)
+      keylength=2*dumpstr.size();
   }
   // Else: do nothing...
   //else if (ret == DB_KEYEXIST) {
@@ -1430,10 +1439,10 @@ Dsymlista::Dsymlista(int dimin,int carin):
   keylength(2048),
   count(0)
 {
-  Dsymlista(dimin,carin,string("example"));
+  Dsymlista(dimin,carin,std::string("example"));
 }
 
-Dsymlista::Dsymlista(int dimin,int carin,string fn):
+Dsymlista::Dsymlista(int dimin,int carin,std::string fn):
   dim(dimin),
   car(carin),
   filename_base(fn),
@@ -1460,27 +1469,26 @@ int compare_d(Db *dbp, const Dbt *a, const Dbt *b){
   char* dstr1=new char[a->get_size()];
   char* dstr2=new char[b->get_size()];
 
-  memcpy(&dstr1, a->get_data(), a->get_size());
-  memcpy(&dstr2, b->get_data(), b->get_size());                                                                    
+  memcpy(dstr1, a->get_data(), a->get_size());
+  memcpy(dstr2, b->get_data(), b->get_size());                                                                    
 
-  stringstream dsstr1,dsstr2;
-  dsstr1 << dstr1;
-  dsstr2 << dstr2;
+  std::istringstream dsstr1, dsstr2;
+  dsstr1.str(dstr1);
+  dsstr2.str(dstr2);
 
-  Dsym* dobj1=new D(dsstr1);
-  Dsym* dobj2=new D(dsstr2);
+  Dsym* dobj1=new Dsym(&dsstr1);
+  Dsym* dobj2=new Dsym(&dsstr2);
 
   return kisebb(dobj2,0,dobj1,0);
 }
 
-pair<Dsym*,int> Dsymlista::getnextsorted(void){
+std::pair<Dsym*,int> Dsymlista::getnextsorted(void){
   if (current == 0){
     reset_cursor();
     generate_ordered_numbering();
   }
 
-  stringstream dumpstr;
-  int ssz;
+  int ssz=0;
   char* str;
   int ret;
 
@@ -1496,47 +1504,49 @@ pair<Dsym*,int> Dsymlista::getnextsorted(void){
   ret = current->get(&key, &data, DB_NEXT);
   if (ret == DB_NOTFOUND){
     delete[] str;
-    return NULL;
+    return std::pair<Dsym*,int>(NULL,0);
   }
 
-  dumpstr << *str;
-  D* output(dumpstr);
+  std::istringstream dumpsstr;
+  dumpsstr.str(std::string(str));
+  Dsym* output=new Dsym(&dumpsstr);
 
   delete[] str;
 
-  return pair<Dsym*,int>(output,ssz);
+  return std::pair<Dsym*,int>(output,ssz);
 }
 
-Dsymlista::reset_cursor(void){
+void Dsymlista::reset_cursor(void){
   sorteddb.cursor(0,&current,DB_CURSOR_BULK);
 }
 
 // Create ordered numbering and set keylength if needed
-Dsymlista::generate_ordered_numbering(void){
+void Dsymlista::generate_ordered_numbering(void){
   Dbc *cursor;
-  sorteddb.cursor(0,&current,DB_CURSOR_BULK);
+  sorteddb.cursor(0,&cursor,DB_CURSOR_BULK);
 
-  stringstream dumpstr;
-  int ssz=0;
+  int ssz=1;
+  int temp;
   char* str;
   int ret;
 
   str=new char[keylength];
 
   Dbt key;
-  Dbt data(&ssz, sizeof(ssz));
+  Dbt data(&temp, sizeof(temp));
 
   key.set_data(str);
   key.set_ulen(keylength);
   key.set_flags(DB_DBT_USERMEM);
 
   try {
-    ret = current->get(&key, &data, DB_NEXT);
+    ret = cursor->get(&key, &data, DB_NEXT);
     while (ret != DB_NOTFOUND){
-      ssz++;
-      current->put(&key, &data, DB_CURRENT);
+      temp=ssz++;
+      data.set_data(&temp);
+      cursor->put(&key, &data, DB_CURRENT);
       fastdb.put(NULL, &key, &data, 0);
-      ret = current->get(&key, &data, DB_NEXT);
+      ret = cursor->get(&key, &data, DB_NEXT);
     }
   }
   catch (DbMemoryException& e){
@@ -1556,20 +1566,22 @@ Dsymlista::generate_ordered_numbering(void){
 //annyi pluszt teszunk hozza, hogy kulon fajlba (currD) kiirjuk az osszes
 //lehetseges matrix-rendszert is.
 void Dsymlista::print_html(void){
-  if (first==NULL)
-    return;
-  ostringstream filename;
+  std::ostringstream filename;
   filename<<"d"<<dim<<"c"<<car<<".html";
-  ofstream html_file;
+  std::ofstream html_file;
   html_file.open(filename.str().c_str());
 
   //Header
-  html_file<<"<html>"<<endl<<"<body>"<<endl;
+  html_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
 
-  while (pair<Dsym*,int> it=getnextsorted()) {
-    Dsym* curr=it.first();
-    int ssz=it.second();
-    cerr<<"\r"<<ssz;
+  while (true) {
+    std::pair<Dsym*,int> it=getnextsorted();
+    Dsym* curr=it.first;
+    if(curr==NULL)
+      break;
+    curr->ellenoriz();
+    int ssz=it.second;
+    std::cerr<<"\r"<<ssz;
     curr->dual=0;
     curr->dualis();
     inf=1000000;
@@ -1577,36 +1589,36 @@ void Dsymlista::print_html(void){
     curr->create_kdim();
     curr->filter_bad_orbifolds();
 
-    ostringstream currDname;
+    std::ostringstream currDname;
     currDname<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".html";
-    ofstream currD;
+    std::ofstream currD;
     currD.open(currDname.str().c_str());
 
-    currD<<"<html>"<<endl<<"<body>"<<endl<<"<table border=\"2\">"<<endl;
-    currD<<"<caption>"<<ssz<<"</caption>"<<endl;
+    currD<<"<html>"<<std::endl<<"<body>"<<std::endl<<"<table border=\"2\">"<<std::endl;
+    currD<<"<caption>"<<ssz<<"</caption>"<<std::endl;
 
-    ostringstream xfigfile;
+    std::ostringstream xfigfile;
     xfigfile<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig";
     curr->write_xfig(xfigfile.str());
-    ostringstream figtojpg;
+    std::ostringstream figtojpg;
     figtojpg<<"fig2dev -L jpeg "<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig "
       <<"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg";
     //system(figtojpg.str().c_str());
     //remove(xfigfile.str().c_str());
     currD<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg\"/></td>"
-      <<endl;
+      <<std::endl;
 
-    currD<<"<td><table border=\"1\">"<<endl;
+    currD<<"<td><table border=\"1\">"<<std::endl;
     curr->print_param_mx(&currD);
     currD<< "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
       " dimensional components: "<< "(" <<curr->osszefuggo(0);
     for (int i=1;i<dim+1;i++) currD<<","<<curr->osszefuggo(i);
-    currD<< ")</td></tr>"<<endl;
+    currD<< ")</td></tr>"<<std::endl;
     currD<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
     int dualchk;
     for (int i=1;i<car+1;i++) {
       curr->dual->atsorszamoz(i);
-      dualchk=check(curr->dual,i);
+      dualchk=check_with_start(curr->dual,i);
       if (dualchk!=0) {
 	break;
       }
@@ -1618,42 +1630,42 @@ void Dsymlista::print_html(void){
 	currD<<"Selfdual";
       else
 	currD<<"D."<<dualchk;
-    currD<<"</td></tr>"<<endl;
+    currD<<"</td></tr>"<<std::endl;
 
-    currD<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<endl;
+    currD<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
     for(int i=0;i<dim;i++) {
       currD << "(" <<i<<","<<i+1<<") ";
       curr->print_params(i,&currD);
-      if (i<dim-1) currD <<"<br>"<<endl;
-      else currD<<endl<<"</td></tr>"<<endl;
+      if (i<dim-1) currD <<"<br>"<<std::endl;
+      else currD<<std::endl<<"</td></tr>"<<std::endl;
     }
     currD<<"</table></tr></table><br><table border=\"1\" cellpadding=\"3\">"
-      <<endl<<"<caption>Possible parameter values:</caption>"<<endl
+      <<std::endl<<"<caption>Possible parameter values:</caption>"<<std::endl
       <<"<thead><tr>";
-    for(list<Dsym::param>::iterator pit=curr->plist.begin();
+    for(std::list<Dsym::param>::iterator pit=curr->plist.begin();
 	pit!=curr->plist.end();pit++)
       currD<<"<td align=center>"<<pit->kar<<"</td>";
     currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
-    currD<<"</tr></thead><tbody>"<<endl;
+    currD<<"</tr></thead><tbody>"<<std::endl;
     curr->mxnum=curr->print_possible_params(curr->plist.begin(),
 	&currD);
-    currD<<endl<<"</tbody></table></body></html>"<<endl;
+    currD<<std::endl<<"</tbody></table></body></html>"<<std::endl;
 
     //html file:
-    html_file<<"<table border=\"2\">"<<endl;
-    html_file<<"<caption>"<<ssz<<"</caption>"<<endl;
+    html_file<<"<table border=\"2\">"<<std::endl;
+    html_file<<"<caption>"<<ssz<<"</caption>"<<std::endl;
     html_file<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz
-      <<".jpg\"/></td>"<<endl;
-    html_file<<"<td><table border=\"1\">"<<endl;
+      <<".jpg\"/></td>"<<std::endl;
+    html_file<<"<td><table border=\"1\">"<<std::endl;
     html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<currDname.str()
-      <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<endl;
+      <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<std::endl;
     curr->print_param_mx(&html_file);
     html_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
       " dimensional components: "<< "(" <<curr->osszefuggo(0);
     for (int i=1;i<dim+1;i++) html_file <<","<<curr->osszefuggo(i);
-    html_file << ")</td></tr>"<<endl;
+    html_file << ")</td></tr>"<<std::endl;
     html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
     if (dualchk==0)
       html_file<<"Not "<<dim<<"-connected";
@@ -1662,26 +1674,27 @@ void Dsymlista::print_html(void){
 	html_file<<"Selfdual";
       else
 	html_file<<"D."<<dualchk;
-    html_file<<"</td></tr>"<<endl;
-    html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<endl;
+    html_file<<"</td></tr>"<<std::endl;
+    html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
     for(int i=0;i<dim;i++) {
       html_file << "(" <<i<<","<<i+1<<") ";
       curr->print_params(i,&html_file);
-      if (i<dim-1) html_file <<"<br>"<<endl;
-      else html_file<<endl<<"</td></tr>"<<endl;
+      if (i<dim-1) html_file <<"<br>"<<std::endl;
+      else html_file<<std::endl<<"</td></tr>"<<std::endl;
     }
-    html_file<<endl<<"</table></tr></table><br>"<<endl;
+    html_file<<std::endl<<"</table></tr></table><br>"<<std::endl;
+    delete curr;
   }
 
   //Footer
-  html_file<<"</body>"<<endl<<"</html>"<<endl;
+  html_file<<"</body>"<<std::endl<<"</html>"<<std::endl;
 
 }
 
 //xfig konstruktor: feltoltjuk a valtozokat, es rajzolunk egy el nelkuli
 //multigrafot. rad a korok sugara, koordx illetve koordy pedig a korok x es y
 //koordinatainak listaja.
-xfig::xfig(string filename,int dim1,int car1):dim(dim1),car(car1) {
+xfig::xfig(std::string filename,int dim1,int car1):dim(dim1),car(car1) {
   rad=200;
   koordx=new int[car];
   koordy=new int[car];
@@ -1690,15 +1703,15 @@ xfig::xfig(string filename,int dim1,int car1):dim(dim1),car(car1) {
     koordy[i]=int(round(4000-1500*sin(PI-i*2*PI/car)));
   }
   outfile.open(filename.c_str());
-  outfile << "#FIG 3.2  Produced by xfig version 3.2.5-alpha5" <<endl;
-  outfile << "Landscape" <<endl;
-  outfile << "Center" <<endl;
-  outfile << "Metric" <<endl;
-  outfile << "A4" <<endl;
-  outfile << "100.00" <<endl;
-  outfile << "Single" <<endl;
-  outfile << "-2" <<endl;
-  outfile << "1200 2" <<endl;
+  outfile << "#FIG 3.2  Produced by xfig version 3.2.5-alpha5" <<std::endl;
+  outfile << "Landscape" <<std::endl;
+  outfile << "Center" <<std::endl;
+  outfile << "Metric" <<std::endl;
+  outfile << "A4" <<std::endl;
+  outfile << "100.00" <<std::endl;
+  outfile << "Single" <<std::endl;
+  outfile << "-2" <<std::endl;
+  outfile << "1200 2" <<std::endl;
   for(int i=0;i<car;i++){
     create_circle(i);
     create_numtext(i);
@@ -1709,13 +1722,13 @@ xfig::xfig(string filename,int dim1,int car1):dim(dim1),car(car1) {
 void xfig::create_circle(int n) {
   outfile << "1 3 0 1 0 7 49 -1 20 0.000 1 0.0000 "<<koordx[n]<<" "<<koordy[n]
     <<" "<<rad<<" "<<rad<<" "<<koordx[n]<<" "<<koordy[n]<<" "
-    <<koordx[n]+rad<<" "<<koordy[n]<<endl;
+    <<koordx[n]+rad<<" "<<koordy[n]<<std::endl;
 }
 
 //xfig::create_numtext: az n-edik sorszam beleirasa.
 void xfig::create_numtext(int n) {
   outfile << "4 0 0 48 -1 0 12 0.0000 4 150 105 "<<koordx[n]-52<<" "
-    <<koordy[n]+75<< " "<<n+1<<"\\001"<<endl;
+    <<koordy[n]+75<< " "<<n+1<<"\\001"<<std::endl;
 }
 
 //xfig::create_line: n0 es n1 koze szin "szinu" (sokkal inkabb mintaju) el
@@ -1751,7 +1764,7 @@ void xfig::create_line(int n0,int n1,int szin) {
   }
   outfile << "2 1 "<<minta<<" 4 0 7 50 -1 -1 "<<mintaszelesseg
     <<".000 0 0 -1 0 0 2\n\t "<<koordx[n0]+diffx<<" "<<koordy[n0]+diffy
-    <<" "<<koordx[n1]+diffx<<" "<<koordy[n1]+diffy<<endl;
+    <<" "<<koordx[n1]+diffx<<" "<<koordy[n1]+diffy<<std::endl;
 }
 
 //xfig destruktor: listak torlese, fajl bezarasa.
@@ -1771,25 +1784,25 @@ xfig::~xfig(void) {
 int main(int,char**,char**){
   int dim;
   int car;
-  char fels;
   dim=3;
-  cout << "Cardinality: ";cin >> car;cout<<car<<endl;
+  std::cout << "Cardinality: ";std::cin >> car;std::cout<<car<<std::endl;
   Dsym* D=new Dsym(dim,car);
-  string fn=string("d")+itoa(dim)+"c"+itoa(car);
+  char buffer [50];
+  sprintf (buffer, "d%dc%d", dim, car);
+  std::string fn(buffer);
   Dsymlista* saved=new Dsymlista(dim,car,fn);
   bt=0;
   bt1=0;
   bt0=0;
   backtrack(D,saved,0,0,1,0);
-  int ujssz=1;
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
-  cout<<"saved"<<endl;
-  cout<<bt<<endl;
-  cout<<saved->count<<endl;
-  cout<<bt1<<endl;
-  cout<<float(bt1)/float(saved->count)<<endl;
-  cout<<bt0<<endl;
+  std::cout<<"saved"<<std::endl;
+  std::cout<<bt<<std::endl;
+  std::cout<<saved->count<<std::endl;
+  std::cout<<bt1<<std::endl;
+  std::cout<<float(bt1)/float(saved->count)<<std::endl;
+  std::cout<<bt0<<std::endl;
   saved->print_html();
   delete D;
   delete saved;
