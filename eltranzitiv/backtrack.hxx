@@ -3,11 +3,13 @@
 #include <list>
 #include <algorithm>
 #include <set>
+#include<db_cxx.h>
+#include<sstream>
+#include <stdio.h>
 
-#define THRESH 0.0000001
+
+#define THRESH 0.000001
 #define DEGENERATION_LIMIT 3
-
-using namespace std;
 
 //simplex osztaly: A D-szimbolumok szimplexeinek avagy csucsainak tarolasara.
 //Fontos informacio a dimenzio (ennel eggyel tobb szomszedsagi operacio van) 
@@ -137,9 +139,11 @@ class Dsym {
     Dsym*  dual;
 
     Dsym(int,int);
+    Dsym(istream*);
     ~Dsym(void);
     Dsym* save(void);
     Dsym* save_with_start(int);
+    int dump(ostream*);
     int elhozzaad(int,int,int);
     void eltorol(int,int,int);
     void atsorszamoz(int);
@@ -224,19 +228,35 @@ struct Dsymlinklist {
 //  a multigrafokat leiro kep-fajlokat bele linkeli.
 // print: A kepernyore irja az involuciokat es az informaciok egy reszet.
 class Dsymlista {
+  private:
+    int dim,car;
+    string filename_base;
+    Db fastdb,sorteddb;
+    Dbc *current;
+    int keylength;
+
   public:
-    Dsymlinklist *first,*last,*it;	//csinaljuk meg avl-lel
     int count;
 
-    Dsymlista(void);
+    Dsymlista(int,int);
+    Dsymlista(int,int,string);
     ~Dsymlista(void);
     void append(Dsym* uj_elem);
 
-    int check(Dsym*,int);
+    int check(Dsym*);
+    int check_with_start(Dsym*,int);
+    int check_sorted(Dsym*,int);
+
+    Dsym* getnextsorted(void);
+    void reset_cursor(void);
+    void generate_ordered_numbering(void);
 
     void print_html(void);
     void print(void);		//mindet kiirja
 };
+
+// DB kulso fuggvenykent varja ezt.
+int compare_d(Db *, const Dbt *, const Dbt *);
 
 //backtrack: felsorolja az osszes lehetseges (szamunkra esetleg erdekes)
 // multigrafot (barmely elszint veve igaz, hogy max 2 elemu komponensei vannak

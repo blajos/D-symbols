@@ -7,7 +7,7 @@
 #include <set>
 #include <math.h>
 #include <sstream>
-using namespace std;
+#include <stdio.h>
 #define PI 3.14159265
 
 //simplex konstruktor: megadjuk a dimenziot, az elemszamot, lefoglaljuk a
@@ -58,6 +58,52 @@ Dsym::Dsym(int dimin, int carin):
   for (int i=0;i<car;i++) params[i]=new list<param>::iterator[dim];
   dual=0;
   klist=new list<kisebbdim>[dim+1];
+}
+
+// Restore Dsym from a dump
+Dsym::Dsym(istream* in){
+  *in >> dim >> car;
+  Dsym(dim,car);
+  char level_control;
+  for(int i=0;i<dim+1;i++){
+    *in >> level_control;
+    if (level_control == '('){
+      *in >> level_control;
+      while (level_control == '('){
+        int first,second;
+        *in >> first;
+        *in >> level_control;
+        if (level_control == ','){
+          *in >> second;
+          *in >> level_control;
+          // Set adjacency: i is the operation, first and second are the orbits
+          elhozzaad(i,first,second);
+        }
+        if (level_control != ')')
+          throw 1;  //Something's wrong
+        *in >> level_control;
+      }
+    }
+    else {
+      throw 2; //Something's wrong
+    }
+  }
+}
+
+int Dsym::dump(ostream *out){
+  *out<<dim<<" "<<car;
+  for(int j=0;j<dim+1;j++){
+    *out<<" (";
+    for(int i=0;i<car;i++){
+      int icsucsjszomszedja=csucsok[0][i]->szomszed[j]->sorszam[0];
+      if (icsucsjszomszedja == i)
+	*out<<i+1;
+      else if (i < icsucsjszomszedja)
+	*out<<"("<<i+1<<icsucsjszomszedja+1<<")";
+    }
+    *out<<")";
+  }
+  return 0;
 }
 
 //Dsym destruktor: memoria felszabaditasa
@@ -341,7 +387,7 @@ int Dsym::ellenoriz(void) {
     //cout << "Nem osszefuggo" <<endl;
     return 1; //csak az osszefuggoek erdekesek
   }
-  int sor=sorszamozas();
+  sorszamozas();
   //if (sor==1) return 1; 
   if (!uvw()){
     //cout << "Nem uvw0" <<endl;
@@ -373,7 +419,7 @@ void Dsym::eltorol(int szin, int honnan, int hova) {
     return;
   if (csucsok[0][honnan]->szomszed[szin] != csucsok[0][hova]) {
     cerr << "Nincs el (szin, honnan, hova): " <<szin<<" "<<honnan<<" "<<hova
-						<< endl;
+      << endl;
     return;
   }
   csucsok[0][honnan]->szomszed[szin]=csucsok[0][honnan];
@@ -570,12 +616,14 @@ int Dsym::kdimsf(list<param>::iterator inf_param){
       float sum=0;
       for(list<simplex*>::iterator currszim=curr->szek.begin();
 	  currszim!=curr->szek.end();currszim++){
-	for(int j=0;j<dim;j++)
-	  if(!((elhagy==0 && j==0) || (elhagy==dim && j==dim-1)))
+	for(int j=0;j<dim;j++){
+	  if(!((elhagy==0 && j==0) || (elhagy==dim && j==dim-1))){
 	    if(params[(*currszim)->sorszam[1]][j]!=inf_param)
 	      sum+=1.0/float((*currszim)->mx[j][j+1]);
 	    else
 	      sum+=10*THRESH; // Ezzel jelezzuk, hogy a vegtelen lancnak az elemei erdekesek, nem a hatarerteke
+	  }
+	}
 	sum-=0.5;
       }
       if(sum<-THRESH) {
@@ -595,7 +643,6 @@ int Dsym::kdimsf(list<param>::iterator inf_param){
 //egyuttveve minimalis-e a D-szimbolum.
 int Dsym::min(void){
   osszevlist.clear();
-  int atsorsz=0;
   int i=1;  //csak az elso csucs kell sorszamozashoz, nem max eseten is eleg.
   int nemmax=1;
   //Ha van a matrixok kozott kulonbozo, akkor lehet csak max:
@@ -943,7 +990,6 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
 	return 1;
       }
     else{
-      int ret=0;
       list<param>::iterator curr1=currparam;
       curr1++;
       //Ha meg egy valtozo helyere tudnank vegtelent irni, visszaterunk
@@ -1001,13 +1047,14 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 	for(int i=0;i<dim-1;i++)
 	  if(i!=op)
 	    for(int j=i+2;j<dim+1;j++)
-	      if(j!=op)
+	      if(j!=op){
 		if((*szit)->szomszed[i]->sorszam[0]==(*szit)->sorszam[0] &&
 		    (*szit)->szomszed[j]->sorszam[0]==(*szit)->sorszam[0])
 		  peremek++;
 		else if((*szit)->szomszed[i]->szomszed[j]->sorszam[0]==
 		    (*szit)->sorszam[0])
 		  forgatasok++;
+	      }
       forgatasok=forgatasok/2; //mert mindig ketszer annyi van belole, mint kell
       if(peremek+forgatasok>=2) continue;
 
@@ -1018,7 +1065,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
       for(list<simplex*>::iterator szit=komp->szek.begin();
 	  szit!=komp->szek.end();szit++)
 	for(int i=0;i<dim;i++)
-	  if(noop!=i && params[(*szit)->sorszam[1]][i]->ertek>1)
+	  if(noop!=i && params[(*szit)->sorszam[1]][i]->ertek>1){
 	    if(params[(*szit)->sorszam[1]][i]->eh>0){
 	      if(find(parforgatasok.begin(),parforgatasok.end(), 
 		    *params[(*szit)->sorszam[1]][i])==parforgatasok.end())
@@ -1029,6 +1076,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 		    *params[(*szit)->sorszam[1]][i])==parperemek.end())
 		parperemek.push_back(*params[(*szit)->sorszam[1]][i]);
 	    }
+	  }
 
       if(
 	  ( (peremek+parperemek.size()<=2 && 
@@ -1060,7 +1108,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 	}
 
 
-	if(jo_orb==0)
+	if(jo_orb==0){
 	  if(parek.size()==1){
 	    if(peremek==1 || forgatasok==1)
 	      *badorb<<parek.begin()->kar<<"=2";
@@ -1082,6 +1130,7 @@ int Dsym::filter_bad_orbifolds03(ostringstream *badorb){
 	      else if(egyik->ertek!=masik->ertek)
 		return 0;
 	    }
+	}
       }
     }
   return ret;
@@ -1150,7 +1199,7 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
       }
       //cout << " " << bt1 << " " << start << endl;
       Dsym* ujD=D->save_with_start(start);
-      if (saved->check(ujD,1)==0){
+      if (saved->check(ujD)==0){
 	//saved->append(ujD);
 	backtrack_edges(D,saved,0,1);
       }
@@ -1169,13 +1218,13 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
     for (int i=1;i<hova;i++){ // A 0-adik csucs uressege nem szamit
       bool ures1=true;
       for(int j=0;j<dim+1;j++)
-       if (D->csucsok[0][i]->szomszed[j] != D->csucsok[0][i]){
-         ures1=false;
-         break;
-       }
+	if (D->csucsok[0][i]->szomszed[j] != D->csucsok[0][i]){
+	  ures1=false;
+	  break;
+	}
       if (ures1){
-       erdemes=false;
-       break;
+	erdemes=false;
+	break;
       }
     }
 
@@ -1202,13 +1251,13 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
 	fok+=1 << j;
     if (honnan > 0){
       for(int j=0;j<dim+1;j++)
-       if (D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
-         szukseges_fok+=1 << j;
+	if (D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
+	  szukseges_fok+=1 << j;
       if(fok <= szukseges_fok &&
-         fok >= 1 &&
-         current_largest >= honnan+1 &&
-         not backtrack_breaks_uvw(D,honnan))
-        backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
+	  fok >= 1 &&
+	  current_largest >= honnan+1 &&
+	  not backtrack_breaks_uvw(D,honnan))
+	backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
     }
     else if(fok>=1)  // current largest ekkor egyertelmu
       backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
@@ -1220,7 +1269,6 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
 // szin is not needed (it's always 1)
 void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
   int car=D->car;
-  int dim=D->dim;
   int szin=1;
   bt0++;
   if (honnan==car-1){	//a vegen megallunk
@@ -1238,7 +1286,7 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
       }
       //cout << " " << bt1 << " " << start << endl;
       Dsym* ujD=D->save_with_start(start);
-      if (saved->check(ujD,1)==0){
+      if (saved->check(ujD)==0){
 	saved->append(ujD);
       }
     }
@@ -1299,96 +1347,209 @@ bool backtrack_breaks_uvw(Dsym* D,int honnan){
   return false;
 }
 
-//Dsymlista::check: Hatulrol indulva megnezzuk, hogy hanyadik helyre kene tenni
-//az uj elemet (a megfelelo csucsot kijelolve elsonek.) Azert hatulrol, mert
-//olyan felsorolo algoritmust szeretnenk, ami sorba rakva sorolja fel oket. it
-//kulso valtozot feltoltjuk.
-int Dsymlista::check(Dsym* uj_elem,int var_uj) {
-  it=last;
-  while(it!=NULL) {
-    int kis=kisebb(uj_elem,var_uj,it->curr,1);
-    if (kis==0) {
-      return it->ssz;
-    }
-    else if (kis==1) it=it->prev;
-    else break;		//kis==-1
-  }
-  return 0;
+//Dsymlista::check: Az adott elem szerepel-e mar a listainkban?
+int Dsymlista::check(Dsym* element){
+  stringstream dumpstr;
+  element->dump(&dumpstr);
+  int a;
+
+  Dbt key((void*)dumpstr.str().c_str(), dumpstr.str().size() + 1);
+  Dbt data(&a, sizeof(a));
+
+  int ret=fastdb.get(NULL, &key, &data, 0);
+  if (ret == DB_NOTFOUND)
+    return 0;
+  else
+    return 1;
 }
 
-//Dsymlista::append: az uj elemet a linkelt lista it-vel mutatott eleme moge
-//szurja be. Fontos, hogy check(uj_elem,1)-et meg kell hivni elotte.
-void Dsymlista::append(Dsym* uj_elem) {
-  cerr<<"\r"<<count++;
-  Dsymlinklist* uj=new Dsymlinklist;
-  uj->curr=uj_elem;
-  uj->ssz=1;
-  uj->prev=it;
-  if(uj->prev==NULL){
-    uj->next=first;
-    first=uj;
-  }
-  else {
-    uj->next=it->next;			//it.....uj.....it->next
-    it->next=uj;
-  }
-  if(uj->next==NULL) {
-    last=uj;
-  }
-  else {
-    uj->next->prev=uj;
-  }
+//Dsymlista::check_with_start: Az adott elem szerepel-e mar a listainkban?
+int Dsymlista::check_with_start(Dsym* element,int start){
+  Dsym* ujD=element->save_with_start(start);
+  int ret=check(ujD);
+  delete ujD;
+  return ret;
 }
 
-//Dsymlista konstruktor: ures lista alapertelemezesei.
-Dsymlista::Dsymlista(void):first(0),last(0),count(0) {}
+//Dsymlista::check_sorted: Az adott elem hanyadik a rendezett listaban
+int Dsymlista::check_sorted(Dsym* element,int start){
+  stringstream dumpstr;
+  Dsym* ujD=element->save_with_start(start);
+  int ret=-3;
+  if (check(ujD)){
+    ujD->dump(&dumpstr);
+    int a;
 
-//Dsymlista destruktor: 
+    Dbt key((void*)dumpstr.str().c_str(), dumpstr.str().size() + 1);
+    Dbt data(&a, sizeof(a));
+
+    int ret=sorteddb.get(NULL, &key, &data, 0);
+    if (ret == DB_NOTFOUND)
+      ret=-1;
+    else
+      ret=a;
+  }
+  else{
+    // Elvileg nem erhetunk ide
+    throw -2;
+    ret=-2;
+  }
+  delete ujD;
+  return ret;
+}
+
+
+//Dsymlista::append: az uj elemet beszurjuk az adatbazisokba. (Ha a fastdb-ben mar szerepel, akkor nem.)
+void Dsymlista::append(Dsym* new_element){
+  stringstream dumpstr;
+  new_element->dump(&dumpstr);
+  int a=0;
+
+  Dbt key((void*)dumpstr.str().c_str(), dumpstr.str().size() + 1);
+  Dbt data(&a, sizeof(a));
+
+  int ret = fastdb.put(NULL, &key, &data, DB_NOOVERWRITE);
+  if (ret == 0) {
+    cerr<<"\r"<<count++;
+    sorteddb.put(NULL, &key, &data, DB_NOOVERWRITE);
+
+    if ((int)dumpstr.str().size() + 1 > keylength)
+      keylength=2*dumpstr.str().size();
+  }
+  // Else: do nothing...
+  //else if (ret == DB_KEYEXIST) {
+  //}
+}                                                                                                                 
+
+Dsymlista::Dsymlista(int dimin,int carin):
+  dim(dimin),
+  car(carin),
+  fastdb(NULL,0),
+  sorteddb(NULL,0),
+  current(0),
+  keylength(2048),
+  count(0)
+{
+  Dsymlista(dimin,carin,string("example"));
+}
+
+Dsymlista::Dsymlista(int dimin,int carin,string fn):
+  dim(dimin),
+  car(carin),
+  filename_base(fn),
+  fastdb(NULL,0),
+  sorteddb(NULL,0),
+  current(0),
+  keylength(2048),
+  count(0)
+{ 
+  sorteddb.set_bt_compare(&compare_d);
+
+  fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
+  sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
+}
+
 Dsymlista::~Dsymlista(void){
-  for (Dsymlinklist* it=first;it!=NULL;it=it->next) {
-    delete it->curr;
-    delete it->prev;
-  }
-  delete last;
+  if (current!=0)
+    current->close();
+  fastdb.close(0);
+  sorteddb.close(0);
 }
 
-//Dsymlista::print: kiirja a konzolra a multigrafot (involucio alakban) egy
-//sorszammal; kiszamolja, hogy a listaban hanyadik elem a dulisa, majd kiirja;
-//operacio-paronkent kiirja egy sorba az oda tartozo parametereket (+-szal
-//jelolve az iranyitott korbejarasokat;) illetve egy fajlba irja a multigraf
-//rajzat (fig formatumban, amit kesobb jpg-ge alakithatunk.)
-void Dsymlista::print(void){
-  for (Dsymlinklist* it=first;it!=NULL;it=it->next) {
-    int dim=it->curr->dim;
-    int car=it->curr->car;
-    cout<<endl<<it->ssz;
-    it->curr->print(1);
-    it->curr->dual=0;
-    it->curr->dualis();
+int compare_d(Db *dbp, const Dbt *a, const Dbt *b){
+  char* dstr1=new char[a->get_size()];
+  char* dstr2=new char[b->get_size()];
 
-    cout<<"Dual: D.";
-    for (int i=1;i<car+1;i++) {
-      it->curr->dual->atsorszamoz(i);
-      int c=check(it->curr->dual,i);
-      if (c!=0) {
-	cout<<c;
-	break;
-      }
-    }
-    cout<<endl;
+  memcpy(&dstr1, a->get_data(), a->get_size());
+  memcpy(&dstr2, b->get_data(), b->get_size());                                                                    
 
-    cout<<"Parameters: "<<endl;
-    for(int i=0;i<dim;i++) {
-      cout << "(" <<i<<","<<i+1<<") ";
-      it->curr->print_params(i,&cout);
-      cout<<endl;
-    }
-    ostringstream xfigfile;
-    xfigfile<<"d"<<dim<<"c"<<car<<"_"<<it->ssz<<".fig";
-    it->curr->write_xfig(xfigfile.str());
+  stringstream dsstr1,dsstr2;
+  dsstr1 << dstr1;
+  dsstr2 << dstr2;
+
+  Dsym* dobj1=new D(dsstr1);
+  Dsym* dobj2=new D(dsstr2);
+
+  return kisebb(dobj2,0,dobj1,0);
+}
+
+pair<Dsym*,int> Dsymlista::getnextsorted(void){
+  if (current == 0){
+    reset_cursor();
+    generate_ordered_numbering();
   }
-  cout<<endl;
-  cout << count<<endl;
+
+  stringstream dumpstr;
+  int ssz;
+  char* str;
+  int ret;
+
+  str=new char[keylength];
+
+  Dbt key;
+  Dbt data(&ssz, sizeof(ssz));
+
+  key.set_data(str);
+  key.set_ulen(keylength);
+  key.set_flags(DB_DBT_USERMEM);
+
+  ret = current->get(&key, &data, DB_NEXT);
+  if (ret == DB_NOTFOUND){
+    delete[] str;
+    return NULL;
+  }
+
+  dumpstr << *str;
+  D* output(dumpstr);
+
+  delete[] str;
+
+  return pair<Dsym*,int>(output,ssz);
+}
+
+Dsymlista::reset_cursor(void){
+  sorteddb.cursor(0,&current,DB_CURSOR_BULK);
+}
+
+// Create ordered numbering and set keylength if needed
+Dsymlista::generate_ordered_numbering(void){
+  Dbc *cursor;
+  sorteddb.cursor(0,&current,DB_CURSOR_BULK);
+
+  stringstream dumpstr;
+  int ssz=0;
+  char* str;
+  int ret;
+
+  str=new char[keylength];
+
+  Dbt key;
+  Dbt data(&ssz, sizeof(ssz));
+
+  key.set_data(str);
+  key.set_ulen(keylength);
+  key.set_flags(DB_DBT_USERMEM);
+
+  try {
+    ret = current->get(&key, &data, DB_NEXT);
+    while (ret != DB_NOTFOUND){
+      ssz++;
+      current->put(&key, &data, DB_CURRENT);
+      fastdb.put(NULL, &key, &data, 0);
+      ret = current->get(&key, &data, DB_NEXT);
+    }
+  }
+  catch (DbMemoryException& e){
+    if (e.get_errno() == DB_BUFFER_SMALL) {
+      keylength=2*key.get_size();
+      generate_ordered_numbering();
+    }
+    else {
+      throw 1;
+    }
+  }
+
+  delete[] str;
 }
 
 //Dsymlista::print_html: Hasonloan mint az elobb, kiirjuk html-be az adatokat,
@@ -1397,8 +1558,6 @@ void Dsymlista::print(void){
 void Dsymlista::print_html(void){
   if (first==NULL)
     return;
-  int dim=first->curr->dim;
-  int car=first->curr->car;
   ostringstream filename;
   filename<<"d"<<dim<<"c"<<car<<".html";
   ofstream html_file;
@@ -1407,47 +1566,47 @@ void Dsymlista::print_html(void){
   //Header
   html_file<<"<html>"<<endl<<"<body>"<<endl;
 
-  for (Dsymlinklist* it=first;it!=NULL;it=it->next) {
-    cerr<<"\r"<<it->ssz;
-    it->curr->dual=0;
-    it->curr->dualis();
+  while (pair<Dsym*,int> it=getnextsorted()) {
+    Dsym* curr=it.first();
+    int ssz=it.second();
+    cerr<<"\r"<<ssz;
+    curr->dual=0;
+    curr->dualis();
     inf=1000000;
-    it->curr->create_params();
-    it->curr->create_kdim();
-    it->curr->filter_bad_orbifolds();
+    curr->create_params();
+    curr->create_kdim();
+    curr->filter_bad_orbifolds();
 
     ostringstream currDname;
-    currDname<<"d"<<dim<<"c"<<car<<"_"<<it->ssz<<".html";
+    currDname<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".html";
     ofstream currD;
     currD.open(currDname.str().c_str());
 
     currD<<"<html>"<<endl<<"<body>"<<endl<<"<table border=\"2\">"<<endl;
-    dim=it->curr->dim;
-    car=it->curr->car;
-    currD<<"<caption>"<<it->ssz<<"</caption>"<<endl;
+    currD<<"<caption>"<<ssz<<"</caption>"<<endl;
 
     ostringstream xfigfile;
-    xfigfile<<"d"<<dim<<"c"<<car<<"_"<<it->ssz<<".fig";
-    it->curr->write_xfig(xfigfile.str());
+    xfigfile<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig";
+    curr->write_xfig(xfigfile.str());
     ostringstream figtojpg;
-    figtojpg<<"fig2dev -L jpeg "<<"d"<<dim<<"c"<<car<<"_"<<it->ssz<<".fig "
-      <<"d"<<dim<<"c"<<car<<"_"<<it->ssz<<".jpg";
+    figtojpg<<"fig2dev -L jpeg "<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig "
+      <<"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg";
     //system(figtojpg.str().c_str());
     //remove(xfigfile.str().c_str());
-    currD<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<it->ssz<<".jpg\"/></td>"
+    currD<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg\"/></td>"
       <<endl;
 
     currD<<"<td><table border=\"1\">"<<endl;
-    it->curr->print_param_mx(&currD);
+    curr->print_param_mx(&currD);
     currD<< "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
-      " dimensional components: "<< "(" <<it->curr->osszefuggo(0);
-    for (int i=1;i<dim+1;i++) currD<<","<<it->curr->osszefuggo(i);
+      " dimensional components: "<< "(" <<curr->osszefuggo(0);
+    for (int i=1;i<dim+1;i++) currD<<","<<curr->osszefuggo(i);
     currD<< ")</td></tr>"<<endl;
     currD<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
     int dualchk;
     for (int i=1;i<car+1;i++) {
-      it->curr->dual->atsorszamoz(i);
-      dualchk=check(it->curr->dual,i);
+      curr->dual->atsorszamoz(i);
+      dualchk=check(curr->dual,i);
       if (dualchk!=0) {
 	break;
       }
@@ -1455,7 +1614,7 @@ void Dsymlista::print_html(void){
     if (dualchk==0)
       currD<<"Not found";
     else
-      if (dualchk==it->ssz)
+      if (dualchk==ssz)
 	currD<<"Selfdual";
       else
 	currD<<"D."<<dualchk;
@@ -1464,42 +1623,42 @@ void Dsymlista::print_html(void){
     currD<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<endl;
     for(int i=0;i<dim;i++) {
       currD << "(" <<i<<","<<i+1<<") ";
-      it->curr->print_params(i,&currD);
+      curr->print_params(i,&currD);
       if (i<dim-1) currD <<"<br>"<<endl;
       else currD<<endl<<"</td></tr>"<<endl;
     }
     currD<<"</table></tr></table><br><table border=\"1\" cellpadding=\"3\">"
       <<endl<<"<caption>Possible parameter values:</caption>"<<endl
       <<"<thead><tr>";
-    for(list<Dsym::param>::iterator pit=it->curr->plist.begin();
-	pit!=it->curr->plist.end();pit++)
+    for(list<Dsym::param>::iterator pit=curr->plist.begin();
+	pit!=curr->plist.end();pit++)
       currD<<"<td align=center>"<<pit->kar<<"</td>";
     currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
       <<"<td>Good orbifold criteria</td>";
     currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
-    it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(),
+    curr->mxnum=curr->print_possible_params(curr->plist.begin(),
 	&currD);
     currD<<endl<<"</tbody></table></body></html>"<<endl;
 
     //html file:
     html_file<<"<table border=\"2\">"<<endl;
-    html_file<<"<caption>"<<it->ssz<<"</caption>"<<endl;
-    html_file<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<it->ssz
+    html_file<<"<caption>"<<ssz<<"</caption>"<<endl;
+    html_file<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz
       <<".jpg\"/></td>"<<endl;
     html_file<<"<td><table border=\"1\">"<<endl;
     html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<currDname.str()
-      <<"\">Number of matrices: "<<it->curr->mxnum<<"</a></td></tr>"<<endl;
-    it->curr->print_param_mx(&html_file);
+      <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<endl;
+    curr->print_param_mx(&html_file);
     html_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
-      " dimensional components: "<< "(" <<it->curr->osszefuggo(0);
-    for (int i=1;i<dim+1;i++) html_file <<","<<it->curr->osszefuggo(i);
+      " dimensional components: "<< "(" <<curr->osszefuggo(0);
+    for (int i=1;i<dim+1;i++) html_file <<","<<curr->osszefuggo(i);
     html_file << ")</td></tr>"<<endl;
     html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
     if (dualchk==0)
       html_file<<"Not "<<dim<<"-connected";
     else
-      if (dualchk==it->ssz)
+      if (dualchk==ssz)
 	html_file<<"Selfdual";
       else
 	html_file<<"D."<<dualchk;
@@ -1507,7 +1666,7 @@ void Dsymlista::print_html(void){
     html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<endl;
     for(int i=0;i<dim;i++) {
       html_file << "(" <<i<<","<<i+1<<") ";
-      it->curr->print_params(i,&html_file);
+      curr->print_params(i,&html_file);
       if (i<dim-1) html_file <<"<br>"<<endl;
       else html_file<<endl<<"</td></tr>"<<endl;
     }
@@ -1616,14 +1775,15 @@ int main(int,char**,char**){
   dim=3;
   cout << "Cardinality: ";cin >> car;cout<<car<<endl;
   Dsym* D=new Dsym(dim,car);
-  Dsymlista* saved=new Dsymlista;
+  string fn=string("d")+itoa(dim)+"c"+itoa(car);
+  Dsymlista* saved=new Dsymlista(dim,car,fn);
   bt=0;
   bt1=0;
   bt0=0;
   backtrack(D,saved,0,0,1,0);
   int ujssz=1;
-  for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
-    it->ssz=ujssz++;
+  //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
+  //it->ssz=ujssz++;
   cout<<"saved"<<endl;
   cout<<bt<<endl;
   cout<<saved->count<<endl;
