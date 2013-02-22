@@ -271,8 +271,12 @@ class stringdb {
 
   public:
     stringdb(std::string);
+    stringdb(int,std::string);
+    stringdb(int);
+    void create(std::string);
     ~stringdb(void);
     void append(std::string);
+    void append(std::string,int);
 
     bool check(std::string);
 };
@@ -285,7 +289,7 @@ class stringdb {
 // argumentumok: Dsym*: benne dolgozunk (hozzaadunk es torlunk eleket)
 //               Dsymlista*: az erdekesek listaja
 //               int,int,int: vizsgalt el: (szin,honnan,hova,current_largest)
-void backtrack(Dsym*,Dsymlista*,int,int,int,int);
+void backtrack(int,int);
 
 //backtrack_edges: Hanyfelekeppen tudjuk az 1-es operaciot hozzaadni a
 //rendszerhez?

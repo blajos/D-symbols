@@ -3,4 +3,20 @@ Mi is itt az otlet?
 Ha a backtrack algoritmussal eloallitottunk egy allapotot, majd az onnan
 elerheto osszes tovabbi allapotot; akkor ha ujra elerjuk ezt az allapotot mas
 permutacioval, mar nem fogunk uj eredmenyeket kapni, ugyhogy nem is megyunk
-tovabb.
+tovabb. Na ez igy nem mukodik...
+
+DE: Kicsit tavolabbrol megnezve a feladatot eddig a backtrack algoritmussal az
+osszes lehetseges el-kombinaciot vizsgaltuk gyakorlatilag egy melysegi
+bejarassal. Mi lenne, ha ehelyett egy szelessegi bejarassal probalkoznank az
+elek szama szerint a kovetkezo modon:
+- Tegyuk fel, hogy felsoroltuk az osszes lehetseges n-elu D-szimbolum reszletet,
+  amikbol meg lehetseges D-szimbolumot faragni.
+- Az osszes ilyenhez az osszes lehetseges modon adjunk hozza meg egy elet es
+  nezzuk meg, hogy a kapott D-szimbolum reszlet 1-es kezdetu szamozasat korabban
+  mar megkaptuk-e, ha meg nem, akkor az osszes lehetseges kezdopontu
+  atsorszamozasat taroljuk el.
+- Vegul nezzuk meg, hogy a D-szimbolum reszlet valodi D-szimbolum-e.
+
+Kis segitseg az adattarolassal magunknak: el tudjuk tarolni, hogy mennyi graf
+csucsot hasznaltunk mar fel, ezzel az osszefuggoseg megallapitasa es az elso
+izolalt pont megtalalasa trivialis.

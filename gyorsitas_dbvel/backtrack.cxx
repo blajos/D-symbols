@@ -1230,120 +1230,90 @@ bool operator == (Dsym::param a,Dsym::param b) {
   return a.kar==b.kar;
 }
 
-//backtrack: Felsoroljuk az osszes lehetseges car elemszamu, dim+1 elszinu
-//multigrafot, ahol teljesul, hogy egy csucsban nincs 2 azonos szinu, de
-//kulonbozo el. A lehetseges eleket fel tudjuk sorolni x y z szamharmasokkal,
-//ahol: x a szin, y a kezdo, z a vegpont. (x,y,z>=0; y<z; x<dim+1; y,z<car)
-//Ezeket soroljuk fel (akar tetszoleges sorrendben is lehetne, de az alabbi tunt
-//a legegyszerubbnek) eloszor el nelkul, majd az elt berajzolva. Ezzel megkapjuk
-//a backtrack-fat. Nem optimalis: minden multigrafot leirunk, igy ha az adott
-//kezdoponthoz beallitjuk a csucsok sorszamat, akkor (n-1)! azonos grafot
-//kapunk. A rendezesi algoritmust sokkal jobban ki kene hasznalni.
-//
-// Modositas az eredetihez kepest: Nem adunk hozza "1" szinu elet, azokat csak a
-// levelekben fogjuk tovabb csocsalni.
-int bt;
-int bt1;
-long long bt0;
-stringdb* already_seen;
-void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current_largest) {
-  int car=D->car;
-  int dim=D->dim;
-  bt0++;
-  if (honnan==car-1){	//a vegen megallunk
-    //ellenorzesek
-    bt++;
-    int joe=D->ellenoriz();
-    //mentes, ha kell
-    if (joe==-1) {
-      bt1++;
-      int start=1;
-      for(int i=1;i<car;i++){
-	D->atsorszamoz(i+1);
-	if(kisebb(D,i+1,D,start)==1)
-	  start=i+1;
-      }
-      //std::cout << " " << bt1 << " " << start << std::endl;
-      Dsym* ujD=D->save_with_start(start);
-      if (saved->check(ujD)==0){
-	//saved->append(ujD);
-	backtrack_edges(D,saved,0,1);
-      }
-      delete ujD;
-    }
-    return;
-  }
+//backtrack: Felsoroljuk az osszes lehetseges el-kombinaciot, el-szam szerint
+//rendezve
+Dsymlista* saved;
+void backtrack(int dim, int car) {
+  stringdb* seen_prev,seen_now;
+  int number_of_edges=0;
+  bool found_new=true;
+  seen_now=new stringdb(number_of_edges);
+  seen_prev=0;
+  Dsym D(dim,car);
+  std::ostringstream dumpsstr;
+  D.dump(&dumpsstr,1);
+  seen_now->append(dumpsstr.str());
+  while (found_new and number_of_edges++) {
+    found_new=false;
+    if (seen_prev)
+      delete seen_prev;
+    seen_prev=seen_now;
+    seen_now=new stringdb(number_of_edges);
+    stringdb seen_now_permut=new stringdb(number_of_edges,"_permut");
 
-  // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni, a nala 1-el kisebb
-  // csucs kell nem ures legyen, kiveve 0-1 kozti elso elet.
-  bool ures=true;
-  for(int j=0;j<dim+1;j++)
-    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova]){
-      ures=false;
-      break;
-    }
+    //Osszes elozoleg megtalalt Dsym
+    Dbc* prev_cursor;
+    seen_prev.cursor(0,&prev_cursor,DB_CURSOR_BULK);
 
-  bool erdemes=true;
-  if ( ures && hova >= 2 ){
-    bool ures1=true;
-    for(int j=0;j<dim+1;j++)
-      if (D->csucsok[0][hova-1]->szomszed[j] != D->csucsok[0][hova-1]){
-	ures1=false;
+    while {
+      str=new char[seen_prev.keylength];
+      int max;
+
+      Dbt key(str, keylength);
+      key.set_flags(DB_DBT_USERMEM);                                                                                     
+      Dbt data(&max, sizeof(max));
+
+      ret = prev_cursor->get(&key, &data, DB_NEXT);
+      if (ret == DB_NOTFOUND){
+	delete[] str;
 	break;
       }
-    if (ures1){
-      erdemes=false;
-    }
-  }
+      std::istringstream dumpsstr;
+      dumpsstr.str(std::string(str));
+      Dsym D(&dumpsstr);
+      max=data.get_data();
 
+      //Az osszes lehetseges elet hozzaadjuk
+      for(int szin=0; szin<dim+1; szin++){
+	if (szin==1) //Eltranzitiv eset
+	  continue;
+        for(int honnan=0; honnan<max; honnan++)
+	  for(int hova=honnan+1; hova<max+1 && hova<car; hova++)
+	    if (D.elhozzaad(szin,honnan,hova)){
+	      int newmax=max;
+	      if (hova==max)
+		newmax++;
+	      bool voltmar=false;
 
-  //ha erdemes elt hozzaadni, ujra meghivjuk onmagunkat
-  if (erdemes && D->elhozzaad(szin,honnan,hova)){
-    int largest=current_largest;
-    if (hova > largest)
-      largest=hova;
+	      //1. ellenorzes: seen_new-hoz erdemes-e hozzaadni
+	      D.atsorszamoz(1,newmax);
+	      std::ostringstream dumpsstr;
+	      D.dump(&dumpsstr,1);
+	      std::string dumpstr=dumpsstr.str();
+	      if (seen_new_permut.check(dumpstr))
+		voltmar=true;
+	      else{
+		found_new=true;
+		seen_new.append(dumpstr,newmax);
+		seen_new_permut.append(dumpstr,newmax);
+		for (int i=2;i<newmax;i++){
+		  D.atsorszamoz(i,newmax);
+		  std::ostringstream dumpsstr;
+		  D.dump(&dumpsstr,i);
+		  std::string dumpstr=dumpsstr.str();
+		  seen_new_permut.append(dumpstr,newmax);
+		}
+	      }
 
-    // szereplunk-e mar a vizsgalt szimbolumok kozott esetleg mas
-    // sorszamozassal?
-    /* debug */
-    std::ostringstream dumpsstr1;
-    D->dump(&dumpsstr1);
-    std::cerr <<std::endl<< dumpsstr1.str() << std::endl;
-    for(int i=1;i<=largest;i++){
-      D->atsorszamoz(i,largest);
-      std::ostringstream dumpsstr;
-      D->dump(&dumpsstr,i);
-      std::string dumpstr=dumpsstr.str();
-      if(already_seen->check(dumpstr)){
-	std::cerr << "Volt mar:" <<dumpstr <<std::endl;
-	return;
+	      //2. ellenorzes: seen_edge_new-hoz erdemes-e hozzaadni
+	      if (newmax == car && not voltmar && D.ellenoriz() == -1){
+		seen_edge_new.append(dumpsstr.str(),0);
+	      }
+
+	      //Vegul toroljuk az elet
+	      D.eltorol(szin,honnan,hova);
+	    }
       }
-    }
-    std::ostringstream dumpsstr;
-    D->dump(&dumpsstr,1);
-    already_seen->append(dumpsstr.str());
-    std::cerr << "Uj:" << dumpsstr.str() << std::endl;
-
-    backtrack(D,saved,szin,honnan,hova,largest);
-    D->eltorol(szin,honnan,hova);
-  }
-
-  if(szin==0) backtrack(D,saved,2,honnan,honnan+1,current_largest); //FIXME Ez miez? Igy hagyjuk ki az el szerinti operatorokat.
-  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1,current_largest);
-  else if(hova+1<car) 
-    backtrack(D,saved,szin,honnan,hova+1,current_largest);
-  else {
-    int fok=0;
-    //Akkor megyunk tovabb honnan+1-re a forrassal, ha tovabbra is osszefuggo
-    //marad az eddigi rendszer.
-
-    for(int j=0;j<dim+1;j++) 
-      if(D->csucsok[0][honnan+1]->szomszed[j] != D->csucsok[0][honnan+1]){
-	fok=1;
-	break;
-      }
-    if(fok>=1 /*and not backtrack_breaks_uvw(D,honnan)*/){
-      backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
     }
   }
 }
@@ -1393,41 +1363,36 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
 /* Megvizsgaljuk, hogy az aktualis diagramban van nem m_ij=2 erteku
  * operacio-par, kezdopont harmas.
  */
-bool backtrack_breaks_uvw(Dsym* D,int honnan){
+bool backtrack_breaks_uvw(Dsym* D,int max){
   int dim=D->dim;
-  int max=honnan+1;
   simplex*** csucsok=D->csucsok;
   for (int r=0;r<=max;r++)
     for (int i=0;i<dim-1;i++)
       for (int i1=i+2;i1<dim+1;i1++){
-	/* A kovetkezo minta felismerese: |_
-	   Ha talalunk nem szomszedos operacio parokkal 2 hosszu lancot, ahol mindket
-	   tag nem nagyobb, mint max; az rossz. */
-	if(csucsok[0][r]->szomszed[i] == csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1] != csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] == csucsok[0][r]->szomszed[i1]->szomszed[i]){
-	  //std::cout << "Nem uvw1" <<std::endl;
-	  //D->print(0);
-	  return true;
+	/* Ha 4 lepesbol egyszer sem fordultunk vissza es nem is jutottunk a
+	 * kiindulasi pontra, akkor nem jo. "|_|-"-szeru minta.
+	 */
+	simplex* csucs=csucsok[0][r];
+	int j,j1;
+	if ( csucs != csucs->szomszed[i] ){
+	  j=i;
+	  j1=i1;
 	}
-	/* A kovetkezo minta felismerese: |_|
-	   Ha talalunk nem szomszedos operacio parokkal 3 hosszu valamit, ahol mindket
-	   tag nem nagyobb, mint max, es nem zarodik vissza; az is rossz. */
-	if(csucsok[0][r]->szomszed[i] == csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1] != csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] != csucsok[0][r]->szomszed[i1]->szomszed[i] &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->szomszed[i] != csucsok[0][r]){
-	  //std::cout << "Nem uvw2" <<std::endl;
-	  //D->print(0);
-	  return true;
+	else {
+	  j=i1;
+	  j1=i;
 	}
+	int steps=0;
+	while (steps++ < 4 && 
+	    csucs != csucs->szomszed[j] &&
+	    csucs != csucsok[0][r]){
+	  csucs=csucs->szomszed[j];
+	  int temp=j;
+	  j=j1;
+	  j1=temp;
+	}
+	if (steps == 4)
+	  return true;
       }
   return false;
 }
@@ -1788,11 +1753,10 @@ void Dsymlista::print_html(void){
 }
 
 //Simple string hash database
-stringdb::stringdb(std::string filename):
-  filename_base(filename),
-  db(NULL,0),
-  keylength(2048)
-{
+void stringdb::create(std::string filename) {
+  filename_base=filename;
+  db(NULL,0);
+  keylength=2048;
   try {
     Db a(NULL,0);
     a.remove((filename + "_temp.db").c_str(), NULL, 0);
@@ -1806,17 +1770,39 @@ stringdb::stringdb(std::string filename):
   db.open(NULL, (filename + "_temp.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
 }
 
-stringdb::~stringdb(void){
-  db.close(0);
+stringdb::stringdb(std::string filename) {
+  create(filename);
 }
 
-void stringdb::append(std::string what){
-  int a=0;
+stringdb::stringdb(int num, std::string filename) {
+  char fn[20];
+  itoa(num,&fn);
+  create(string(fn)+filename);
+}
 
+stringdb::~stringdb(void){
+  db.close(0);
+  /*  try {
+      Db a(NULL,0);
+      a.remove((filename + "_temp.db").c_str(), NULL, 0);
+      }
+      catch (DbException& e){
+      ;
+      }*/
+}
+
+void stringdb::append(std::string what, int a){
   Dbt key((void*)what.c_str(), what.size() + 1);
   Dbt data(&a, sizeof(a));
 
+  if (keylength <= (int)what.size() + 1)
+    keylength = 2*what.size();
+
   db.put(NULL, &key, &data, DB_NOOVERWRITE);
+}
+
+void stringdb::append(std::string what){
+  append(what,0);
 }
 
 bool stringdb::check(std::string what){
