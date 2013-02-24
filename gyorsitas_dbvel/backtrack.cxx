@@ -1234,6 +1234,7 @@ bool operator == (Dsym::param a,Dsym::param b) {
 //backtrack: Felsoroljuk az osszes lehetseges el-kombinaciot, el-szam szerint
 //rendezve
 Dsymlista* saved;
+int bt1;
 void backtrack(int dim, int car) {
   int number_of_edges=0;
   bool found_new=true;
@@ -1276,6 +1277,7 @@ void backtrack(int dim, int car) {
 	delete[] str;
 	break;
       }
+      bt1++;
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
       delete[] str;
@@ -1344,6 +1346,7 @@ void backtrack(int dim, int car) {
 // backtrack_edges: In which combinations can we add the operations for
 // edge-center-adjacencies
 // szin is not needed (it's always 1)
+int bt2;
 void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
   int szin=1;
   int number_of_edges=0;
@@ -1379,6 +1382,7 @@ void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
 	delete[] str;
 	break;
       }
+      bt2++;
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
       delete[] str;
@@ -1998,12 +2002,15 @@ int main(int,char**,char**){
   sprintf (buffer, "d%dc%d", dim, car);
   std::string fn(buffer);
   saved=new Dsymlista(dim,car,fn);
+  bt1=0;
+  bt2=0;
   backtrack(dim,car);
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
   std::cout<<"saved"<<std::endl;
   std::cout<<saved->count<<std::endl;
   saved->print_html();
+  std::cout<<"backtrack_steps: "<< bt1<<", backtrack_edges_steps: "<<bt2<<std::endl;
   delete saved;
   return 0;
 }
