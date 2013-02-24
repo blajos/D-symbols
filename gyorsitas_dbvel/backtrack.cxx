@@ -1839,7 +1839,9 @@ void stringdb::create(char* dbname)
   keylength=2048;
   db.set_cachesize(1,500*1024*1024,1);
 
-  db.open(NULL, "data/temp.db", dbname, DB_HASH, DB_CREATE, 0);
+  char temp[50];
+  sprintf(temp,"data/%s",dbname);
+  db.open(NULL, temp, NULL, DB_HASH, DB_CREATE, 0);
   db.cursor(0,&cursor,DB_CURSOR_BULK);
 }
 
