@@ -1186,7 +1186,7 @@ bool operator == (Dsym::param a,Dsym::param b) {
 int bt;
 int bt1;
 long long bt0;
-void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current_largest) {
+void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
   int car=D->car;
   int dim=D->dim;
   bt0++;
@@ -1216,59 +1216,56 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova,int current
 
   // Nem a legkisebb 0-ad foku csucsot nem akarjuk hozzaadni, a nala 1-el kisebb
   // csucs kell nem ures legyen, kiveve 0-1 kozti elso elet.
-  bool ures=true;
-  for(int j=0;j<dim+1;j++)
-    if (D->csucsok[0][hova]->szomszed[j] != D->csucsok[0][hova]){
-      ures=false;
-      break;
-    }
-
-  bool erdemes=true;
-  if ( ures && hova >= 2 ){
-    bool ures1=true;
+  bool erdemes=false;
+  if (hova == 1)
+    erdemes = true;
+  if ( hova >= 2 ){
     for(int j=0;j<dim+1;j++)
       if (D->csucsok[0][hova-1]->szomszed[j] != D->csucsok[0][hova-1]){
-	ures1=false;
+	erdemes=true;
 	break;
       }
-    if (ures1){
-      erdemes=false;
-    }
   }
 
   //ha erdemes elt hozzaadni, ujra meghivjuk onmagunkat
   if (erdemes && D->elhozzaad(szin,honnan,hova)){
-    int largest=current_largest;
-    if (hova > largest)
-      largest=hova;
-    backtrack(D,saved,szin,honnan,hova,largest);
+    backtrack(D,saved,szin,honnan,hova);
     D->eltorol(szin,honnan,hova);
   }
 
-  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1,current_largest);
-  else if(szin+1<dim+1 && szin==0) backtrack(D,saved,szin+2,honnan,honnan+1,current_largest);
-  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1,current_largest);
+  if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1);
+  else if(szin+1<dim+1 && szin==0) backtrack(D,saved,szin+2,honnan,honnan+1); //eltranzitiv esetben kihagyjuk az 1-es szint
+  else if(szin+1<dim+1) backtrack(D,saved,szin+1,honnan,honnan+1);
   else {
-    int szukseges_fok=0;
-    int fok=0;
-    //Heurisztika: az elso csucs fokszamanal nem veszunk nagyobb fokszamu esetet
-    //(lexikografikusan: szinek szerint)
-
-    for(int j=0;j<dim+1;j++) 
-      if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
-	fok+=1 << j;
     if (honnan > 0){
-      for(int j=0;j<dim+1;j++)
-	if (D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
-	  szukseges_fok+=1 << j;
-      if(fok <= szukseges_fok &&
-	  fok >= 1 &&
-	  current_largest >= honnan+1 &&
-	  not backtrack_breaks_uvw(D,honnan))
-	backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
+      //Heurisztika: 
+      // fokszam: i-edik tipusu el eseten 2^i-t hozzaadunk az eddigiekhez (0-val
+      // kezdunk)
+      // mivel honnan-nal nem nagyobb vegu elet mar biztos nem adunk hozza, es az
+      // osszes permutaciot megnezzuk, ezert a 0..honnan rendszer lehet fok
+      // szerint csokkeno sorrendben
+      // Es ehhez eleg annyi, hogy (honnan-1)-nel nem nagyobb honnan foka
+      //
+      // Update: Ez egy szep elkepzeles, de sajnos nem igaz, hogy minden
+      // permutaciot megnezunk: ha ket egyforman legnagyobb foku csucs nem
+      // szomszedos, akkor nem fogjuk oket egymas utan bevalasztani. 
+
+      int szukseges_fok=0;
+      for(int j=0;j<dim+1;j++) 
+	if(D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
+	  szukseges_fok+=1 << j; 
+
+      int fok=0;
+      for(int j=0;j<dim+1;j++) 
+	if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
+	  fok+=1 << j; 
+
+      if ( fok <= szukseges_fok && not backtrack_breaks_uvw(D,honnan))
+	backtrack(D,saved,0,honnan+1,honnan+2);
     }
-    else if(fok>=1)  // current largest ekkor egyertelmu
-      backtrack(D,saved,0,honnan+1,honnan+2,current_largest);
+    else{
+      backtrack(D,saved,0,honnan+1,honnan+2);
+    }
   }
 }
 
@@ -1814,7 +1811,7 @@ int main(int,char**,char**){
   bt=0;
   bt1=0;
   bt0=0;
-  backtrack(D,saved,0,0,1,0);
+  backtrack(D,saved,0,0,1);
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
   std::cout<<"saved"<<std::endl;

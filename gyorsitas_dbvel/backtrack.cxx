@@ -1277,7 +1277,6 @@ void backtrack(int dim, int car) {
 	delete[] str;
 	break;
       }
-      bt1++;
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
       delete[] str;
@@ -1291,6 +1290,7 @@ void backtrack(int dim, int car) {
 	for(int honnan=0; honnan<max+1 && honnan<car-1; honnan++)
 	  for(int hova=honnan+1; hova<max+2 && hova<car; hova++)
 	    if (D.elhozzaad(szin,honnan,hova)){
+	      bt1++;
 	      int newmax=max;
 	      if (hova==max+1)
 		newmax++;
@@ -1382,7 +1382,6 @@ void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
 	delete[] str;
 	break;
       }
-      bt2++;
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
       delete[] str;
@@ -1392,6 +1391,7 @@ void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
       for(int honnan=0; honnan < car-1; honnan++)
 	for(int hova=honnan+1; hova<car; hova++)
 	  if (D.elhozzaad(szin,honnan,hova)){
+	    bt2++;
 	    bool voltmar=false;
 
 	    //1. ellenorzes: seen_new-hoz erdemes-e hozzaadni
@@ -1461,15 +1461,13 @@ bool backtrack_breaks_uvw(Dsym* D,int max){
 	  j1=i;
 	}
 	int steps=0;
-	while (steps++ < 4 && 
-	    csucs != csucs->szomszed[j] &&
-	    csucs != csucsok[0][r]){
+	do {
 	  csucs=csucs->szomszed[j];
 	  int temp=j;
 	  j=j1;
 	  j1=temp;
-	}
-	if (steps == 4)
+	} while (steps++ < 4 && csucs != csucs->szomszed[j] && csucs != csucsok[0][r]);
+	if (steps == 4 && csucs != csucsok[0][r])
 	  return true;
       }
   return false;

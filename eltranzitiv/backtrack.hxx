@@ -267,8 +267,8 @@ int compare_d(Db *, const Dbt *, const Dbt *);
 // erdekes, akkor hozzad egy masolatot a listahoz.
 // argumentumok: Dsym*: benne dolgozunk (hozzaadunk es torlunk eleket)
 //               Dsymlista*: az erdekesek listaja
-//               int,int,int: vizsgalt el: (szin,honnan,hova,current_largest)
-void backtrack(Dsym*,Dsymlista*,int,int,int,int);
+//               int,int,int: vizsgalt el: (szin,honnan,hova)
+void backtrack(Dsym*,Dsymlista*,int,int,int);
 
 //backtrack_edges: Hanyfelekeppen tudjuk az 1-es operaciot hozzaadni a
 //rendszerhez?
