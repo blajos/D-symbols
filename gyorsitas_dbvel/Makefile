@@ -6,7 +6,7 @@ OBJECTS=$(SOURCES:.cxx=.o)
 EXECUTABLE=a.out
 
 all: $(SOURCES) $(EXECUTABLE)
-	rm -f *.db
+	rm -f data/*
 
 $(EXECUTABLE): $(OBJECTS)
 	$(CC) $(LDFLAGS) $(OBJECTS) -o $@

@@ -129,6 +129,42 @@ int Dsym::dump(std::ostream *out, int first){
   return 0;
 }
 
+int Dsym::dump(char *output){
+  sprintf(output,"%d %d ",dim,car);
+  for(int j=0;j<dim+1;j++){
+    strcat(output,"(");
+    for(int i=0;i<car;i++){
+      int icsucsjszomszedja=csucsok[0][i]->szomszed[j]->sorszam[0];
+      char temp[20];
+      if (icsucsjszomszedja == i)
+	sprintf(temp,"(%d)",i+1);
+      else if (i < icsucsjszomszedja)
+	sprintf(temp,"(%d,%d)",i+1,icsucsjszomszedja+1);
+      strcat(output,temp);
+    }
+    strcat(output,")");
+  }
+  return 0;
+}
+
+int Dsym::dump(char *output,int first){
+  sprintf(output,"%d %d ",dim,car);
+  for(int j=0;j<dim+1;j++){
+    strcat(output,"(");
+    for(int i=0;i<car;i++){
+      int icsucsjszomszedja=csucsok[first][i]->szomszed[j]->sorszam[first];
+      char temp[20];
+      if (icsucsjszomszedja == i)
+	sprintf(temp,"(%d)",i+1);
+      else if (i < icsucsjszomszedja)
+	sprintf(temp,"(%d,%d)",i+1,icsucsjszomszedja+1);
+      strcat(output,temp);
+    }
+    strcat(output,")");
+  }
+  return 0;
+}
+
 //Dsym destruktor: memoria felszabaditasa
 Dsym::~Dsym(void) {
   if(dual!=0) delete dual;
@@ -1234,6 +1270,7 @@ bool operator == (Dsym::param a,Dsym::param b) {
 //backtrack: Felsoroljuk az osszes lehetseges el-kombinaciot, el-szam szerint
 //rendezve
 Dsymlista* saved;
+int bt1;
 void backtrack(int dim, int car) {
   int number_of_edges=0;
   bool found_new=true;
@@ -1244,10 +1281,10 @@ void backtrack(int dim, int car) {
   sprintf(temp,"d%dc%d_edge_",dim,car);
   stringdb* seen_edge_new=new stringdb(0,temp);
   Dsym D(dim,car);
-  std::ostringstream dumpsstr;
+  char dumpstr[500];
   D.atsorszamoz(1,0);
-  D.dump(&dumpsstr,1);
-  seen_now->append(dumpsstr.str());
+  D.dump(dumpstr,1);
+  seen_now->append(dumpstr,500);
   while (found_new and ++number_of_edges) {
     found_new=false;
     if (seen_prev)
@@ -1255,8 +1292,6 @@ void backtrack(int dim, int car) {
     seen_prev=seen_now;
     sprintf(temp,"d%dc%d_",dim,car);
     seen_now=new stringdb(number_of_edges,temp);
-    sprintf(temp,"d%dc%d_permut_",dim,car);
-    stringdb seen_now_permut(number_of_edges,temp);
 
     //Osszes elozoleg megtalalt Dsym
     Dbc* prev_cursor=seen_prev->get_cursor();
@@ -1276,6 +1311,7 @@ void backtrack(int dim, int car) {
 	delete[] str;
 	break;
       }
+      bt1++;
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
       delete[] str;
@@ -1296,28 +1332,26 @@ void backtrack(int dim, int car) {
 
 	      //1. ellenorzes: seen_now-hoz erdemes-e hozzaadni
 	      D.atsorszamoz(1,newmax);
-	      std::ostringstream dumpsstr;
-	      D.dump(&dumpsstr,1);
-	      std::string dumpstr=dumpsstr.str();
-	      if (seen_now_permut.check(dumpstr))
+	      char dumpstr[500];
+	      D.dump(dumpstr,1);
+	      if(seen_now->check(dumpstr))
 		voltmar=true;
-	      else{
+	      for (int i=2;i<newmax+2;i++){
+		D.atsorszamoz(i,newmax);
+		char dumpstr[500];
+		D.dump(dumpstr,i);
+		if(seen_now->check(dumpstr))
+		  voltmar=true;
+	      }
+	      if (not voltmar) {
 		found_new=true;
-		if (not backtrack_breaks_uvw(&D,newmax))
-		  seen_now->append(dumpstr,newmax);
-		seen_now_permut.append(dumpstr,newmax);
-		for (int i=2;i<newmax+2;i++){
-		  D.atsorszamoz(i,newmax);
-		  std::ostringstream dumpsstr;
-		  D.dump(&dumpsstr,i);
-		  std::string dumpstr=dumpsstr.str();
-		  seen_now_permut.append(dumpstr,newmax);
-		}
+		//if ( not backtrack_breaks_uvw(&D,newmax))
+		  seen_now->append(dumpstr,500,newmax);
 	      }
 
 	      //2. ellenorzes: seen_edge_new-hoz erdemes-e hozzaadni
 	      if (newmax == car-1 && not voltmar && D.ellenoriz() == -1){
-		seen_edge_new->append(dumpstr,0);
+		seen_edge_new->append(dumpstr,500,0);
 		int start=1;
 		for(int i=1;i<car;i++){
 		  D.atsorszamoz(i+1);
@@ -1344,6 +1378,7 @@ void backtrack(int dim, int car) {
 // backtrack_edges: In which combinations can we add the operations for
 // edge-center-adjacencies
 // szin is not needed (it's always 1)
+int bt2;
 void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
   int szin=1;
   int number_of_edges=0;
@@ -1379,6 +1414,7 @@ void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
 	delete[] str;
 	break;
       }
+      bt2++;
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
       delete[] str;
@@ -1392,22 +1428,20 @@ void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
 
 	    //1. ellenorzes: seen_new-hoz erdemes-e hozzaadni
 	    D.atsorszamoz(1);
-	    std::ostringstream dumpsstr;
-	    D.dump(&dumpsstr,1);
-	    std::string dumpstr=dumpsstr.str();
+	    char dumpstr[500];
+	    D.dump(dumpstr,1);
 	    if (seen_now_permut.check(dumpstr))
 	      voltmar=true;
 	    else{
 	      found_new=true;
-	      if (not backtrack_breaks_uvw(&D,car-1))
-		seen_now->append(dumpstr,0);
-	      seen_now_permut.append(dumpstr,0);
+	      //if (not backtrack_breaks_uvw(&D,car-1))
+		seen_now->append(dumpstr,500,0);
+	      seen_now_permut.append(dumpstr,500,0);
 	      for (int i=2;i<=car;i++){
 		D.atsorszamoz(i);
-		std::ostringstream dumpsstr;
-		D.dump(&dumpsstr,i);
-		std::string dumpstr=dumpsstr.str();
-		seen_now_permut.append(dumpstr,0);
+		char dumpstr[500];
+		D.dump(dumpstr,i);
+		seen_now_permut.append(dumpstr,500,0);
 	      }
 	    }
 
@@ -1438,6 +1472,7 @@ void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
  * operacio-par, kezdopont harmas.
  */
 bool backtrack_breaks_uvw(Dsym* D,int max){
+  // Nem mukodik
   int dim=D->dim;
   simplex*** csucsok=D->csucsok;
   for (int r=0;r<=max;r++)
@@ -1885,6 +1920,20 @@ void stringdb::append(std::string what){
   append(what,0);
 }
 
+void stringdb::append(char* what, int size, int a){
+  Dbt key((void*)what, size);
+  Dbt data(&a, sizeof(a));
+
+  if (keylength <= size)
+    keylength = 2*size;
+
+  db.put(NULL, &key, &data, DB_NOOVERWRITE);
+}
+
+void stringdb::append(char* what, int size){
+  append(what,size,0);
+}
+
 bool stringdb::check(std::string what){
   int a;
 
@@ -1998,11 +2047,14 @@ int main(int,char**,char**){
   sprintf (buffer, "d%dc%d", dim, car);
   std::string fn(buffer);
   saved=new Dsymlista(dim,car,fn);
+  bt1=0;
+  bt2=0;
   backtrack(dim,car);
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
   std::cout<<"saved"<<std::endl;
   std::cout<<saved->count<<std::endl;
+  std::cout<<"backtrack_steps: "<< bt1<<", backtrack_edges_steps: "<<bt2<<std::endl;
   saved->print_html();
   delete saved;
   return 0;
