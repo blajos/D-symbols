@@ -1306,9 +1306,9 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
   }
 
   if(hova+1<car) backtrack_edges(D,saved,honnan,hova+1);
-  else {
-    backtrack_edges(D,saved,honnan+1,honnan+2);
-  }
+  else 
+    if (not backtrack_breaks_uvw(D,honnan))
+      backtrack_edges(D,saved,honnan+1,honnan+2);
 }
 
 /* Megvizsgaljuk, hogy az aktualis diagramban van nem m_ij=2 erteku
