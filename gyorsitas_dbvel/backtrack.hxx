@@ -267,13 +267,14 @@ class stringdb {
   private:
     std::string filename_base;
     Db db;
-    int keylength;
+    Dbc* cursor;
 
   public:
-    stringdb(std::string);
-    stringdb(int,std::string);
-    stringdb(int);
-    void create(std::string);
+    int keylength;
+    Dbc* get_cursor(void);
+    stringdb(char*);
+    stringdb(int,char*);
+    void create(char*);
     ~stringdb(void);
     void append(std::string);
     void append(std::string,int);
@@ -293,7 +294,7 @@ void backtrack(int,int);
 
 //backtrack_edges: Hanyfelekeppen tudjuk az 1-es operaciot hozzaadni a
 //rendszerhez?
-void backtrack_edges(Dsym*,Dsymlista*,int,int);
+void backtrack_edges(int,int,stringdb*);
 
 //Lehet-e meg jo a diagram?
 bool backtrack_breaks_uvw(Dsym*,int);

@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #define PI 3.14159265
 
 //simplex konstruktor: megadjuk a dimenziot, az elemszamot, lefoglaljuk a
@@ -1234,80 +1235,100 @@ bool operator == (Dsym::param a,Dsym::param b) {
 //rendezve
 Dsymlista* saved;
 void backtrack(int dim, int car) {
-  stringdb* seen_prev,seen_now;
   int number_of_edges=0;
   bool found_new=true;
-  seen_now=new stringdb(number_of_edges);
-  seen_prev=0;
+  stringdb* seen_prev=0;
+  char temp[50];
+  sprintf(temp,"d%dc%d_",dim,car);
+  stringdb* seen_now=new stringdb(number_of_edges,temp);
+  sprintf(temp,"d%dc%d_edge_",dim,car);
+  stringdb* seen_edge_new=new stringdb(0,temp);
   Dsym D(dim,car);
   std::ostringstream dumpsstr;
+  D.atsorszamoz(1,0);
   D.dump(&dumpsstr,1);
   seen_now->append(dumpsstr.str());
-  while (found_new and number_of_edges++) {
+  while (found_new and ++number_of_edges) {
     found_new=false;
     if (seen_prev)
       delete seen_prev;
     seen_prev=seen_now;
-    seen_now=new stringdb(number_of_edges);
-    stringdb seen_now_permut=new stringdb(number_of_edges,"_permut");
+    sprintf(temp,"d%dc%d_",dim,car);
+    seen_now=new stringdb(number_of_edges,temp);
+    sprintf(temp,"d%dc%d_permut_",dim,car);
+    stringdb seen_now_permut(number_of_edges,temp);
 
     //Osszes elozoleg megtalalt Dsym
-    Dbc* prev_cursor;
-    seen_prev.cursor(0,&prev_cursor,DB_CURSOR_BULK);
+    Dbc* prev_cursor=seen_prev->get_cursor();
 
-    while {
-      str=new char[seen_prev.keylength];
+    while (1){
+      char* str=new char[2*seen_prev->keylength+1];
       int max;
 
-      Dbt key(str, keylength);
+      Dbt key;
+      key.set_data(str);
+      key.set_ulen(seen_prev->keylength);
       key.set_flags(DB_DBT_USERMEM);                                                                                     
       Dbt data(&max, sizeof(max));
 
-      ret = prev_cursor->get(&key, &data, DB_NEXT);
+      int ret = prev_cursor->get(&key, &data, DB_NEXT);
       if (ret == DB_NOTFOUND){
 	delete[] str;
 	break;
       }
       std::istringstream dumpsstr;
       dumpsstr.str(std::string(str));
+      delete[] str;
       Dsym D(&dumpsstr);
-      max=data.get_data();
+      max=*(int*)data.get_data();
 
       //Az osszes lehetseges elet hozzaadjuk
       for(int szin=0; szin<dim+1; szin++){
 	if (szin==1) //Eltranzitiv eset
 	  continue;
-        for(int honnan=0; honnan<max; honnan++)
-	  for(int hova=honnan+1; hova<max+1 && hova<car; hova++)
+	for(int honnan=0; honnan<max+1 && honnan<car-1; honnan++)
+	  for(int hova=honnan+1; hova<max+2 && hova<car; hova++)
 	    if (D.elhozzaad(szin,honnan,hova)){
 	      int newmax=max;
-	      if (hova==max)
+	      if (hova==max+1)
 		newmax++;
 	      bool voltmar=false;
 
-	      //1. ellenorzes: seen_new-hoz erdemes-e hozzaadni
+	      //1. ellenorzes: seen_now-hoz erdemes-e hozzaadni
 	      D.atsorszamoz(1,newmax);
 	      std::ostringstream dumpsstr;
 	      D.dump(&dumpsstr,1);
 	      std::string dumpstr=dumpsstr.str();
-	      if (seen_new_permut.check(dumpstr))
+	      if (seen_now_permut.check(dumpstr))
 		voltmar=true;
 	      else{
 		found_new=true;
-		seen_new.append(dumpstr,newmax);
-		seen_new_permut.append(dumpstr,newmax);
-		for (int i=2;i<newmax;i++){
+		if (not backtrack_breaks_uvw(&D,newmax))
+		  seen_now->append(dumpstr,newmax);
+		seen_now_permut.append(dumpstr,newmax);
+		for (int i=2;i<newmax+2;i++){
 		  D.atsorszamoz(i,newmax);
 		  std::ostringstream dumpsstr;
 		  D.dump(&dumpsstr,i);
 		  std::string dumpstr=dumpsstr.str();
-		  seen_new_permut.append(dumpstr,newmax);
+		  seen_now_permut.append(dumpstr,newmax);
 		}
 	      }
 
 	      //2. ellenorzes: seen_edge_new-hoz erdemes-e hozzaadni
-	      if (newmax == car && not voltmar && D.ellenoriz() == -1){
-		seen_edge_new.append(dumpsstr.str(),0);
+	      if (newmax == car-1 && not voltmar && D.ellenoriz() == -1){
+		seen_edge_new->append(dumpstr,0);
+		int start=1;
+		for(int i=1;i<car;i++){
+		  D.atsorszamoz(i+1);
+		  if(kisebb(&D,i+1,&D,start)==1)
+		    start=i+1;
+		}
+		Dsym* ujD=D.save_with_start(start);
+		if (saved->check(ujD)==0){
+		  saved->append(ujD);
+		}
+		delete ujD;
 	      }
 
 	      //Vegul toroljuk az elet
@@ -1316,48 +1337,101 @@ void backtrack(int dim, int car) {
       }
     }
   }
+  delete seen_now;
+  backtrack_edges(dim,car,seen_edge_new);
 }
 
 // backtrack_edges: In which combinations can we add the operations for
 // edge-center-adjacencies
 // szin is not needed (it's always 1)
-void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
-  int car=D->car;
+void backtrack_edges(int dim,int car,stringdb* seen_edge_new) {
   int szin=1;
-  bt0++;
-  if (honnan==car-1){	//a vegen megallunk
-    //ellenorzesek
-    bt++;
-    int joe=D->ellenoriz();
-    //mentes, ha kell
-    if (joe==-1) {
-      bt1++;
-      int start=1;
-      for(int i=1;i<car;i++){
-	D->atsorszamoz(i+1);
-	if(kisebb(D,i+1,D,start)==1)
-	  start=i+1;
+  int number_of_edges=0;
+  bool found_new=true;
+  stringdb* seen_prev=0;
+  stringdb* seen_now=seen_edge_new;
+  while (found_new and ++number_of_edges) {
+    found_new=false;
+    if (seen_prev)
+      delete seen_prev;
+    seen_prev=seen_now;
+    char temp[50];
+    sprintf(temp,"d%dc%d_edge_",dim,car);
+    seen_now=new stringdb(number_of_edges,temp);
+    sprintf(temp,"d%dc%d_edge_permut",dim,car);
+    stringdb seen_now_permut(number_of_edges,temp);
+
+    //Osszes elozoleg megtalalt Dsym
+    Dbc* prev_cursor=seen_prev->get_cursor();
+
+    while (1){
+      char* str=new char[seen_prev->keylength];
+      int max;
+
+      Dbt key;
+      key.set_data(str);
+      key.set_ulen(seen_prev->keylength);
+      key.set_flags(DB_DBT_USERMEM);                                                                                     
+      Dbt data(&max, sizeof(max));
+
+      int ret = prev_cursor->get(&key, &data, DB_NEXT);
+      if (ret == DB_NOTFOUND){
+	delete[] str;
+	break;
       }
-      //std::cout << " " << bt1 << " " << start << std::endl;
-      Dsym* ujD=D->save_with_start(start);
-      if (saved->check(ujD)==0){
-	saved->append(ujD);
-      }
-      delete ujD;
+      std::istringstream dumpsstr;
+      dumpsstr.str(std::string(str));
+      delete[] str;
+      Dsym D(&dumpsstr);
+
+      //Az osszes lehetseges elet hozzaadjuk
+      for(int honnan=0; honnan < car-1; honnan++)
+	for(int hova=honnan+1; hova<car; hova++)
+	  if (D.elhozzaad(szin,honnan,hova)){
+	    bool voltmar=false;
+
+	    //1. ellenorzes: seen_new-hoz erdemes-e hozzaadni
+	    D.atsorszamoz(1);
+	    std::ostringstream dumpsstr;
+	    D.dump(&dumpsstr,1);
+	    std::string dumpstr=dumpsstr.str();
+	    if (seen_now_permut.check(dumpstr))
+	      voltmar=true;
+	    else{
+	      found_new=true;
+	      if (not backtrack_breaks_uvw(&D,car-1))
+		seen_now->append(dumpstr,0);
+	      seen_now_permut.append(dumpstr,0);
+	      for (int i=2;i<=car;i++){
+		D.atsorszamoz(i);
+		std::ostringstream dumpsstr;
+		D.dump(&dumpsstr,i);
+		std::string dumpstr=dumpsstr.str();
+		seen_now_permut.append(dumpstr,0);
+	      }
+	    }
+
+	    //2. ellenorzes: seen_edge_new-hoz erdemes-e hozzaadni
+	    if (not voltmar && D.ellenoriz() == -1){
+	      int start=1;
+	      for(int i=1;i<car;i++){
+		D.atsorszamoz(i+1);
+		if(kisebb(&D,i+1,&D,start)==1)
+		  start=i+1;
+	      }
+	      Dsym* ujD=D.save_with_start(start);
+	      if (saved->check(ujD)==0){
+		saved->append(ujD);
+	      }
+	      delete ujD;
+	    }
+
+	    //Vegul toroljuk az elet
+	    D.eltorol(szin,honnan,hova);
+	  }
     }
-    return;
   }
-
-  //ha tudunk elt hozzaadni, ujra meghivjuk onmagunkat
-  if (D->elhozzaad(szin,honnan,hova)){
-    backtrack_edges(D,saved,honnan,hova);
-    D->eltorol(szin,honnan,hova);
-  }
-
-  if(hova+1<car) backtrack_edges(D,saved,honnan,hova+1);
-  else {
-    backtrack_edges(D,saved,honnan+1,honnan+2);
-  }
+  delete seen_now;
 }
 
 /* Megvizsgaljuk, hogy az aktualis diagramban van nem m_ij=2 erteku
@@ -1510,14 +1584,16 @@ Dsymlista::Dsymlista(int dimin,int carin,std::string fn):
   sorteddb.set_cachesize(1,500*1024*1024,1);
   sorteddb.set_bt_compare(&compare_d);
 
-  fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
-  sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
+  fastdb.open(NULL, ("data/" + filename_base + "_fast.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
+  sorteddb.open(NULL, ("data/" + filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
 }
 
 Dsymlista::~Dsymlista(void){
   if (current!=0)
     current->close();
+  fastdb.sync(0);
   fastdb.close(0);
+  sorteddb.sync(0);
   sorteddb.close(0);
 }
 
@@ -1628,7 +1704,10 @@ void Dsymlista::generate_ordered_numbering(void){
 //lehetseges matrix-rendszert is.
 void Dsymlista::print_html(void){
   std::ostringstream filename;
-  filename<<"d"<<dim<<"c"<<car<<".html";
+  char dir[20];
+  sprintf(dir,"d%dc%d",dim,car);
+  mkdir(dir,0755);
+  filename<<"d"<<dim<<"c"<<car<<"/index.html";
   std::ofstream html_file;
   html_file.open(filename.str().c_str());
 
@@ -1651,7 +1730,7 @@ void Dsymlista::print_html(void){
     curr->filter_bad_orbifolds();
 
     std::ostringstream currDname;
-    currDname<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".html";
+    currDname<<"d"<<dim<<"c"<<car<<"/"<<ssz<<".html";
     std::ofstream currD;
     currD.open(currDname.str().c_str());
 
@@ -1659,14 +1738,14 @@ void Dsymlista::print_html(void){
     currD<<"<caption>"<<ssz<<"</caption>"<<std::endl;
 
     std::ostringstream xfigfile;
-    xfigfile<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig";
+    xfigfile<<"d"<<dim<<"c"<<car<<"/"<<ssz<<".fig";
     curr->write_xfig(xfigfile.str());
     std::ostringstream figtojpg;
     figtojpg<<"fig2dev -L jpeg "<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig "
       <<"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg";
     //system(figtojpg.str().c_str());
     //remove(xfigfile.str().c_str());
-    currD<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg\"/></td>"
+    currD<<"<tr><td><img src=\""<<ssz<<".jpg\"/></td>"
       <<std::endl;
 
     currD<<"<td><table border=\"1\">"<<std::endl;
@@ -1717,10 +1796,10 @@ void Dsymlista::print_html(void){
     //html file:
     html_file<<"<table border=\"2\">"<<std::endl;
     html_file<<"<caption>"<<ssz<<"</caption>"<<std::endl;
-    html_file<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz
+    html_file<<"<tr><td><img src=\""<<ssz
       <<".jpg\"/></td>"<<std::endl;
     html_file<<"<td><table border=\"1\">"<<std::endl;
-    html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<currDname.str()
+    html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<ssz<<".html"
       <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<std::endl;
     curr->print_param_mx(&html_file);
     html_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
@@ -1753,42 +1832,41 @@ void Dsymlista::print_html(void){
 }
 
 //Simple string hash database
-void stringdb::create(std::string filename) {
-  filename_base=filename;
-  db(NULL,0);
+void stringdb::create(char* dbname)
+{
+  //  filename_base=filename;
+  filename_base=std::string(dbname);
   keylength=2048;
-  try {
-    Db a(NULL,0);
-    a.remove((filename + "_temp.db").c_str(), NULL, 0);
-  }
-  catch (DbException& e){
-    ;
-  }
-
   db.set_cachesize(1,500*1024*1024,1);
 
-  db.open(NULL, (filename + "_temp.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
+  db.open(NULL, "data/temp.db", dbname, DB_HASH, DB_CREATE, 0);
+  db.cursor(0,&cursor,DB_CURSOR_BULK);
 }
 
-stringdb::stringdb(std::string filename) {
-  create(filename);
+stringdb::stringdb(char* dbname):
+  db(NULL,0)
+{
+  create(dbname);
 }
 
-stringdb::stringdb(int num, std::string filename) {
-  char fn[20];
-  itoa(num,&fn);
-  create(string(fn)+filename);
+stringdb::stringdb(int num, char* dbname):
+  db(NULL,0)
+{
+  char fn[50];
+  sprintf(fn,"%s%d",dbname,num);
+  create(fn);
 }
 
 stringdb::~stringdb(void){
+  cursor->close();
+  db.sync(0);
   db.close(0);
-  /*  try {
-      Db a(NULL,0);
-      a.remove((filename + "_temp.db").c_str(), NULL, 0);
-      }
-      catch (DbException& e){
-      ;
-      }*/
+}
+
+Dbc* stringdb::get_cursor(void){
+  cursor->close();
+  db.cursor(0,&cursor,DB_CURSOR_BULK);
+  return cursor;
 }
 
 void stringdb::append(std::string what, int a){
@@ -1914,26 +1992,16 @@ int main(int,char**,char**){
   int car;
   dim=3;
   std::cout << "Cardinality: ";std::cin >> car;std::cout<<car<<std::endl;
-  Dsym* D=new Dsym(dim,car);
   char buffer [50];
   sprintf (buffer, "d%dc%d", dim, car);
   std::string fn(buffer);
-  Dsymlista* saved=new Dsymlista(dim,car,fn);
-  bt=0;
-  bt1=0;
-  bt0=0;
-  already_seen=new stringdb("temp");
-  backtrack(D,saved,0,0,1,0);
+  saved=new Dsymlista(dim,car,fn);
+  backtrack(dim,car);
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
   std::cout<<"saved"<<std::endl;
-  std::cout<<bt<<std::endl;
   std::cout<<saved->count<<std::endl;
-  std::cout<<bt1<<std::endl;
-  std::cout<<float(bt1)/float(saved->count)<<std::endl;
-  std::cout<<bt0<<std::endl;
   saved->print_html();
-  delete D;
   delete saved;
   return 0;
 }
