@@ -240,6 +240,25 @@ void Dsym::atsorszamoz(int i) {
   delete[] D;
 }
 
+int Dsym::fok(int csucs,int sorszamozas){
+  // fokszam: i-edik tipusu el eseten 2^i-t hozzaadunk az eddigiekhez (0-val
+  // kezdunk)
+  // Update: csalunk: az eltranzitivitas miatt az el szerinti fok legyen a
+  // legkevesbe fontos
+  int fok=0;
+  for(int j=0;j<dim+1;j++)
+    if(csucsok[sorszamozas][csucs]->szomszed[j] != csucsok[sorszamozas][csucs]){
+      if ( j==0)
+	fok+=1 << 1;
+      else if (j==1)
+	fok+=1 << 0;
+      else
+	fok+=1 << j;
+    }
+  return fok;
+}
+
+
 //my_find(...): mit a keresendo dolog, hossz a lista hossza, hol a lista elejere
 //mutato pointer.
 //Csak egy egyszeru segedfv keresesre.
@@ -1185,6 +1204,7 @@ bool operator == (Dsym::param a,Dsym::param b) {
 // levelekben fogjuk tovabb csocsalni.
 int bt;
 int bt1;
+int bt2;
 long long bt0;
 void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
   int car=D->car;
@@ -1207,6 +1227,7 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
 	//saved->append(ujD);
+	bt2++;
 	backtrack_edges(D,saved,0,1);
       }
       delete ujD;
@@ -1239,8 +1260,6 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
   else {
     if (honnan > 0){
       //Heurisztika: 
-      // fokszam: i-edik tipusu el eseten 2^i-t hozzaadunk az eddigiekhez (0-val
-      // kezdunk)
       // mivel honnan-nal nem nagyobb vegu elet mar biztos nem adunk hozza, es az
       // osszes permutaciot megnezzuk, ezert a 0..honnan rendszer lehet fok
       // szerint csokkeno sorrendben
@@ -1250,16 +1269,8 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
       // permutaciot megnezunk: ha ket egyforman legnagyobb foku csucs nem
       // szomszedos, akkor nem fogjuk oket egymas utan bevalasztani. 
 
-      int szukseges_fok=0;
-      for(int j=0;j<dim+1;j++) 
-	if(D->csucsok[0][0]->szomszed[j] != D->csucsok[0][0])
-	  szukseges_fok+=1 << j; 
-
-      int fok=0;
-      for(int j=0;j<dim+1;j++) 
-	if(D->csucsok[0][honnan]->szomszed[j] != D->csucsok[0][honnan])
-	  fok+=1 << j; 
-
+      int szukseges_fok=D->fok(0,0);
+      int fok=D->fok(honnan,0);
       if ( fok <= szukseges_fok && not backtrack_breaks_uvw(D,honnan))
 	backtrack(D,saved,0,honnan+1,honnan+2);
     }
@@ -1272,17 +1283,21 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
 // backtrack_edges: In which combinations can we add the operations for
 // edge-center-adjacencies
 // szin is not needed (it's always 1)
+int bte;
+int bte1;
+int bte2;
+long long bte0;
 void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
   int car=D->car;
   int szin=1;
-  bt0++;
+  bte0++;
   if (honnan==car-1){	//a vegen megallunk
     //ellenorzesek
-    bt++;
+    bte++;
     int joe=D->ellenoriz();
     //mentes, ha kell
     if (joe==-1) {
-      bt1++;
+      bte1++;
       int start=1;
       for(int i=1;i<car;i++){
 	D->atsorszamoz(i+1);
@@ -1292,6 +1307,7 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
       //std::cout << " " << bt1 << " " << start << std::endl;
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
+	bte2++;
 	saved->append(ujD);
       }
       delete ujD;
@@ -1307,8 +1323,9 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
 
   if(hova+1<car) backtrack_edges(D,saved,honnan,hova+1);
   else 
-    if (not backtrack_breaks_uvw(D,honnan))
+    if (not backtrack_breaks_uvw(D,honnan)){
       backtrack_edges(D,saved,honnan+1,honnan+2);
+    }
 }
 
 /* Megvizsgaljuk, hogy az aktualis diagramban van nem m_ij=2 erteku
@@ -1632,7 +1649,7 @@ void Dsymlista::print_html(void){
     for (int i=1;i<dim+1;i++) currD<<","<<curr->osszefuggo(i);
     currD<< ")</td></tr>"<<std::endl;
     currD<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
-    int dualchk;
+    int dualchk=0;
     for (int i=1;i<car+1;i++) {
       curr->dual->atsorszamoz(i);
       dualchk=check_with_start(curr->dual,i);
@@ -1705,6 +1722,7 @@ void Dsymlista::print_html(void){
 
   //Footer
   html_file<<"</body>"<<std::endl<<"</html>"<<std::endl;
+  std::cerr<<std::endl;
 
 }
 
@@ -1810,17 +1828,20 @@ int main(int,char**,char**){
   Dsymlista* saved=new Dsymlista(dim,car,fn);
   bt=0;
   bt1=0;
+  bt2=0;
   bt0=0;
+  bte=0;
+  bte1=0;
+  bte2=0;
+  bte0=0;
   backtrack(D,saved,0,0,1);
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
-  std::cout<<"saved"<<std::endl;
-  std::cout<<bt<<std::endl;
-  std::cout<<saved->count<<std::endl;
-  std::cout<<bt1<<std::endl;
-  std::cout<<float(bt1)/float(saved->count)<<std::endl;
-  std::cout<<bt0<<std::endl;
+  std::cout<<std::endl<<"saved: "<<saved->count<<std::endl;
   saved->print_html();
+  std::cout<<"Statistics:"<<std::endl;
+  std::cout<<"Backtrack steps: "<<bt0<<", leaves: "<<bt<<", valid: "<<bt1<<", saved:"<<bt2<<std::endl;
+  std::cout<<"    edges steps: "<<bte0<<", leaves: "<<bte<<", valid: "<<bte1<<", saved:"<<bte2<<std::endl;
   delete D;
   delete saved;
   return 0;

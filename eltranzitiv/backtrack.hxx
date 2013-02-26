@@ -150,6 +150,7 @@ class Dsym {
     int elhozzaad(int,int,int);
     void eltorol(int,int,int);
     void atsorszamoz(int);
+    int fok(int,int);
 
     int osszefuggo(int);
     int dualis(void);
