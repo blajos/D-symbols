@@ -243,17 +243,10 @@ void Dsym::atsorszamoz(int i) {
 int Dsym::fok(int csucs,int sorszamozas){
   // fokszam: i-edik tipusu el eseten 2^i-t hozzaadunk az eddigiekhez (0-val
   // kezdunk)
-  // Update: csalunk: az eltranzitivitas miatt az el szerinti fok legyen a
-  // legkevesbe fontos
   int fok=0;
   for(int j=0;j<dim+1;j++)
     if(csucsok[sorszamozas][csucs]->szomszed[j] != csucsok[sorszamozas][csucs]){
-      if ( j==0)
-	fok+=1 << 1;
-      else if (j==1)
-	fok+=1 << 0;
-      else
-	fok+=1 << j;
+      fok+=1 << j;
     }
   return fok;
 }
