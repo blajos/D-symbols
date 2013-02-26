@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <list>
+#include <vector>
 #include <algorithm>
 #include <set>
 #include<db_cxx.h>
@@ -12,6 +13,7 @@
 
 #define THRESH 0.000001
 #define DEGENERATION_LIMIT 3
+#define PI 3.14159265
 
 //simplex osztaly: A D-szimbolumok szimplexeinek avagy csucsainak tarolasara.
 //Fontos informacio a dimenzio (ennel eggyel tobb szomszedsagi operacio van) 
@@ -159,6 +161,7 @@ class Dsym {
     int ellenoriz(void);
 
     void write_xfig(std::string);
+    void write_svg(std::ostream*);
 
     int*** involucio;
     void invol_create(int);
@@ -255,8 +258,10 @@ class Dsymlista {
     void reset_cursor(void);
     void generate_ordered_numbering(void);
 
-    void print_html(void);
+    void print_html(std::string filebase);
     void print(void);		//mindet kiirja
+    std::string get_filename(std::string, int);
+    void create_directories(std::string,int,int);
 };
 
 // DB kulso fuggvenykent varja ezt.
@@ -309,6 +314,101 @@ class xfig {
   void create_numtext(int n);		//az n-edik kor szama
   void create_line(int n0,int n1,int szin);	//osszekotjuk a ket kort
   ~xfig(void);
+};
+
+
+//Ezt az ujrairos projektbol emeltem be, igy nyilvan nem mindennek az alapja a Base
+
+/*
+  Class: Base
+
+  The base of every class. It contains some basic information: dimension and
+  cardinality. And it has the basic funcions that should be defined in every
+  class: <dump>, <print_html>
+*/
+class Base {
+  public:
+    /*
+      Variables: Base variables
+
+      dim - Dimension
+      car - Cardinality
+    */
+    int dim,car;
+    /*
+      Constructor: Base
+      Initialize Base object without parameters. It should be filled later.
+    */
+    Base(void);
+    /*
+      Constructor: Base
+      Initialize Base object's dimension, cardinality.
+    */
+    Base(int dim, int car);
+    /* 
+      Constructor: Base
+      Restore data dumped with function dump from istream.
+    */
+    Base(std::istream*);
+    /*
+      Destructor: ~Base
+      Virtual destructor of Base object, so destructor works fine if used for
+      virtual objects.
+    */
+    virtual ~Base(void);
+    /* 
+      Func: dump()
+      Dump data to ostream in computer readable format.
+
+      Output format is like "3 6", dimension and cardinality.
+    */
+    virtual int dump(std::ostream*);
+    /* 
+      Func: print_html()
+      Pretty print the class in xhtml format.
+    */
+    virtual int print_html(std::ostream*);
+};
+
+
+/* Class: Svg
+   Svg object for writing a D-diagram's SVG graphics code some output.
+   */
+class Svg : public Base{
+  /* Variables: Geometric variables
+     koordx - Array of x coordinates.
+     koordy - Array of y coordinates.
+     rad - Radius of circles.
+     size - Size of canvas.
+     fontsize - Size of fonts.
+     */
+  int *koordx,*koordy,rad,size,fontsize;
+  std::list<std::vector<int> > lines;
+
+  public:
+  /* Constructor: Svg
+     Initialize Svg object.
+     */
+  Svg(int dim,int car);
+  /* Destructor: ~Svg
+     Destroy Svg object.
+     */
+  ~Svg(void);
+  /* Func: create_circle()
+     Create the *n*'th circle.
+     */
+  void create_circle(int n,std::ostream* out);
+  /* Func: create_numtext()
+     Create the *n*'th circle's label.
+     */
+  void create_numtext(int n,std::ostream* out);
+  /* Func: create_line()
+     Create a line between the *n0*'th and the *n1*'th circle using pattern
+     *color*.
+   */
+  void create_line(int n0,int n1,int color,std::ostream* out);
+  int add_line(int n0,int n1,int color);
+  int print_html(std::ostream*);
 };
 
 //TODO: 

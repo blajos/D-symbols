@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/stat.h>
 #define PI 3.14159265
 
 //simplex konstruktor: megadjuk a dimenziot, az elemszamot, lefoglaljuk a
@@ -524,6 +525,137 @@ void Dsym::write_xfig(std::string file) {
 	out.create_line(i,csucsok[1][i]->szomszed[j]->sorszam[1],j);
 }
 
+//Dsym::write_svg: out streambe letrehozza a megfelelo tartalmat. (Csak az eleket kell
+//berajzolni, mert minden mas megegyezik az azonos dimenzioju es elemszamu
+//multigrafok kozott, es minden elt csak egy iranyba szabad megrajzolni,
+//kulonben a mintak fedesbe kerulhetnek.)
+void Dsym::write_svg(std::ostream* out) {
+  Svg rajz(dim,car);
+  for(int i=0;i<car-1;i++) 
+    for(int j=0;j<dim+1;j++)
+      if(csucsok[1][i]->szomszed[j]->sorszam[1]>csucsok[1][i]->sorszam[1])
+	rajz.add_line(i,csucsok[1][i]->szomszed[j]->sorszam[1],j);
+  rajz.print_html(out);
+}
+
+Base::Base(void):
+  dim(0),
+  car(0)
+{
+  return;
+}
+
+Base::Base(int dimin, int carin):
+  dim(dimin),
+  car(carin)
+{
+  return;
+}
+
+Base::Base(std::istream* in){
+  *in >> dim >> car;
+}
+
+Base::~Base(){
+  return;
+}
+
+int Base::dump(std::ostream* out){
+  *out << dim << " " << car;
+  return 0;
+}
+
+int Base::print_html(std::ostream*){
+  return 0;
+}
+
+Svg::Svg(int dimin,int carin):
+  Base(dimin,carin)
+{
+  rad=20;
+  fontsize=28;
+  size=car*50;
+  if (size < 300)
+    size=300;
+  koordx=new int[car];
+  koordy=new int[car];
+  for (int i=0;i<car;i++) {
+    koordx[i]=int(round(size/2+(size/2-rad)*cos(PI-i*2*PI/car)));
+    koordy[i]=int(round(size/2-(size/2-rad)*sin(PI-i*2*PI/car)));
+  }
+}
+
+void Svg::create_circle(int n,std::ostream* out) {
+  *out << "<circle cx=\"" << koordx[n] << "\" cy=\"" << koordy[n] <<
+    "\" r=\"" << rad << "\" fill=\"white\" stroke=\"black\" stroke-width=\"1\"/>";
+}
+
+void Svg::create_numtext(int n,std::ostream* out) {
+  *out << "<text x=\"" << koordx[n] << "\" y=\"" <<
+    (koordy[n]+round(fontsize/3)) << "\" font-size=\""<< fontsize <<
+    "\" text-anchor=\"middle\" dominant-baseline=\"mathematical\">" << n+1 <<
+    "</text>";
+}
+
+void Svg::create_line(int n0,int n1,int szin,std::ostream* out) {
+  int diff=(szin*2*rad/dim-rad)*3/4;
+  float length=sqrt(pow(koordx[n1]-koordx[n0],2)+pow(koordy[n1]-koordy[n0],2));
+  int diffy=(koordx[n1]-koordx[n0])*diff/(int)length;
+  int diffx=-(koordy[n1]-koordy[n0])*diff/(int)length;
+  std::string style;
+  switch (szin){
+    case 0:
+      style="stroke-dasharray:2,10";
+      break;
+    case 1:
+      style="stroke-dasharray:8,8";
+      break;
+    case 2:
+      style="";
+      break;
+    case 3:
+      style="stroke-dasharray:8,8,2,10";
+      break;
+    default:
+      style="stroke-dasharray:8,8,2,10";
+      for (int i=3;i<szin;i++) style+=",2,10";
+  }
+  *out << "<line style=\"" << style <<
+    "\" x1=\"" << koordx[n0]+diffx <<
+    "\" y1=\"" << koordy[n0]+diffy <<
+    "\" x2=\"" << koordx[n1]+diffx <<
+    "\" y2=\"" << koordy[n1]+diffy <<
+    "\" stroke=\"black\" stroke-width=\"1\"/>";
+}
+
+Svg::~Svg(void) {
+  delete[] koordx;
+  delete[] koordy;
+}
+
+int Svg::print_html(std::ostream* out){
+  *out << "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" <<
+    size << "px\" height=\""<<size<<"px\" version=\"1.1\">";
+
+  for(std::list<std::vector<int> >::iterator it=lines.begin();it!=lines.end();it++)
+    create_line((*it)[0],(*it)[1],(*it)[2],out);
+
+  for(int i=0;i<car;i++){
+    create_circle(i,out);
+    create_numtext(i,out);
+  }
+  *out << "</svg>";
+  return 0;
+}
+
+int Svg::add_line(int n0,int n1,int szin){
+  std::vector<int> *a=new std::vector<int>;
+  a->push_back(n0);
+  a->push_back(n1);
+  a->push_back(szin);
+  lines.push_back(*a);
+  return 0;
+}
 
 //Dsym::create_kdim: klist[i] a D-szimbolum 0. operaciojanak elhagyasaval
 //keletkezo komponensek listaja, egy-egy komponensben a benne levo szimplexek
@@ -1589,14 +1721,74 @@ void Dsymlista::generate_ordered_numbering(void){
   delete[] str;
 }
 
+void Dsymlista::create_directories(std::string fbase, int count, int prefix=0 ){
+  //A kovetkezo jellegu mappa strukturat keszitjuk el:
+  //fbase/0/0/234.html
+  //fbase/0/2000/2347.html
+  //fbase/1000000/12000/10124321.html
+  // Igy minden mappaban max 1000 fajl lesz, ezt meg kenyelmesen elviselik a
+  // file rendszerek
+  // log10((float)count)/3 1 millio eseten 2-t ad vissza
+  int levels=(int)log10((float)count)/3 + 1;
+  if (levels == 0)
+    return;
+  else{
+    for(int i=0;i<=count;i+=pow(1000,levels)){
+      std::ostringstream dirst;
+      dirst << fbase << prefix+i << "/";
+      std::string dir=dirst.str();
+      mkdir(dir.c_str(),0755);
+      int max=pow(1000,levels)-1;
+      if(i>0){
+	if (max+i > count)
+	  max=count-i;
+	create_directories(dir,max,prefix+i);
+      }
+    }
+  }
+}
+
+std::string Dsymlista::get_filename(std::string fbase, int num){
+  std::ostringstream out;
+  out << get_path(fbase,num) << num;
+  return out.str();
+}
+
+std::string Dsymlista::get_path(std::string fbase, int num){
+  //A kovetkezo jellegu mappa strukturat keszitjuk el:
+  //fbase/0/0/234.html
+  //fbase/0/2000/2347.html
+  //fbase/1000000/12000/10124321.html
+  // Igy minden mappaban max 1000 fajl lesz, ezt meg kenyelmesen elviselik a
+  // file rendszerek
+  // log10((float)count)/3 1 millio eseten 2-t ad vissza
+  std::ostringstream out;
+  out << fbase;
+  int levels=(int)log10((float)count)/3 + 1;
+
+  for (int level=levels;level > 0;level--){
+    out << (int)(((int)(num/pow(1000,level))) * pow(1000,level)) << "/";
+  }
+  return out.str();
+}
+
 //Dsymlista::print_html: Hasonloan mint az elobb, kiirjuk html-be az adatokat,
 //annyi pluszt teszunk hozza, hogy kulon fajlba (currD) kiirjuk az osszes
 //lehetseges matrix-rendszert is.
-void Dsymlista::print_html(void){
+void Dsymlista::print_html(std::string filebase){
+  std::string path="";
+  std::string prevpath="";
+  std::string fbase;
+  if(filebase.length() != 0)
+    fbase=filebase+"/";
+  else
+    fbase=std::string(".")+"/";
+  mkdir(fbase.c_str(),0755);
   std::ostringstream filename;
-  filename<<"d"<<dim<<"c"<<car<<".html";
+  filename<<fbase<<"index.html";
   std::ofstream html_file;
   html_file.open(filename.str().c_str());
+  create_directories(fbase,count);
 
   //Header
   html_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
@@ -1616,24 +1808,17 @@ void Dsymlista::print_html(void){
     curr->create_kdim();
     curr->filter_bad_orbifolds();
 
-    std::ostringstream currDname;
-    currDname<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".html";
+    std::string fn=get_filename(fbase,ssz);
+    std::string path=get_filename(fbase,ssz);
     std::ofstream currD;
-    currD.open(currDname.str().c_str());
+    currD.open((fn+".html").c_str());
 
     currD<<"<html>"<<std::endl<<"<body>"<<std::endl<<"<table border=\"2\">"<<std::endl;
     currD<<"<caption>"<<ssz<<"</caption>"<<std::endl;
 
-    std::ostringstream xfigfile;
-    xfigfile<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig";
-    curr->write_xfig(xfigfile.str());
-    std::ostringstream figtojpg;
-    figtojpg<<"fig2dev -L jpeg "<<"d"<<dim<<"c"<<car<<"_"<<ssz<<".fig "
-      <<"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg";
-    //system(figtojpg.str().c_str());
-    //remove(xfigfile.str().c_str());
-    currD<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz<<".jpg\"/></td>"
-      <<std::endl;
+    currD<<"<tr><td>";
+    curr->write_svg(&currD);
+    currD<<"</td>"<<std::endl;
 
     currD<<"<td><table border=\"1\">"<<std::endl;
     curr->print_param_mx(&currD);
@@ -1683,10 +1868,11 @@ void Dsymlista::print_html(void){
     //html file:
     html_file<<"<table border=\"2\">"<<std::endl;
     html_file<<"<caption>"<<ssz<<"</caption>"<<std::endl;
-    html_file<<"<tr><td><img src=\"d"<<dim<<"c"<<car<<"_"<<ssz
-      <<".jpg\"/></td>"<<std::endl;
+    html_file<<"<tr><td>";
+    curr->write_svg(&html_file);
+    html_file<<"</td>"<<std::endl;
     html_file<<"<td><table border=\"1\">"<<std::endl;
-    html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<currDname.str()
+    html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<ssz<<".html"
       <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<std::endl;
     curr->print_param_mx(&html_file);
     html_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
@@ -1831,7 +2017,7 @@ int main(int,char**,char**){
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
   std::cout<<std::endl<<"saved: "<<saved->count<<std::endl;
-  saved->print_html();
+  saved->print_html(fn);
   std::cout<<"Statistics:"<<std::endl;
   std::cout<<"Backtrack steps: "<<bt0<<", leaves: "<<bt<<", valid: "<<bt1<<", saved:"<<bt2<<std::endl;
   std::cout<<"    edges steps: "<<bte0<<", leaves: "<<bte<<", valid: "<<bte1<<", saved:"<<bte2<<std::endl;
