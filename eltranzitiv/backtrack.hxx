@@ -241,6 +241,7 @@ class Dsymlista {
     Db fastdb,sorteddb;
     Dbc *current;
     int keylength;
+    int output_limit;
 
   public:
     int count;
@@ -261,6 +262,7 @@ class Dsymlista {
     void print_html(std::string filebase);
     void print(void);		//mindet kiirja
     std::string get_filename(std::string, int);
+    std::string get_path(std::string, int);
     void create_directories(std::string,int,int);
 };
 

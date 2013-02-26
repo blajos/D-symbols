@@ -1119,23 +1119,6 @@ int Dsym::print_possible_infs(int pass,std::list<param>::iterator currparam,
 	  *out<<badorb.str();
 	*out<<"</td>";
 	//backup info
-	*out<<"<td>";
-	*out<<dim<<" "<<car;
-	for(int j=0;j<dim+1;j++){
-	  *out<<" (";
-	  for(int i=0;i<car;i++){
-	    int icsucsjszomszedja=csucsok[0][i]->szomszed[j]->sorszam[0];
-	    if (icsucsjszomszedja == i)
-	      *out<<i+1;
-	    else if (i < icsucsjszomszedja)
-	      *out<<"("<<i+1<<icsucsjszomszedja+1<<")";
-	  }
-	  *out<<")";
-	}
-	for(std::list<param>::iterator pit=plist.begin();pit!=plist.end();pit++){
-	  *out<<" "<<pit->ertek;
-	}
-	*out<<"</td>";
 	*out<<"</tr>"<<std::endl;
 	return 1;
       }
@@ -1592,6 +1575,7 @@ Dsymlista::Dsymlista(int dimin,int carin,std::string fn):
   sorteddb(NULL,0),
   current(0),
   keylength(2048),
+  output_limit(100),
   count(0)
 { 
   try {
@@ -1729,21 +1713,19 @@ void Dsymlista::create_directories(std::string fbase, int count, int prefix=0 ){
   // Igy minden mappaban max 1000 fajl lesz, ezt meg kenyelmesen elviselik a
   // file rendszerek
   // log10((float)count)/3 1 millio eseten 2-t ad vissza
-  int levels=(int)log10((float)count)/3 + 1;
+  int levels=(int)(log((float)count)/log((float)output_limit));
   if (levels == 0)
     return;
   else{
-    for(int i=0;i<=count;i+=pow(1000,levels)){
+    for(int i=0;i<=count;i+=pow(output_limit,levels)){
       std::ostringstream dirst;
       dirst << fbase << prefix+i << "/";
       std::string dir=dirst.str();
       mkdir(dir.c_str(),0755);
-      int max=pow(1000,levels)-1;
-      if(i>0){
-	if (max+i > count)
-	  max=count-i;
-	create_directories(dir,max,prefix+i);
-      }
+      int max=pow(output_limit,levels)-1;
+      if (max+i > count)
+	max=count-i;
+      create_directories(dir,max,prefix+i);
     }
   }
 }
@@ -1764,10 +1746,10 @@ std::string Dsymlista::get_path(std::string fbase, int num){
   // log10((float)count)/3 1 millio eseten 2-t ad vissza
   std::ostringstream out;
   out << fbase;
-  int levels=(int)log10((float)count)/3 + 1;
+  int levels=(int)(log((float)count)/log((float)output_limit));
 
   for (int level=levels;level > 0;level--){
-    out << (int)(((int)(num/pow(1000,level))) * pow(1000,level)) << "/";
+    out << (int)(((int)(num/pow(output_limit,level))) * pow(output_limit,level)) << "/";
   }
   return out.str();
 }
@@ -1777,7 +1759,7 @@ std::string Dsymlista::get_path(std::string fbase, int num){
 //lehetseges matrix-rendszert is.
 void Dsymlista::print_html(std::string filebase){
   std::string path="";
-  std::string prevpath="";
+  std::string prev_path="";
   std::string fbase;
   if(filebase.length() != 0)
     fbase=filebase+"/";
@@ -1786,12 +1768,13 @@ void Dsymlista::print_html(std::string filebase){
   mkdir(fbase.c_str(),0755);
   std::ostringstream filename;
   filename<<fbase<<"index.html";
-  std::ofstream html_file;
-  html_file.open(filename.str().c_str());
+  std::ofstream index_file;
+  std::ofstream list_file;
+  index_file.open(filename.str().c_str());
   create_directories(fbase,count);
 
   //Header
-  html_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
+  index_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
 
   while (true) {
     std::pair<Dsym*,int> it=getnextsorted();
@@ -1808,19 +1791,27 @@ void Dsymlista::print_html(std::string filebase){
     curr->create_kdim();
     curr->filter_bad_orbifolds();
 
-    std::string fn=get_filename(fbase,ssz);
-    std::string path=get_filename(fbase,ssz);
+    std::string fn=get_filename("",ssz);
+    path=get_path("",ssz);
+    if ( path != prev_path ){
+      prev_path=path;
+      if(list_file.is_open()){
+	list_file<<"</body>"<<std::endl<<"</html>"<<std::endl;
+	list_file.close();
+      }
+      list_file.open((fbase+path+"list.html").c_str());
+      list_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
+      index_file << "<a href=\"" << (path+"list.html") << "\">From " << ssz << " to " << ssz+output_limit-1 << "<br>" << std::endl;
+    }
     std::ofstream currD;
-    currD.open((fn+".html").c_str());
+    currD.open((fbase+fn+".html").c_str());
 
-    currD<<"<html>"<<std::endl<<"<body>"<<std::endl<<"<table border=\"2\">"<<std::endl;
-    currD<<"<caption>"<<ssz<<"</caption>"<<std::endl;
+    currD<<"<html>"<<std::endl<<"<body>"<<std::endl;
+    currD<<"<h1>"<<ssz<<"</h1>"<<std::endl;
 
-    currD<<"<tr><td>";
     curr->write_svg(&currD);
-    currD<<"</td>"<<std::endl;
 
-    currD<<"<td><table border=\"1\">"<<std::endl;
+    currD<<"<table border=\"1\">"<<std::endl;
     curr->print_param_mx(&currD);
     currD<< "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
       " dimensional components: "<< "(" <<curr->osszefuggo(0);
@@ -1851,7 +1842,7 @@ void Dsymlista::print_html(std::string filebase){
       if (i<dim-1) currD <<"<br>"<<std::endl;
       else currD<<std::endl<<"</td></tr>"<<std::endl;
     }
-    currD<<"</table></tr></table><br><table border=\"1\" cellpadding=\"3\">"
+    currD<<"</table><br><table border=\"1\" cellpadding=\"3\">"
       <<std::endl<<"<caption>Possible parameter values:</caption>"<<std::endl
       <<"<thead><tr>";
     for(std::list<Dsym::param>::iterator pit=curr->plist.begin();
@@ -1859,48 +1850,45 @@ void Dsymlista::print_html(std::string filebase){
       currD<<"<td align=center>"<<pit->kar<<"</td>";
     currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
       <<"<td>Good orbifold criteria</td>";
-    currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<std::endl;
     curr->mxnum=curr->print_possible_params(curr->plist.begin(),
 	&currD);
     currD<<std::endl<<"</tbody></table></body></html>"<<std::endl;
 
     //html file:
-    html_file<<"<table border=\"2\">"<<std::endl;
-    html_file<<"<caption>"<<ssz<<"</caption>"<<std::endl;
-    html_file<<"<tr><td>";
-    curr->write_svg(&html_file);
-    html_file<<"</td>"<<std::endl;
-    html_file<<"<td><table border=\"1\">"<<std::endl;
-    html_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<ssz<<".html"
+    list_file<<"<h1>"<<ssz<<"</h1>"<<std::endl;
+    curr->write_svg(&list_file);
+    list_file<<"<table border=\"1\">"<<std::endl;
+    list_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<ssz<<".html"
       <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<std::endl;
-    curr->print_param_mx(&html_file);
-    html_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
+    curr->print_param_mx(&list_file);
+    list_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
       " dimensional components: "<< "(" <<curr->osszefuggo(0);
-    for (int i=1;i<dim+1;i++) html_file <<","<<curr->osszefuggo(i);
-    html_file << ")</td></tr>"<<std::endl;
-    html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
+    for (int i=1;i<dim+1;i++) list_file <<","<<curr->osszefuggo(i);
+    list_file << ")</td></tr>"<<std::endl;
+    list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
     if (dualchk==0)
-      html_file<<"Not "<<dim<<"-connected";
+      list_file<<"Not "<<dim<<"-connected";
     else
       if (dualchk==ssz)
-	html_file<<"Selfdual";
+	list_file<<"Selfdual";
       else
-	html_file<<"D."<<dualchk;
-    html_file<<"</td></tr>"<<std::endl;
-    html_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
+	list_file<<"D."<<dualchk;
+    list_file<<"</td></tr>"<<std::endl;
+    list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
     for(int i=0;i<dim;i++) {
-      html_file << "(" <<i<<","<<i+1<<") ";
-      curr->print_params(i,&html_file);
-      if (i<dim-1) html_file <<"<br>"<<std::endl;
-      else html_file<<std::endl<<"</td></tr>"<<std::endl;
+      list_file << "(" <<i<<","<<i+1<<") ";
+      curr->print_params(i,&list_file);
+      if (i<dim-1) list_file <<"<br>"<<std::endl;
+      else list_file<<std::endl<<"</td></tr>"<<std::endl;
     }
-    html_file<<std::endl<<"</table></tr></table><br>"<<std::endl;
+    list_file<<std::endl<<"</table><br><hr>"<<std::endl;
     delete curr;
   }
 
   //Footer
-  html_file<<"</body>"<<std::endl<<"</html>"<<std::endl;
+  list_file<<"</body>"<<std::endl<<"</html>"<<std::endl;
+  index_file<<"</body>"<<std::endl<<"</html>"<<std::endl;
   std::cerr<<std::endl;
 
 }
