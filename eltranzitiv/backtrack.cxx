@@ -1758,8 +1758,8 @@ std::string Dsymlista::get_path(std::string fbase, int num){
 //annyi pluszt teszunk hozza, hogy kulon fajlba (currD) kiirjuk az osszes
 //lehetseges matrix-rendszert is.
 void Dsymlista::print_html(std::string filebase){
-  std::string path="";
-  std::string prev_path="";
+  std::string path="-1";
+  std::string prev_path="-1";
   std::string fbase;
   if(filebase.length() != 0)
     fbase=filebase+"/";
@@ -1775,6 +1775,8 @@ void Dsymlista::print_html(std::string filebase){
 
   //Header
   index_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
+  index_file<<"<h1>Dimension: "<<dim<<"</h1>"<<std::endl;
+  index_file<<"<h2>Cardinality: "<<car<<"</h2>"<<std::endl;
 
   while (true) {
     std::pair<Dsym*,int> it=getnextsorted();
