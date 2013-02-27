@@ -255,6 +255,7 @@ class Dsymlista {
     int check_with_start(Dsym*,int);
     int check_sorted(Dsym*,int);
 
+    void sync();
     std::pair<Dsym*, int> getnextsorted(void);
     void reset_cursor(void);
     void generate_ordered_numbering(void);

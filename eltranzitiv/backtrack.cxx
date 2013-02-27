@@ -1443,39 +1443,45 @@ bool backtrack_breaks_uvw(Dsym* D,int honnan){
   int dim=D->dim;
   int max=honnan+1;
   simplex*** csucsok=D->csucsok;
+  /* A kovetkezo mintak felismerese: |_ |_|
+     Ha talalunk nem szomszedos operacio parokkal legalabb 2 hosszu lancot
+     (mindket vege hurok es mindket vege kisebb, mint max)
+     Vagy legalabb 5 hosszu barmit; az rossz. */
   for (int r=0;r<=max;r++)
     for (int i=0;i<dim-1;i++)
       for (int i1=i+2;i1<dim+1;i1++){
-	/* A kovetkezo minta felismerese: |_
-	   Ha talalunk nem szomszedos operacio parokkal 2 hosszu lancot, ahol mindket
-	   tag nem nagyobb, mint max; az rossz. */
-	if(csucsok[0][r]->szomszed[i] == csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1] != csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] == csucsok[0][r]->szomszed[i1]->szomszed[i]){
-	  //std::cout << "Nem uvw1" <<std::endl;
-	  //D->print(0);
-	  return true;
+        simplex* csucs=csucsok[0][r];
+        int j,j1;
+	bool chain=true;
+        if ( csucs != csucs->szomszed[i] ){
+	  if ( csucs != csucs->szomszed[i1])
+	    chain=false;
+          j=i;
+          j1=i1;
+        }
+        else if ( csucs != csucs->szomszed[i1]){
+          j=i1;                                                                                                      
+          j1=i;                                                                                                      
+        }
+	else { //i, i1 nem vezet ki csucsbol
+	  continue;
 	}
-	/* A kovetkezo minta felismerese: |_|
-	   Ha talalunk nem szomszedos operacio parokkal 3 hosszu valamit, ahol mindket
-	   tag nem nagyobb, mint max, es nem zarodik vissza; az is rossz. */
-	if(csucsok[0][r]->szomszed[i] == csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1] != csucsok[0][r] &&
-	    csucsok[0][r]->szomszed[i1]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i] != csucsok[0][r]->szomszed[i1] &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1] != csucsok[0][r]->szomszed[i1]->szomszed[i] &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->sorszam[0] <= max &&
-	    csucsok[0][r]->szomszed[i1]->szomszed[i]->szomszed[i1]->szomszed[i] != csucsok[0][r]){
-	  //std::cout << "Nem uvw2" <<std::endl;
-	  //D->print(0);
-	  return true;
-	}
+        int steps=0;
+        do {
+          csucs=csucs->szomszed[j];
+          int temp=j;
+          j=j1;
+          j1=temp;
+        } while (++steps <= 5 && csucs != csucs->szomszed[j] && csucs != csucsok[0][r]);
+        if (steps == 5 or (steps >= 2 and chain and csucs->sorszam[0]<=max))
+          return true;
       }
   return false;
+}
+
+//Dsymlista::sync: Flush sorted db to disk
+void Dsymlista::sync(void){
+  sorteddb.sync(0);
 }
 
 //Dsymlista::check: Az adott elem szerepel-e mar a listainkban?
@@ -1713,6 +1719,8 @@ void Dsymlista::create_directories(std::string fbase, int count, int prefix=0 ){
   // Igy minden mappaban max 1000 fajl lesz, ezt meg kenyelmesen elviselik a
   // file rendszerek
   // log10((float)count)/3 1 millio eseten 2-t ad vissza
+  if ( count == 0 )
+    return;
   int levels=(int)(log((float)count)/log((float)output_limit));
   if (levels == 0)
     return;
@@ -2004,13 +2012,14 @@ int main(int,char**,char**){
   bte2=0;
   bte0=0;
   backtrack(D,saved,0,0,1);
+  saved->sync();
   //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
   //it->ssz=ujssz++;
   std::cout<<std::endl<<"saved: "<<saved->count<<std::endl;
-  saved->print_html(fn);
   std::cout<<"Statistics:"<<std::endl;
   std::cout<<"Backtrack steps: "<<bt0<<", leaves: "<<bt<<", valid: "<<bt1<<", saved:"<<bt2<<std::endl;
   std::cout<<"    edges steps: "<<bte0<<", leaves: "<<bte<<", valid: "<<bte1<<", saved:"<<bte2<<std::endl;
+  //saved->print_html(fn);
   delete D;
   delete saved;
   return 0;
