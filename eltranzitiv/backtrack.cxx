@@ -399,6 +399,15 @@ int Dsym::uvw(void) {
   return 1;
 }
 
+bool Dsym::lehet_eltranzitiv(void){
+  if (dim!=3)
+    throw "Nope.";
+  for (int r=0;r<car;r++) {
+    if (csucsok[1][r]->mx[2][3] > 6)
+      return false;
+  }
+  return true;
+}
 
 //Dsym::ellenoriz: Az elobb definialt ellenorzesek lefuttatasa.
 int Dsym::ellenoriz(void) {
@@ -411,6 +420,9 @@ int Dsym::ellenoriz(void) {
   if (!uvw()){
     //std::cout << "Nem uvw0" <<std::endl;
     //print(0);
+    return 1;
+  }
+  if (!lehet_eltranzitiv()){
     return 1;
   }
   return -1;
@@ -656,6 +668,150 @@ int Svg::add_line(int n0,int n1,int szin){
   lines.push_back(*a);
   return 0;
 }
+
+AnimSvg::AnimSvg(int dimin,int carin):
+  Svg(dimin,carin)
+{
+  show=new std::list<int>**[dim+1];
+  hide=new std::list<int>**[dim+1];
+  for (int d=0;d<dim+1;d++){
+    show[d]=new std::list<int>*[car];
+    hide[d]=new std::list<int>*[car];
+    for (int c1=0;c1<car;c1++){
+      show[d][c1]=new std::list<int>[car];
+      hide[d][c1]=new std::list<int>[car];
+    }
+  }
+}
+
+AnimSvg::~AnimSvg(){
+  for (int d=0;d<dim+1;d++){
+    for (int c1=0;c1<car;c1++){
+      delete[] show[d][c1];
+      delete[] hide[d][c1];
+    }
+    delete[] show[d];
+    delete[] hide[d];
+  }
+  delete[] show;
+  delete[] hide;
+}
+
+void AnimSvg::add_line(int n0,int n1,int color,int timetick){
+  show[color][n0][n1].push_back(timetick);
+}
+
+void AnimSvg::remove_line(int n0,int n1,int color,int timetick){
+  hide[color][n0][n1].push_back(timetick);
+}
+
+void AnimSvg::add_sleep(int timetick){
+  sleep.push_back(timetick);
+}
+
+int AnimSvg::print_html(std::ostream* out){
+  *out << "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 "<< size<< " "<< size<<"\" width=\"" <<
+    size << "px\" height=\""<<size<<"px\" version=\"1.1\">"<<std::endl;
+
+  print_sleep(out);
+  for(int szin=0;szin<dim+1;szin++)
+    for(int n0=0;n0<car;n0++)
+      for(int n1=n0+1;n1<car;n1++)
+	print_line(n0,n1,szin,out);
+
+  for(int i=0;i<car;i++){
+    create_circle(i,out);
+    create_numtext(i,out);
+  }
+  *out << "</svg>";
+  return 0;
+}
+
+void AnimSvg::create_circle(int n,std::ostream* out) {
+  *out << "  <circle cx=\"" << koordx[n] << "\" cy=\"" << koordy[n] <<
+    "\" r=\"" << rad << "\" fill=\"white\" stroke=\"black\" stroke-width=\"1\"/>"<<std::endl;
+}
+
+void AnimSvg::create_numtext(int n,std::ostream* out) {
+  *out << "  <text x=\"" << koordx[n] << "\" y=\"" <<
+    (koordy[n]+round(fontsize/3)) << "\" font-size=\""<< fontsize <<
+    "\" text-anchor=\"middle\" dominant-baseline=\"mathematical\">" << n+1 <<
+    "</text>"<<std::endl;
+}
+
+void AnimSvg::print_sleep(std::ostream* out) {
+  *out << "  <rect x=\"0\" y=\"0\" width=\"" << size << "px\" height=\""<<size<<"px\" fill=\"green\" opacity=\"0\">" << std::endl;
+  for(std::list<int>::iterator it=sleep.begin();
+      it!=sleep.end(); it++){
+    std::string prev;
+    if (*it == 0)
+      prev="0";
+    else {
+      std::ostringstream temp;
+      temp << "A" << (*it)-1 << ".end";
+      prev=temp.str();
+    }
+    *out << "    <animate id=\"A"<< *it+9 <<"\" attributeName=\"opacity\" values=\"0;1;0\" dur=\"2s\" begin=\"" << prev << "\" fill=\"freeze\"/>" << std::endl;
+  }
+  *out << "  </rect>" << std::endl;
+}
+
+void AnimSvg::print_line(int n0,int n1,int szin,std::ostream* out) {
+  int diff=(szin*2*rad/dim-rad)*3/4;
+  float length=sqrt(pow(koordx[n1]-koordx[n0],2)+pow(koordy[n1]-koordy[n0],2));
+  int diffy=(koordx[n1]-koordx[n0])*diff/(int)length;
+  int diffx=-(koordy[n1]-koordy[n0])*diff/(int)length;
+  std::string style;
+  switch (szin){
+    case 0:
+      style="stroke-dasharray:2,10";
+      break;
+    case 1:
+      style="stroke-dasharray:8,8";
+      break;
+    case 2:
+      style="";
+      break;
+    case 3:
+      style="stroke-dasharray:8,8,2,10";
+      break;
+    default:
+      style="stroke-dasharray:8,8,2,10";
+      for (int i=3;i<szin;i++) style+=",2,10";
+  }
+  *out << "  <line style=\"" << style <<
+    "\" x1=\"" << koordx[n0]+diffx <<
+    "\" y1=\"" << koordy[n0]+diffy <<
+    "\" x2=\"" << koordx[n1]+diffx <<
+    "\" y2=\"" << koordy[n1]+diffy <<
+    "\" stroke=\"black\" stroke-width=\"1\" opacity=\"0\">"<<std::endl;
+  for(std::list<int>::iterator it=show[szin][n0][n1].begin();
+      it!=show[szin][n0][n1].end(); it++){
+    std::string prev;
+    if (*it == 0)
+      prev="0";
+    else {
+      std::ostringstream temp;
+      temp << "A" << (*it)-1 << ".end";
+      prev=temp.str();
+    }
+    *out << "    <animate id=\"A"<< *it <<"\" attributeName=\"opacity\" values=\"0;1\" dur=\"1s\" begin=\"" << prev << "\" fill=\"freeze\"/>" << std::endl;
+  }
+  for(std::list<int>::iterator it=hide[szin][n0][n1].begin();
+      it!=hide[szin][n0][n1].end(); it++){
+    std::string prev;
+    if (*it == 0)
+      prev="0";
+    else {
+      std::ostringstream temp;
+      temp << "A" << (*it)-1 << ".end";
+      prev=temp.str();
+    }
+    *out << "    <animate id=\"A"<< *it <<"\" attributeName=\"opacity\" values=\"1;0\" dur=\"0.5s\" begin=\"" << prev << "\" fill=\"freeze\"/>" << std::endl;
+  }
+  *out << "  </line>" << std::endl;
+}
+
 
 //Dsym::create_kdim: klist[i] a D-szimbolum 0. operaciojanak elhagyasaval
 //keletkezo komponensek listaja, egy-egy komponensben a benne levo szimplexek
@@ -1314,6 +1470,8 @@ int bt;
 int bt1;
 int bt2;
 long long bt0;
+int timetick;
+AnimSvg* animation;
 void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
   int car=D->car;
   int dim=D->dim;
@@ -1358,8 +1516,10 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
 
   //ha erdemes elt hozzaadni, ujra meghivjuk onmagunkat
   if (erdemes && D->elhozzaad(szin,honnan,hova)){
+    //animation->add_line(honnan, hova, szin, timetick++);
     backtrack(D,saved,szin,honnan,hova);
     D->eltorol(szin,honnan,hova);
+    //animation->remove_line(honnan, hova, szin, timetick++);
   }
 
   if(hova+1<car) backtrack(D,saved,szin,honnan,hova+1);
@@ -1379,7 +1539,8 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
 
       int szukseges_fok=D->fok(0,0);
       int fok=D->fok(honnan,0);
-      if ( fok <= szukseges_fok && not backtrack_breaks_uvw(D,honnan))
+      if ( fok <= szukseges_fok && not backtrack_breaks_uvw(D,honnan) && not
+	  backtrack_breaks_eltranzitiv(D,honnan))
 	backtrack(D,saved,0,honnan+1,honnan+2);
     }
     else{
@@ -1416,6 +1577,8 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
 	bte2++;
+        //animation->add_sleep(timetick);
+        timetick+=10;
 	saved->append(ujD);
       }
       delete ujD;
@@ -1425,8 +1588,10 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
 
   //ha tudunk elt hozzaadni, ujra meghivjuk onmagunkat
   if (D->elhozzaad(szin,honnan,hova)){
+    //animation->add_line(honnan, hova, szin, timetick++);
     backtrack_edges(D,saved,honnan,hova);
     D->eltorol(szin,honnan,hova);
+    //animation->remove_line(honnan, hova, szin, timetick++);
   }
 
   if(hova+1<car) backtrack_edges(D,saved,honnan,hova+1);
@@ -1450,32 +1615,74 @@ bool backtrack_breaks_uvw(Dsym* D,int honnan){
   for (int r=0;r<=max;r++)
     for (int i=0;i<dim-1;i++)
       for (int i1=i+2;i1<dim+1;i1++){
-        simplex* csucs=csucsok[0][r];
-        int j,j1;
+	simplex* csucs=csucsok[0][r];
+	int j,j1;
 	bool chain=true;
-        if ( csucs != csucs->szomszed[i] ){
+	if ( csucs != csucs->szomszed[i] ){
 	  if ( csucs != csucs->szomszed[i1])
 	    chain=false;
-          j=i;
-          j1=i1;
-        }
-        else if ( csucs != csucs->szomszed[i1]){
-          j=i1;                                                                                                      
-          j1=i;                                                                                                      
-        }
+	  j=i;
+	  j1=i1;
+	}
+	else if ( csucs != csucs->szomszed[i1]){
+	  j=i1;                                                                                                      
+	  j1=i;                                                                                                      
+	}
 	else { //i, i1 nem vezet ki csucsbol
 	  continue;
 	}
-        int steps=0;
-        do {
-          csucs=csucs->szomszed[j];
-          int temp=j;
-          j=j1;
-          j1=temp;
-        } while (++steps <= 5 && csucs != csucs->szomszed[j] && csucs != csucsok[0][r]);
-        if (steps == 5 or (steps >= 2 and chain and csucs->sorszam[0]<=max))
-          return true;
+	int steps=0;
+	do {
+	  csucs=csucs->szomszed[j];
+	  int temp=j;
+	  j=j1;
+	  j1=temp;
+	} while (++steps <= 5 && csucs != csucs->szomszed[j] && csucs != csucsok[0][r]);
+	if (steps == 5 or (steps >= 2 and chain and csucs->sorszam[0]<=max))
+	  return true;
       }
+  return false;
+}
+
+// Legfeljebb 6 alakzat talalkozhat egy elnel (mert a dualis a laptranzitiv,
+// ahol legfeljebb 6-szog lapok lehetnek)
+bool backtrack_breaks_eltranzitiv(Dsym* D,int honnan){
+  int dim=D->dim;
+  if (dim!=3)
+    throw "That doesn't work.";
+  int max=honnan+1;
+  simplex*** csucsok=D->csucsok;
+  /* Ha talalunk (2,3) operacio parokkal legalabb 7 hosszu lancot, vagy 13
+   * hosszu barmit; az rossz.*/
+  for (int r=0;r<=max;r++){
+    int i=2;
+    int i1=3;
+    simplex* csucs=csucsok[0][r];
+    int j,j1;
+    bool chain=true;
+    if ( csucs != csucs->szomszed[i] ){
+      if ( csucs != csucs->szomszed[i1])
+	chain=false;
+      j=i;
+      j1=i1;
+    }
+    else if ( csucs != csucs->szomszed[i1]){
+      j=i1;                                                                                                      
+      j1=i;                                                                                                      
+    }
+    else { //i, i1 nem vezet ki csucsbol
+      continue;
+    }
+    int steps=0;
+    do {
+      csucs=csucs->szomszed[j];
+      int temp=j;
+      j=j1;
+      j1=temp;
+    } while (++steps <= 5 && csucs != csucs->szomszed[j] && csucs != csucsok[0][r]);
+    if (steps == 13 or (steps >= 7 and chain and csucs->sorszam[0]<=max))
+      return true;
+  }
   return false;
 }
 
@@ -1568,6 +1775,8 @@ Dsymlista::Dsymlista(int dimin,int carin):
   sorteddb(NULL,0),
   current(0),
   keylength(2048),
+  output_limit(100),
+  verify_ok(false),
   count(0)
 {
   Dsymlista(dimin,carin,std::string("example"));
@@ -1582,23 +1791,37 @@ Dsymlista::Dsymlista(int dimin,int carin,std::string fn):
   current(0),
   keylength(2048),
   output_limit(100),
+  verify_ok(false),
   count(0)
 { 
   try {
     Db a(NULL,0);
-    Db b(NULL,0);
-    a.remove((filename_base + "_fast.db").c_str(), NULL, 0);
-    b.remove((filename_base + "_sort.db").c_str(), NULL, 0);
+    a.set_bt_compare(&compare_d);
+    if (a.verify((filename_base + "_sort.db").c_str(), NULL, NULL, 0) == 0)
+      verify_ok=true;
+    a.close(0);
   }
   catch (DbException& e){
     ;
   }
 
-  fastdb.set_cachesize(1,500*1024*1024,1);
-  sorteddb.set_cachesize(1,500*1024*1024,1);
+  if ( not verify_ok ){
+    try {
+      Db a(NULL,0);
+      Db b(NULL,0);
+      a.remove((filename_base + "_fast.db").c_str(), NULL, 0);
+      b.remove((filename_base + "_sort.db").c_str(), NULL, 0);
+    }
+    catch (DbException& e){
+      ;
+    }
+  }
+
+  fastdb.set_cachesize(0,200*1024*1024,2);
+  sorteddb.set_cachesize(0,200*1024*1024,2);
   sorteddb.set_bt_compare(&compare_d);
 
-  fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_HASH, DB_CREATE, 0);
+  fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
   sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
 }
 
@@ -2003,23 +2226,29 @@ int main(int,char**,char**){
   sprintf (buffer, "d%dc%d", dim, car);
   std::string fn(buffer);
   Dsymlista* saved=new Dsymlista(dim,car,fn);
-  bt=0;
-  bt1=0;
-  bt2=0;
-  bt0=0;
-  bte=0;
-  bte1=0;
-  bte2=0;
-  bte0=0;
-  backtrack(D,saved,0,0,1);
-  saved->sync();
-  //for (Dsymlinklist* it=saved->first;it!=NULL;it=it->next)
-  //it->ssz=ujssz++;
-  std::cout<<std::endl<<"saved: "<<saved->count<<std::endl;
-  std::cout<<"Statistics:"<<std::endl;
-  std::cout<<"Backtrack steps: "<<bt0<<", leaves: "<<bt<<", valid: "<<bt1<<", saved:"<<bt2<<std::endl;
-  std::cout<<"    edges steps: "<<bte0<<", leaves: "<<bte<<", valid: "<<bte1<<", saved:"<<bte2<<std::endl;
-  //saved->print_html(fn);
+  if( not saved->verify_ok ){
+    bt=0;
+    bt1=0;
+    bt2=0;
+    bt0=0;
+    bte=0;
+    bte1=0;
+    bte2=0;
+    bte0=0;
+    timetick=0;
+    animation=new AnimSvg(dim,car);
+    backtrack(D,saved,0,0,1);
+    saved->sync();
+    std::cout<<std::endl<<"saved: "<<saved->count<<std::endl;
+    std::cout<<"Statistics:"<<std::endl;
+    std::cout<<"Backtrack steps: "<<bt0<<", leaves: "<<bt<<", valid: "<<bt1<<", saved:"<<bt2<<std::endl;
+    std::cout<<"    edges steps: "<<bte0<<", leaves: "<<bte<<", valid: "<<bte1<<", saved:"<<bte2<<std::endl;
+    std::ofstream animf;
+    //animf.open(fn+"_anim.svg");
+    //animation->print_html(&animf);
+    delete animation;
+  }
+  saved->print_html(fn);
   delete D;
   delete saved;
   return 0;

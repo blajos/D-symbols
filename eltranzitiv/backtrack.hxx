@@ -157,6 +157,7 @@ class Dsym {
     int osszefuggo(int);
     int dualis(void);
     int sorszamozas(void);
+    bool lehet_eltranzitiv(void);
     int uvw(void);
     int ellenoriz(void);
 
@@ -244,6 +245,7 @@ class Dsymlista {
     int output_limit;
 
   public:
+    bool verify_ok;
     int count;
 
     Dsymlista(int,int);
@@ -285,6 +287,7 @@ void backtrack_edges(Dsym*,Dsymlista*,int,int);
 
 //Lehet-e meg jo a diagram?
 bool backtrack_breaks_uvw(Dsym*,int);
+bool backtrack_breaks_eltranzitiv(Dsym*,int);
 
 //Rendezes matrixok nelkul: elso multigraf es kezdopontja, masodik multigraf es
 // kezdopontja. 
@@ -385,6 +388,7 @@ class Svg : public Base{
      size - Size of canvas.
      fontsize - Size of fonts.
      */
+  protected:
   int *koordx,*koordy,rad,size,fontsize;
   std::list<std::vector<int> > lines;
 
@@ -412,6 +416,24 @@ class Svg : public Base{
   void create_line(int n0,int n1,int color,std::ostream* out);
   int add_line(int n0,int n1,int color);
   int print_html(std::ostream*);
+};
+
+class AnimSvg : public Svg {
+  private:
+    std::list<int>*** show;
+    std::list<int>*** hide;
+    std::list<int> sleep;
+  public:
+    AnimSvg(int dim, int car);
+    ~AnimSvg(void);
+    void print_line(int n0,int n1,int color,std::ostream* out);
+    void print_sleep(std::ostream* out);
+    void add_line(int n0,int n1,int color,int timetick);
+    void remove_line(int n0,int n1,int color,int timetick);
+    int print_html(std::ostream*);
+    void create_circle(int n,std::ostream* out);
+    void create_numtext(int n,std::ostream* out);
+    void add_sleep(int timetick);
 };
 
 //TODO: 

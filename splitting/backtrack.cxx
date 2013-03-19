@@ -922,24 +922,6 @@ int Dsym::print_possible_infs(int pass,list<param>::iterator currparam,
 	else
 	  *out<<badorb.str();
 	*out<<"</td>";
-	//backup info
-	*out<<"<td>";
-	*out<<dim<<" "<<car;
-	for(int j=0;j<dim+1;j++){
-	  *out<<" (";
-	  for(int i=0;i<car;i++){
-	    int icsucsjszomszedja=csucsok[0][i]->szomszed[j]->sorszam[0];
-	    if (icsucsjszomszedja == i)
-	      *out<<i+1;
-	    else if (i < icsucsjszomszedja)
-	      *out<<"("<<i+1<<icsucsjszomszedja+1<<")";
-	  }
-	  *out<<")";
-	}
-	for(list<param>::iterator pit=plist.begin();pit!=plist.end();pit++){
-	  *out<<" "<<pit->ertek;
-	}
-	*out<<"</td>";
 	*out<<"</tr>"<<endl;
 	return 1;
       }
@@ -1120,7 +1102,7 @@ void Dsym::print_possible_splittings(ostream *out){
      notpart1 points={}
      list of edges going out=edges of first point
      recursion(out,list of points,part1 points,notpart1 points,list of edges)
-     */
+   */
   list<kisebbdim*> pointlist;
   for(int op=0;op<dim+1;op++)
     for(list<kisebbdim>::iterator komp=klist[op].begin();komp!=klist[op].end(); komp++){
@@ -1131,7 +1113,7 @@ void Dsym::print_possible_splittings(ostream *out){
   part1list.push_back(*(pointlist.begin()));
 
   list<kisebbdim*> notpart1list;
-  
+
   list<pair<kisebbdim*,kisebbdim*> > outbound_edges;
   for(int op=0;op<dim+1;op++)
     if (op!=(*part1list.begin())->op)
@@ -1354,12 +1336,13 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
     for(int i=0;i<car;i++)
       part1szimnum[i]=0;
     for ( list<kisebbdim*>::iterator currpoint=part1list.begin(); currpoint!=part1list.end(); currpoint++ ){
-      *out << (*currpoint)->op << ": ";
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << (*currpoint)->op << "</mi><mn>";
       for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin();
 	  szimp!=(*currpoint)->szek.end(); szimp++ ){
 	*out << (*szimp)->sorszam[0]+1 << " ";
 	part1szimnum[(*szimp)->sorszam[0]]++;
       }
+      *out << "</mn></msub></mrow></math>";
       *out << "<br>";
     }
     *out << "</td>";
@@ -1369,12 +1352,13 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
     for(int i=0;i<car;i++)
       restszimnum[i]=0;
     for ( list<kisebbdim*>::iterator currpoint=rest.begin(); currpoint!=rest.end(); currpoint++ ){
-      *out << (*currpoint)->op << ": ";
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << (*currpoint)->op << "</mi><mn>";
       for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin();
 	  szimp!=(*currpoint)->szek.end(); szimp++ ){
 	*out << (*szimp)->sorszam[0]+1 << " ";
 	restszimnum[(*szimp)->sorszam[0]]++;
       }
+      *out << "</mn></msub></mrow></math>";
       *out << "<br>";
     }
     *out << "</td>";
@@ -1386,7 +1370,8 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
       *out << "E2" <<endl;
     else 
       *out << "H2" <<endl;
-    *out << simplex_sum <<"-2*"<< simpleces.size() <<"-"<< sum <<"="<< cc <<"</td>";
+    //*out << "<br>"<< simplex_sum <<"-2*"<< simpleces.size() <<"-"<< sum << "=" << cc ;
+    *out <<"</td>";
 
     *out << "<td>";
     bool part1fiber=true;
@@ -1415,14 +1400,16 @@ void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
     //debug
     *out << "<td>";
     for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
-      *out << edge->first->op << ": ";
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << edge->first->op << "</mi><mn>";
       for ( list<simplex*>::iterator szimp=edge->first->szek.begin(); szimp!=edge->first->szek.end(); szimp++ )
 	*out << (*szimp)->sorszam[0]+1 << " ";
+      *out << "</mn></msub></mrow></math>";
       *out << " &rarr; ";
 
-      *out << edge->second->op << ": ";
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << edge->second->op << "</mi><mn>";
       for ( list<simplex*>::iterator szimp=edge->second->szek.begin(); szimp!=edge->second->szek.end(); szimp++ )
 	*out << (*szimp)->sorszam[0]+1 << " ";
+      *out << "</mn></msub></mrow></math>";
       *out << "<br>";
     }
     *out << "</td>";
@@ -1734,7 +1721,8 @@ void Dsymlista::print_html(void){
       if (i<dim-1) currD <<"<br>"<<endl;
       else currD<<endl<<"</td></tr>"<<endl;
     }
-    currD<<"</table></tr></table><br><table border=\"1\" cellpadding=\"3\">"
+    currD<<"</table></tr></table><br>";
+    /*currD<<"<table border=\"1\" cellpadding=\"3\">"
       <<endl<<"<caption>Possible parameter values:</caption>"<<endl
       <<"<thead><tr>";
     for(list<Dsym::param>::iterator pit=it->curr->plist.begin();
@@ -1742,17 +1730,16 @@ void Dsymlista::print_html(void){
       currD<<"<td align=center>"<<pit->kar<<"</td>";
     currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
       <<"<td>Good orbifold criteria</td>";
-    currD<<"<td>Backup info</td>";
     currD<<"</tr></thead><tbody>"<<endl;
     it->curr->mxnum=it->curr->print_possible_params(it->curr->plist.begin(), &currD);
-    currD<<endl<<"</tbody></table>";
+    currD<<endl<<"</tbody></table><br>";*/
     // Possible splittings
-    currD<<"<br><table border=\"1\" cellpadding=\"3\">"
+    currD<<"<table border=\"1\" cellpadding=\"3\">"
       <<endl<<"<caption>Possible splittings:</caption>"<<endl
       <<"<thead><tr>";
-    currD<<endl<<"<td>Vertices of one part</td><td>Vertices of other part</td><td>Type of splitting</td><td>Fiber like?</td><td>Essential parameters</td><td>Edges split</td></tr>";
+    currD<<endl<<"<td>Vertices of one part</td><td>Vertices of other part</td><td>Type of splitting</td><td>Fiber like?</td><td>Essential parameters</td><td>Edges split</td></tr></thead><tbody>";
     it->curr->print_possible_splittings(&currD);
-    currD<<endl<<"</table>";
+    currD<<endl<<"</tbody></table>";
     currD<<endl<<"</body></html>"<<endl;
 
     //html file:
