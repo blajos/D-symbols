@@ -928,12 +928,14 @@ void Dsym::create_kdim(void) {
   }
 }
 
-//Dsym::kdimsf: Igaz-e, hogy ha elhagyjuk a 0. vagy az n. operaciot, akkor a
+//Dsym::kdimsf: Igaz-e, hogy ha elhagyjuk a 0. vagy az 3. operaciot, akkor a
 //kisebb dimenzios szimbolum szferikus vagy euklideszi sikon megvalosulhat.
 //Komponensenkent szamolunk: osszeadjuk az 1/m01+1/m12-1/2 ertekeket, ha nem
 //negativ, akkor igaz az allitas. Mivel lebegopontos szamitasokat vegzunk, nem
 //vizsgalhatunk ==0-t.
 //Kisebb dimenzios reszek szferikusak: 1, van Euk: 0, van hip:-1
+//Miert nem nezzuk meg a 1-2 operaciokat: ekkor pl. 1/m23+1/2+1/2 kell nagyobb
+//legyen 1-nel, ami mindig igaz.
 int Dsym::kdimsf(std::list<param>::iterator inf_param){
   if (dim!=3) return -100;
   int ret=1;
@@ -968,6 +970,7 @@ int Dsym::kdimsf(std::list<param>::iterator inf_param){
 //Dsym::kdimsf i<max eseten igaz-e, hogy a 0-3 operaciok elhagyasaval kapott
 //"ki nem logo" resz D-szimbolumok megfelelnek a felteteleinknek (0,3 eseten
 //euklideszi vagy szferikus; 1,2 eseten szferikus)
+//1-2 esetet nem is kene nezni, mert az uvw feltetel miatt mindig szferikus lesz
 bool Dsym::kdimsf(int max){
   if (dim!=3) return -100;
   uvw1();
@@ -977,6 +980,7 @@ bool Dsym::kdimsf(int max){
     for(std::list<kisebbdim>::iterator curr=klist[currkis].begin();
 	curr!=klist[currkis].end();curr++){
       float sum=0;
+      bool skip=false;
       for(std::list<simplex*>::iterator currszim=curr->szek.begin();
 	  currszim!=curr->szek.end();currszim++)
 	if((*currszim)->sorszam[0] < max){
@@ -986,13 +990,27 @@ bool Dsym::kdimsf(int max){
 		sum+=1.0/float((*currszim)->mx[j][j1]);
 	    }
 	  sum-=1;
-	  if(sum<-THRESH)
-	    return false;
-	  if(sum<THRESH && sum>-THRESH and elhagy > 0 and elhagy < dim)
-	    return false;
 	}
-	else
+	else{
+	  skip=true;
 	  break;
+	}
+      if(not skip){
+	if(sum<-THRESH){
+	  if (elhagy > 0 and elhagy < dim){
+	    std::cout << "Nem lehet";
+	  }
+	  std::cout << sum << " " << max << " " << elhagy <<
+	    (*(curr->szek.begin()))->sorszam[0] << std::endl;
+	  dump(&std::cout);
+	  std::cout << std::endl;
+	  return false;
+	}
+	if(sum<THRESH && sum>-THRESH and elhagy > 0 and elhagy < dim){
+	  std::cout << "Nem lehet";
+	  return false;
+	}
+      }
     }
   }
   return true;
