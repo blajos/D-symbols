@@ -399,6 +399,27 @@ int Dsym::uvw(void) {
   return 1;
 }
 
+void Dsym::uvw1(void) {
+  for (int r=0;r<car;r++) {				//atlotol tavolabbi
+    for (int i=0;i<dim-1;i++)
+      for (int i1=i+2;i1<dim+1;i1++){
+	csucsok[0][r]->mx[i][i1]=2;
+	csucsok[0][r]->mx[i1][i]=2;
+      }
+    for (int i=0;i<dim+1;i++) csucsok[0][r]->mx[i][i]=1;     //atlo
+    for (int i=0;i<dim;i++) {				       //atlo szomszedok
+      int u=1;
+      simplex* csucs=csucsok[0][r];
+      while (csucs->szomszed[i]->szomszed[i+1] != csucsok[0][r]) {
+	u++;
+	csucs=csucs->szomszed[i]->szomszed[i+1];
+      }
+      csucsok[0][r]->mx[i][i+1]=u;
+      csucsok[0][r]->mx[i+1][i]=u;
+    }
+  }
+}
+
 bool Dsym::lehet_eltranzitiv(void){
   if (dim!=3)
     throw "Nope.";
@@ -823,6 +844,7 @@ void AnimSvg::print_line(int n0,int n1,int szin,std::ostream* out) {
 void Dsym::create_kdim(void) {
   for (int elhagy=0;elhagy<dim+1;elhagy++){
     int currkis=elhagy;
+    klist[currkis].clear();
 
     std::list<int> nemelerheto,utolso,uj;
     std::list<int>::iterator hanyadik;
@@ -941,6 +963,39 @@ int Dsym::kdimsf(std::list<param>::iterator inf_param){
     }
   }
   return ret;
+}
+
+//Dsym::kdimsf i<max eseten igaz-e, hogy a 0-3 operaciok elhagyasaval kapott
+//"ki nem logo" resz D-szimbolumok megfelelnek a felteteleinknek (0,3 eseten
+//euklideszi vagy szferikus; 1,2 eseten szferikus)
+bool Dsym::kdimsf(int max){
+  if (dim!=3) return -100;
+  uvw1();
+  create_kdim();
+  for (int elhagy=0;elhagy<dim+1;elhagy++){
+    int currkis=elhagy;
+    for(std::list<kisebbdim>::iterator curr=klist[currkis].begin();
+	curr!=klist[currkis].end();curr++){
+      float sum=0;
+      for(std::list<simplex*>::iterator currszim=curr->szek.begin();
+	  currszim!=curr->szek.end();currszim++)
+	if((*currszim)->sorszam[0] < max){
+	  for(int j=0;j<dim;j++)
+	    for(int j1=j+1;j1<dim+1;j1++){
+	      if(j!=elhagy and j1!=elhagy)
+		sum+=1.0/float((*currszim)->mx[j][j1]);
+	    }
+	  sum-=1;
+	  if(sum<-THRESH)
+	    return false;
+	  if(sum<THRESH && sum>-THRESH and elhagy > 0 and elhagy < dim)
+	    return false;
+	}
+	else
+	  break;
+    }
+  }
+  return true;
 }
 
 //Dsym::min: Megnezzuk, hogy a multigraf szimmetriain tul van-e a
@@ -1540,7 +1595,7 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
       int szukseges_fok=D->fok(0,0);
       int fok=D->fok(honnan,0);
       if ( fok <= szukseges_fok && not backtrack_breaks_uvw(D,honnan) && not
-	  backtrack_breaks_eltranzitiv(D,honnan))
+	  backtrack_breaks_eltranzitiv(D,honnan) and D->kdimsf(honnan+1))
 	backtrack(D,saved,0,honnan+1,honnan+2);
     }
     else{
@@ -1577,8 +1632,8 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
 	bte2++;
-        //animation->add_sleep(timetick);
-        timetick+=10;
+	//animation->add_sleep(timetick);
+	timetick+=10;
 	saved->append(ujD);
       }
       delete ujD;
@@ -1596,7 +1651,7 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
 
   if(hova+1<car) backtrack_edges(D,saved,honnan,hova+1);
   else 
-    if (not backtrack_breaks_uvw(D,honnan)){
+    if (not backtrack_breaks_uvw(D,honnan) and D->kdimsf(honnan+1)){
       backtrack_edges(D,saved,honnan+1,honnan+2);
     }
 }

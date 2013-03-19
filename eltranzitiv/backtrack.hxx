@@ -159,6 +159,7 @@ class Dsym {
     int sorszamozas(void);
     bool lehet_eltranzitiv(void);
     int uvw(void);
+    void uvw1(void);
     int ellenoriz(void);
 
     void write_xfig(std::string);
@@ -191,6 +192,7 @@ class Dsym {
     void decrease_param(std::list<param>::iterator);
 
     int kdimsf(std::list<param>::iterator);
+    bool kdimsf(int);
     int min(void);
     std::list<int> osszevlist;
 
