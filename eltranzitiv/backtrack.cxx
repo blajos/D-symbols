@@ -1000,10 +1000,6 @@ bool Dsym::kdimsf(int max){
 	  if (elhagy > 0 and elhagy < dim){
 	    std::cout << "Nem lehet";
 	  }
-	  std::cout << sum << " " << max << " " << elhagy <<
-	    (*(curr->szek.begin()))->sorszam[0] << std::endl;
-	  dump(&std::cout);
-	  std::cout << std::endl;
 	  return false;
 	}
 	if(sum<THRESH && sum>-THRESH and elhagy > 0 and elhagy < dim){
