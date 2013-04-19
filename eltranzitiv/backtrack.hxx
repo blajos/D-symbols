@@ -176,6 +176,7 @@ class Dsym {
     };
     std::list<param> plist;
     struct kisebbdim {
+      int op;
       std::list<simplex*> szek;
       bool iranyitott;
     };
@@ -202,13 +203,13 @@ class Dsym {
     int idcs;	//segedvaltozo idealis csucsok detektalasahoz
     void print_possible_mxes(std::list<param>::iterator,std::ostream*);
     void print_params(int,std::ostream*);
-    void print_possible_splittings(ostream *out);
-    void print_possible_splittings_recursion(ostream *out,list<kisebbdim*>
-	pointlist,list<kisebbdim*> part1list, list<kisebbdim*> notpart1list,
-	list<pair<kisebbdim*,kisebbdim*> > outbound_edges);
-    void print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
-	outbound_edges, list<kisebbdim*> part1list, list<kisebbdim*> rest);
-    int is_connected(list<kisebbdim*>*);
+    void print_possible_splittings(std::ostream *out);
+    void print_possible_splittings_recursion(std::ostream *out,std::list<kisebbdim*>
+	pointlist,std::list<kisebbdim*> part1list, std::list<kisebbdim*> notpart1list,
+	std::list<std::pair<kisebbdim*,kisebbdim*> > outbound_edges);
+    void print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kisebbdim*> >
+	outbound_edges, std::list<kisebbdim*> part1list, std::list<kisebbdim*> rest);
+    int is_connected(std::list<kisebbdim*>*);
 };
 
 bool operator == (Dsym::param,Dsym::param);

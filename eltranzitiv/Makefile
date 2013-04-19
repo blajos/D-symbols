@@ -1,5 +1,6 @@
 CC=g++
-CFLAGS=-c -Wall -g -O2 -std=gnu++11
+#CFLAGS=-c -Wall -g -std=gnu++11
+CFLAGS=-c -Wall -O2 -g -std=gnu++11
 LDFLAGS=-ldb_cxx
 SOURCES=backtrack.cxx
 OBJECTS=$(SOURCES:.cxx=.o)
