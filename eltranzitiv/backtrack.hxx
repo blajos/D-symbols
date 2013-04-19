@@ -159,7 +159,6 @@ class Dsym {
     int sorszamozas(void);
     bool lehet_eltranzitiv(void);
     int uvw(void);
-    void uvw1(void);
     int ellenoriz(void);
 
     void write_xfig(std::string);
@@ -192,7 +191,6 @@ class Dsym {
     void decrease_param(std::list<param>::iterator);
 
     int kdimsf(std::list<param>::iterator);
-    bool kdimsf(int);
     int min(void);
     std::list<int> osszevlist;
 
@@ -204,6 +202,13 @@ class Dsym {
     int idcs;	//segedvaltozo idealis csucsok detektalasahoz
     void print_possible_mxes(std::list<param>::iterator,std::ostream*);
     void print_params(int,std::ostream*);
+    void print_possible_splittings(ostream *out);
+    void print_possible_splittings_recursion(ostream *out,list<kisebbdim*>
+	pointlist,list<kisebbdim*> part1list, list<kisebbdim*> notpart1list,
+	list<pair<kisebbdim*,kisebbdim*> > outbound_edges);
+    void print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
+	outbound_edges, list<kisebbdim*> part1list, list<kisebbdim*> rest);
+    int is_connected(list<kisebbdim*>*);
 };
 
 bool operator == (Dsym::param,Dsym::param);

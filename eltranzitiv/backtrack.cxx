@@ -399,27 +399,6 @@ int Dsym::uvw(void) {
   return 1;
 }
 
-void Dsym::uvw1(void) {
-  for (int r=0;r<car;r++) {				//atlotol tavolabbi
-    for (int i=0;i<dim-1;i++)
-      for (int i1=i+2;i1<dim+1;i1++){
-	csucsok[0][r]->mx[i][i1]=2;
-	csucsok[0][r]->mx[i1][i]=2;
-      }
-    for (int i=0;i<dim+1;i++) csucsok[0][r]->mx[i][i]=1;     //atlo
-    for (int i=0;i<dim;i++) {				       //atlo szomszedok
-      int u=1;
-      simplex* csucs=csucsok[0][r];
-      while (csucs->szomszed[i]->szomszed[i+1] != csucsok[0][r]) {
-	u++;
-	csucs=csucs->szomszed[i]->szomszed[i+1];
-      }
-      csucsok[0][r]->mx[i][i+1]=u;
-      csucsok[0][r]->mx[i+1][i]=u;
-    }
-  }
-}
-
 bool Dsym::lehet_eltranzitiv(void){
   if (dim!=3)
     throw "Nope.";
@@ -844,7 +823,6 @@ void AnimSvg::print_line(int n0,int n1,int szin,std::ostream* out) {
 void Dsym::create_kdim(void) {
   for (int elhagy=0;elhagy<dim+1;elhagy++){
     int currkis=elhagy;
-    klist[currkis].clear();
 
     std::list<int> nemelerheto,utolso,uj;
     std::list<int>::iterator hanyadik;
@@ -928,7 +906,7 @@ void Dsym::create_kdim(void) {
   }
 }
 
-//Dsym::kdimsf: Igaz-e, hogy ha elhagyjuk a 0. vagy az 3. operaciot, akkor a
+//Dsym::kdimsf: Igaz-e, hogy ha elhagyjuk a 0. vagy az n. operaciot, akkor a
 //kisebb dimenzios szimbolum szferikus vagy euklideszi sikon megvalosulhat.
 //Komponensenkent szamolunk: osszeadjuk az 1/m01+1/m12-1/2 ertekeket, ha nem
 //negativ, akkor igaz az allitas. Mivel lebegopontos szamitasokat vegzunk, nem
@@ -965,51 +943,6 @@ int Dsym::kdimsf(std::list<param>::iterator inf_param){
     }
   }
   return ret;
-}
-
-//Dsym::kdimsf i<max eseten igaz-e, hogy a 0-3 operaciok elhagyasaval kapott
-//"ki nem logo" resz D-szimbolumok megfelelnek a felteteleinknek (0,3 eseten
-//euklideszi vagy szferikus; 1,2 eseten szferikus)
-//1-2 esetet nem is kene nezni, mert az uvw feltetel miatt mindig szferikus lesz
-bool Dsym::kdimsf(int max){
-  if (dim!=3) return -100;
-  uvw1();
-  create_kdim();
-  for (int elhagy=0;elhagy<dim+1;elhagy++){
-    int currkis=elhagy;
-    for(std::list<kisebbdim>::iterator curr=klist[currkis].begin();
-	curr!=klist[currkis].end();curr++){
-      float sum=0;
-      bool skip=false;
-      for(std::list<simplex*>::iterator currszim=curr->szek.begin();
-	  currszim!=curr->szek.end();currszim++)
-	if((*currszim)->sorszam[0] < max){
-	  for(int j=0;j<dim;j++)
-	    for(int j1=j+1;j1<dim+1;j1++){
-	      if(j!=elhagy and j1!=elhagy)
-		sum+=1.0/float((*currszim)->mx[j][j1]);
-	    }
-	  sum-=1;
-	}
-	else{
-	  skip=true;
-	  break;
-	}
-      if(not skip){
-	if(sum<-THRESH){
-	  if (elhagy > 0 and elhagy < dim){
-	    std::cout << "Nem lehet";
-	  }
-	  return false;
-	}
-	if(sum<THRESH && sum>-THRESH and elhagy > 0 and elhagy < dim){
-	  std::cout << "Nem lehet";
-	  return false;
-	}
-      }
-    }
-  }
-  return true;
 }
 
 //Dsym::min: Megnezzuk, hogy a multigraf szimmetriain tul van-e a
@@ -1519,6 +1452,329 @@ void Dsym::print_param_mx(std::ostream *out){
   *out<<"</tr>"<<std::endl;
 }
 
+void Dsym::print_possible_splittings(ostream *out){
+  /*
+     list of points=...
+     part1 points=first point
+     notpart1 points={}
+     list of edges going out=edges of first point
+     recursion(out,list of points,part1 points,notpart1 points,list of edges)
+   */
+  list<kisebbdim*> pointlist;
+  for(int op=0;op<dim+1;op++)
+    for(list<kisebbdim>::iterator komp=klist[op].begin();komp!=klist[op].end(); komp++){
+      pointlist.push_back(&(*komp));
+    }
+
+  list<kisebbdim*> part1list;
+  part1list.push_back(*(pointlist.begin()));
+
+  list<kisebbdim*> notpart1list;
+
+  list<pair<kisebbdim*,kisebbdim*> > outbound_edges;
+  for(int op=0;op<dim+1;op++)
+    if (op!=(*part1list.begin())->op)
+      for(list<kisebbdim>::iterator komp=klist[op].begin(); komp!=klist[op].end(); komp++){
+	bool vankozos=false;
+	// Gyorsitas: try catch
+	for(list<simplex*>::iterator szimp1=komp->szek.begin(); szimp1!=komp->szek.end(); szimp1++)
+	  for(list<simplex*>::iterator szimp2=(*part1list.begin())->szek.begin(); szimp2!=(*part1list.begin())->szek.end(); szimp2++)
+	    if (*szimp1 == *szimp2)
+	      vankozos=true;
+	if (vankozos)
+	  outbound_edges.push_back(pair<kisebbdim*,kisebbdim*>(*part1list.begin(),&(*komp)));
+      }
+
+  print_possible_splittings_recursion(out, pointlist, part1list, notpart1list, outbound_edges);
+}
+
+void Dsym::print_possible_splittings_recursion(ostream *out, list<kisebbdim*> pointlist, list<kisebbdim*> part1list, list<kisebbdim*> notpart1list, list<pair<kisebbdim*,kisebbdim*> > outbound_edges){
+  /* 
+     make copy of list of edges going out
+     make copy of notpart1 points
+     while |list of edges going out| > 0;do
+     make copy of part1 points
+     current edge=pop(list of edges going out)
+     unless  current edge's other end in notpart1 points:
+     part1 points+=current edge's other end
+     make copy of list of edges going out
+     list of edges going out+=new points edges going out
+     list of edges going out-=new points edges going in
+     print_splitting(out, list of edges going out)
+     recurse(list of points,part1 points,notpart1 points,list of edges going
+     out,out)
+     notpart1 points+=current edge's other end
+  //remove every instance of current edge's other end from list of edges
+  //going out(double copy solves this problem)
+  done
+
+  Problem FIXME: Only print splittings if notpart1 is connected!
+
+  outbound_edges' elements' first half is in part1; second part is not in
+  part1.
+   */
+
+  list<kisebbdim*> notpart1list1 = list<kisebbdim*>(notpart1list);
+  for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge_it=outbound_edges.begin(); edge_it!=outbound_edges.end(); edge_it++){
+    list<kisebbdim*> part1list1 = list<kisebbdim*>(part1list);
+    pair<kisebbdim*,kisebbdim*> current_edge = *edge_it;
+    kisebbdim* new_point = current_edge.second;
+    bool do_we_care_about_the_edge=true;
+    for(list<kisebbdim*>::iterator it=notpart1list1.begin(); it!=notpart1list1.end(); it++)
+      if(new_point == *it){
+	do_we_care_about_the_edge=false;
+	break;
+      }
+    if (do_we_care_about_the_edge){
+      part1list1.push_back(new_point);
+      list<pair<kisebbdim*,kisebbdim*> > outbound_edges1 = list<pair<kisebbdim*,kisebbdim*> >(outbound_edges);
+      outbound_edges1.remove(current_edge);
+
+      //list of edges going out+=new point's edges going out
+      for(int op=0;op<dim+1;op++)
+	if (op!=new_point->op)
+	  for(list<kisebbdim>::iterator komp=klist[op].begin(); komp!=klist[op].end(); komp++){
+	    bool vankozos=false;
+	    // Gyorsitas: try catch
+	    for(list<simplex*>::iterator szimp1=komp->szek.begin(); szimp1!=komp->szek.end(); szimp1++)
+	      for(list<simplex*>::iterator szimp2=new_point->szek.begin(); szimp2!=new_point->szek.end(); szimp2++)
+		if (*szimp1 == *szimp2)
+		  vankozos=true;
+	    if (vankozos and find(part1list.begin(),part1list.end(),&(*komp))==part1list.end()){
+	      outbound_edges1.push_back(pair<kisebbdim*,kisebbdim*>(new_point,&(*komp)));
+	    }
+	  }
+
+      //list of edges going out-=new point's edges going in
+      for(list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges1.begin(); edge!=outbound_edges1.end();edge++)
+	while (edge!=outbound_edges1.end() and edge->second == new_point)
+	  edge=outbound_edges1.erase(edge);
+
+      list<kisebbdim*> rest=list<kisebbdim*>(pointlist);
+      for(list<kisebbdim*>::iterator part1list1_it=part1list1.begin(); part1list1_it!=part1list1.end(); part1list1_it++)
+	for(list<kisebbdim*>::iterator rest_it=rest.begin(); rest_it!=rest.end(); rest_it++)
+	  if (*rest_it == *part1list1_it){
+	    rest.erase(rest_it);
+	    break;
+	  }
+      if (part1list1.size() > 1 and rest.size() > 1 and is_connected(&rest))
+	print_splitting(out, outbound_edges1, part1list1, rest);
+      print_possible_splittings_recursion(out, pointlist, part1list1, notpart1list1, outbound_edges1);
+      notpart1list1.push_back(new_point);
+    }
+  }
+}
+
+// Is the partition connected?
+int Dsym::is_connected(list<kisebbdim*> *partlist){
+  list<kisebbdim*> unreached=list<kisebbdim*>(*partlist);
+  list<kisebbdim*> reached_prev;
+  reached_prev.push_back(unreached.front());
+  unreached.pop_front();
+  bool modified=true;
+  while(modified){
+    list<kisebbdim*> reached_now;
+    modified=false;
+    for(list<kisebbdim*>::iterator reached_prev_it=reached_prev.begin(); reached_prev_it!=reached_prev.end(); reached_prev_it++){
+      list<kisebbdim*>::iterator unreached_it=unreached.begin();
+      while(unreached_it!=unreached.end()){
+	list<kisebbdim*>::iterator current=unreached_it;
+	unreached_it++;
+	bool vankozos=false;
+	if ((*reached_prev_it)->op != (*current)->op){
+	  for(list<simplex*>::iterator szimp1=(*reached_prev_it)->szek.begin(); szimp1!=(*reached_prev_it)->szek.end(); szimp1++)
+	    for(list<simplex*>::iterator szimp2=(*current)->szek.begin(); szimp2!=(*current)->szek.end(); szimp2++)
+	      if (*szimp1 == *szimp2)
+		vankozos=true;
+	  if (vankozos){
+	    reached_now.push_back(*current);
+	    unreached.erase(current);
+	    modified=true;
+	  }
+	}
+      }
+    }
+    reached_prev.assign(reached_now.begin(),reached_now.end());
+  }
+  if(unreached.empty())
+    return 1;
+  else
+    return 0;
+}
+
+void Dsym::print_splitting(ostream *out, list<pair<kisebbdim*,kisebbdim*> >
+    outbound_edges, list<kisebbdim*> part1list, list<kisebbdim*> rest){
+  /*
+     sum=0;
+     set of simplexes={};
+     simplex_sum=0;
+     foreach edge in outbound_edges:
+     foreach simplex having edge:
+     sum+=1/m_ij
+     simplex_sum+=1
+     push(set of simplexes,simplex)
+     Combinatorial curvature=simplex_sum-2*|set of simplexes|-sum
+     If cc<0:
+     Check good orbifold crit.-> S2
+     elsif cc=0:
+     E2
+     else
+     NOP (We don't care about H2)
+   */
+  float sum=0;
+  list<simplex*> simpleces;
+  float simplex_sum=0;
+  list<param*> splitting_params;
+  for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
+    list<simplex*> simpleces_of_edge;
+    //Egy elnek van elso es masodik csucsa, ezekbol meg tudom mondani a
+    //vonatkozo operacio parokat. Majd meg kell talalni egy kozos szimplexet,
+    //ebbol elindulva az operacioparokkal megtalaljuk a tobbit.
+    int i,j;
+    list<int> ints;
+    for(int i=0;i<dim+1;i++)
+      if (i!=edge->first->op and i!=edge->second->op)
+	ints.push_back(i);
+    if (dim == 3){
+      list<int>::iterator it=ints.begin();
+      i=*it;
+      it++;
+      j=*it;
+    }
+    else
+      throw "We are not in 3 dimensions";
+
+    for(list<simplex*>::iterator szimp1=edge->first->szek.begin(); szimp1!=edge->first->szek.end();szimp1++)
+      for(list<simplex*>::iterator szimp2=edge->second->szek.begin(); szimp2!=edge->second->szek.end();szimp2++)
+	if (*szimp1 == *szimp2)
+	  simpleces_of_edge.push_back(*szimp1);
+
+    if ( j-i == 1 ){
+      param* param_of_edge=&(*params[(*simpleces_of_edge.begin())->sorszam[0]][i]);
+      if ( find(splitting_params.begin(),splitting_params.end(),param_of_edge) == splitting_params.end()) {
+	splitting_params.push_back(param_of_edge);
+      }
+    }
+
+    for (list<simplex*>::iterator szimp=simpleces_of_edge.begin(); szimp!=simpleces_of_edge.end(); szimp++){
+      //FIXME mx[i][j] helyett a parameter minimalis erteket kene venni...
+      //Es tarolni, hogy egy-egy parameterrel hanyszor foglalkoztunk
+      sum+=1.0/(*szimp)->mx[i][j];
+      simplex_sum+=1;
+      if (find(simpleces.begin(),simpleces.end(),*szimp) == simpleces.end())
+	simpleces.push_back(*szimp);
+    }
+  }
+  float cc=simplex_sum-2*simpleces.size()-sum;
+  if ( cc <= THRESH ){
+    //<tr><td>Vertices of one part</td><td>Type of splitting</td><td>Essential
+    //parameters</td></tr>
+    *out << "<tr>";
+    *out << "<td>";
+    /*for(int op=0;op<dim+1;op++){
+      if ( op != 0 )
+     *out << "; ";
+     bool colon=false;
+     for ( list<kisebbdim*>::iterator currpoint=part1list.begin(); currpoint!=part1list.end(); currpoint++ ){
+     if ((*currpoint)->op == op){
+     if (colon)
+     *out << ", ";
+     else
+     colon=true;
+     int min_sorsz=car+1;
+     for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin(); szimp!=(*currpoint)->szek.end(); szimp++ )
+     if ( (*szimp)->sorszam[0] < min_sorsz )
+     min_sorsz=(*szimp)->sorszam[0];
+     *out << min_sorsz+1;
+     }
+     }
+     }*/
+    int* part1szimnum=new int[car];
+    for(int i=0;i<car;i++)
+      part1szimnum[i]=0;
+    for ( list<kisebbdim*>::iterator currpoint=part1list.begin(); currpoint!=part1list.end(); currpoint++ ){
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << (*currpoint)->op << "</mi><mn>";
+      for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin();
+	  szimp!=(*currpoint)->szek.end(); szimp++ ){
+	*out << (*szimp)->sorszam[0]+1 << " ";
+	part1szimnum[(*szimp)->sorszam[0]]++;
+      }
+      *out << "</mn></msub></mrow></math>";
+      *out << "<br>";
+    }
+    *out << "</td>";
+
+    *out << "<td>";
+    int* restszimnum=new int[car];
+    for(int i=0;i<car;i++)
+      restszimnum[i]=0;
+    for ( list<kisebbdim*>::iterator currpoint=rest.begin(); currpoint!=rest.end(); currpoint++ ){
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << (*currpoint)->op << "</mi><mn>";
+      for ( list<simplex*>::iterator szimp=(*currpoint)->szek.begin();
+	  szimp!=(*currpoint)->szek.end(); szimp++ ){
+	*out << (*szimp)->sorszam[0]+1 << " ";
+	restszimnum[(*szimp)->sorszam[0]]++;
+      }
+      *out << "</mn></msub></mrow></math>";
+      *out << "<br>";
+    }
+    *out << "</td>";
+
+    *out << "<td>";
+    if ( cc < -THRESH )
+      *out << "S2" <<endl;
+    else if (cc <= THRESH)
+      *out << "E2" <<endl;
+    else 
+      *out << "H2" <<endl;
+    //*out << "<br>"<< simplex_sum <<"-2*"<< simpleces.size() <<"-"<< sum << "=" << cc ;
+    *out <<"</td>";
+
+    *out << "<td>";
+    bool part1fiber=true;
+    bool restfiber=true;
+    for(int i=0;i<car;i++){
+      if (part1szimnum[i] >= 3){
+	part1fiber=false;
+      }
+      if (restszimnum[i] >= 3){
+	restfiber=false;
+      }
+    }
+    if (part1fiber || restfiber)
+      *out << "Yes";
+    *out << "</td>";
+
+    *out << "<td>";
+    for (list<param*>::iterator param=splitting_params.begin(); param!=splitting_params.end(); param++){
+      if (param!=splitting_params.begin())
+	*out << ", ";
+      //FIXME Hanyszorosan szamit egy-egy parameter?
+      *out << (*param)->kar;
+    }
+    *out << "</td>";
+
+    //debug
+    *out << "<td>";
+    for (list<pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << edge->first->op << "</mi><mn>";
+      for ( list<simplex*>::iterator szimp=edge->first->szek.begin(); szimp!=edge->first->szek.end(); szimp++ )
+	*out << (*szimp)->sorszam[0]+1 << " ";
+      *out << "</mn></msub></mrow></math>";
+      *out << " &rarr; ";
+
+      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << edge->second->op << "</mi><mn>";
+      for ( list<simplex*>::iterator szimp=edge->second->szek.begin(); szimp!=edge->second->szek.end(); szimp++ )
+	*out << (*szimp)->sorszam[0]+1 << " ";
+      *out << "</mn></msub></mrow></math>";
+      *out << "<br>";
+    }
+    *out << "</td>";
+
+    *out << "</tr>"<<endl;
+  }
+}
+
 bool operator == (Dsym::param a,Dsym::param b) {
   return a.kar==b.kar;
 }
@@ -1609,7 +1865,7 @@ void backtrack(Dsym* D,Dsymlista* saved,int szin,int honnan,int hova) {
       int szukseges_fok=D->fok(0,0);
       int fok=D->fok(honnan,0);
       if ( fok <= szukseges_fok && not backtrack_breaks_uvw(D,honnan) && not
-	  backtrack_breaks_eltranzitiv(D,honnan) and D->kdimsf(honnan+1))
+	  backtrack_breaks_eltranzitiv(D,honnan))
 	backtrack(D,saved,0,honnan+1,honnan+2);
     }
     else{
@@ -1645,9 +1901,9 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
       //std::cout << " " << bt1 << " " << start << std::endl;
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
-	bte2++;
-	//animation->add_sleep(timetick);
-	timetick+=10;
+	std::cerr << "\r" << bte2++;
+        //animation->add_sleep(timetick);
+        timetick+=10;
 	saved->append(ujD);
       }
       delete ujD;
@@ -1665,7 +1921,7 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
 
   if(hova+1<car) backtrack_edges(D,saved,honnan,hova+1);
   else 
-    if (not backtrack_breaks_uvw(D,honnan) and D->kdimsf(honnan+1)){
+    if (not backtrack_breaks_uvw(D,honnan)){
       backtrack_edges(D,saved,honnan+1,honnan+2);
     }
 }
@@ -1770,7 +2026,11 @@ int Dsymlista::check(Dsym* element){
   Dbt key((void*)dumpstr.c_str(), dumpstr.size() + 1);
   Dbt data(&a, sizeof(a));
 
-  int ret=fastdb.get(NULL, &key, &data, 0);
+  int ret;
+  if(verify_ok)
+    ret=sorteddb.get(NULL, &key, &data, 0);
+  else
+    ret=fastdb.get(NULL, &key, &data, 0);
   if (ret == DB_NOTFOUND)
     return 0;
   else
@@ -1826,8 +2086,21 @@ void Dsymlista::append(Dsym* new_element){
 
   int ret = fastdb.put(NULL, &key, &data, DB_NOOVERWRITE);
   if (ret == 0) {
-    std::cerr<<"\r"<<count++;
-    sorteddb.put(NULL, &key, &data, DB_NOOVERWRITE);
+    //Only add new element to sorted list, if it has possible matrix values
+    new_element->ellenoriz();
+    new_element->dual=0;
+    new_element->dualis();
+    inf=1000000;
+    new_element->create_params();
+    new_element->create_kdim();
+    new_element->filter_bad_orbifolds();
+
+    std::ostringstream possible_params;
+    new_element->mxnum=new_element->print_possible_params(new_element->plist.begin(), &possible_params);
+    if(new_element->mxnum > 0){
+      std::cerr << std::endl << count++ << std::endl;
+      sorteddb.put(NULL, &key, &data, DB_NOOVERWRITE);
+    }
 
     if ((int)dumpstr.size() + 1 > keylength)
       keylength=2*dumpstr.size();
@@ -1890,14 +2163,33 @@ Dsymlista::Dsymlista(int dimin,int carin,std::string fn):
   sorteddb.set_cachesize(0,200*1024*1024,2);
   sorteddb.set_bt_compare(&compare_d);
 
-  fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
-  sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
+  if (verify_ok){
+    sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_RDONLY, 0);
+    while (true) {
+      std::pair<Dsym*,int> it=getnextsorted();
+      Dsym* curr=it.first;
+      if(curr==NULL)
+	break;
+      delete curr;
+      ++count;
+    }
+    reset_cursor();
+  }
+  else{
+    fastdb.open(NULL, (filename_base + "_fast.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
+    sorteddb.open(NULL, (filename_base + "_sort.db").c_str(), NULL, DB_BTREE, DB_CREATE, 0);
+  }
 }
 
 Dsymlista::~Dsymlista(void){
   if (current!=0)
     current->close();
-  fastdb.close(0);
+  try{
+    fastdb.close(0);
+  }
+  catch (DbException& e){
+    ;
+  }
   sorteddb.close(0);
 }
 
@@ -1963,44 +2255,46 @@ void Dsymlista::reset_cursor(void){
 
 // Create ordered numbering and set keylength if needed
 void Dsymlista::generate_ordered_numbering(void){
-  Dbc *cursor;
-  sorteddb.cursor(0,&cursor,DB_CURSOR_BULK);
+  if(not verify_ok){
+    Dbc *cursor;
+    sorteddb.cursor(0,&cursor,DB_CURSOR_BULK);
 
-  int ssz=1;
-  int temp;
-  char* str;
-  int ret;
+    int ssz=1;
+    int temp;
+    char* str;
+    int ret;
 
-  str=new char[keylength];
+    str=new char[keylength];
 
-  Dbt key;
-  Dbt data(&temp, sizeof(temp));
+    Dbt key;
+    Dbt data(&temp, sizeof(temp));
 
-  key.set_data(str);
-  key.set_ulen(keylength);
-  key.set_flags(DB_DBT_USERMEM);
+    key.set_data(str);
+    key.set_ulen(keylength);
+    key.set_flags(DB_DBT_USERMEM);
 
-  try {
-    ret = cursor->get(&key, &data, DB_NEXT);
-    while (ret != DB_NOTFOUND){
-      temp=ssz++;
-      data.set_data(&temp);
-      cursor->put(&key, &data, DB_CURRENT);
-      fastdb.put(NULL, &key, &data, 0);
+    try {
       ret = cursor->get(&key, &data, DB_NEXT);
+      while (ret != DB_NOTFOUND){
+	temp=ssz++;
+	data.set_data(&temp);
+	cursor->put(&key, &data, DB_CURRENT);
+	fastdb.put(NULL, &key, &data, 0);
+	ret = cursor->get(&key, &data, DB_NEXT);
+      }
     }
-  }
-  catch (DbMemoryException& e){
-    if (e.get_errno() == DB_BUFFER_SMALL) {
-      keylength=2*key.get_size();
-      generate_ordered_numbering();
+    catch (DbMemoryException& e){
+      if (e.get_errno() == DB_BUFFER_SMALL) {
+	keylength=2*key.get_size();
+	generate_ordered_numbering();
+      }
+      else {
+	throw 1;
+      }
     }
-    else {
-      throw 1;
-    }
-  }
 
-  delete[] str;
+    delete[] str;
+  }
 }
 
 void Dsymlista::create_directories(std::string fbase, int count, int prefix=0 ){
@@ -2105,86 +2399,100 @@ void Dsymlista::print_html(std::string filebase){
       list_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
       index_file << "<a href=\"" << (path+"list.html") << "\">From " << ssz << " to " << ssz+output_limit-1 << "<br>" << std::endl;
     }
-    std::ofstream currD;
-    currD.open((fbase+fn+".html").c_str());
+    std::ostringstream possible_params;
+    curr->mxnum=curr->print_possible_params(curr->plist.begin(), &possible_params);
+    if(curr->mxnum > 0){
+      std::ofstream currD;
+      currD.open((fbase+fn+".html").c_str());
 
-    currD<<"<html>"<<std::endl<<"<body>"<<std::endl;
-    currD<<"<h1>"<<ssz<<"</h1>"<<std::endl;
+      currD<<"<html>"<<std::endl<<"<body>"<<std::endl;
+      currD<<"<h1>"<<ssz<<"</h1>"<<std::endl;
 
-    curr->write_svg(&currD);
+      curr->write_svg(&currD);
 
-    currD<<"<table border=\"1\">"<<std::endl;
-    curr->print_param_mx(&currD);
-    currD<< "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
-      " dimensional components: "<< "(" <<curr->osszefuggo(0);
-    for (int i=1;i<dim+1;i++) currD<<","<<curr->osszefuggo(i);
-    currD<< ")</td></tr>"<<std::endl;
-    currD<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
-    int dualchk=0;
-    for (int i=1;i<car+1;i++) {
-      curr->dual->atsorszamoz(i);
-      dualchk=check_with_start(curr->dual,i);
-      if (dualchk!=0) {
-	break;
+      currD<<"<table border=\"1\">"<<std::endl;
+      curr->print_param_mx(&currD);
+      currD<< "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
+	" dimensional components: "<< "(" <<curr->osszefuggo(0);
+      for (int i=1;i<dim+1;i++) currD<<","<<curr->osszefuggo(i);
+      currD<< ")</td></tr>"<<std::endl;
+      currD<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
+      int dualchk=0;
+      for (int i=1;i<car+1;i++) {
+	curr->dual->atsorszamoz(i);
+	dualchk=check_with_start(curr->dual,i);
+	if (dualchk!=0) {
+	  break;
+	}
       }
-    }
-    if (dualchk==0)
-      currD<<"Not found";
-    else
-      if (dualchk==ssz)
-	currD<<"Selfdual";
+      if (dualchk==0)
+	currD<<"Not found";
       else
-	currD<<"D."<<dualchk;
-    currD<<"</td></tr>"<<std::endl;
+	if (dualchk==ssz)
+	  currD<<"Selfdual";
+	else
+	  currD<<"D."<<dualchk;
+      currD<<"</td></tr>"<<std::endl;
 
-    currD<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
-    for(int i=0;i<dim;i++) {
-      currD << "(" <<i<<","<<i+1<<") ";
-      curr->print_params(i,&currD);
-      if (i<dim-1) currD <<"<br>"<<std::endl;
-      else currD<<std::endl<<"</td></tr>"<<std::endl;
-    }
-    currD<<"</table><br><table border=\"1\" cellpadding=\"3\">"
-      <<std::endl<<"<caption>Possible parameter values:</caption>"<<std::endl
-      <<"<thead><tr>";
-    for(std::list<Dsym::param>::iterator pit=curr->plist.begin();
-	pit!=curr->plist.end();pit++)
-      currD<<"<td align=center>"<<pit->kar<<"</td>";
-    currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
-      <<"<td>Good orbifold criteria</td>";
-    currD<<"</tr></thead><tbody>"<<std::endl;
-    curr->mxnum=curr->print_possible_params(curr->plist.begin(),
-	&currD);
-    currD<<std::endl<<"</tbody></table></body></html>"<<std::endl;
+      currD<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
+      for(int i=0;i<dim;i++) {
+	currD << "(" <<i<<","<<i+1<<") ";
+	curr->print_params(i,&currD);
+	if (i<dim-1) currD <<"<br>"<<std::endl;
+	else currD<<std::endl<<"</td></tr>"<<std::endl;
+      }
+      currD<<"</table><br><table border=\"1\" cellpadding=\"3\">"
+	<<std::endl<<"<caption>Possible parameter values:</caption>"<<std::endl
+	<<"<thead><tr>";
+      for(std::list<Dsym::param>::iterator pit=curr->plist.begin();
+	  pit!=curr->plist.end();pit++)
+	currD<<"<td align=center>"<<pit->kar<<"</td>";
+      currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
+	<<"<td>Good orbifold criteria</td>";
+      currD<<"</tr></thead><tbody>"<<std::endl;
+      currD << possible_params.str();
+      currD<<std::endl<<"</tbody></table><br>";
+      // Possible splittings
+      currD<<"<table border=\"1\" cellpadding=\"3\">"
+	<<std::endl<<"<caption>Possible splittings:</caption>"<<std::endl
+	<<"<thead><tr>";
+      currD<<std::endl<<"<td>Vertices of one part</td><td>Vertices of other part</td><td>Type of splitting</td><td>Fiber like?</td><td>Essential parameters</td><td>Edges split</td></tr></thead><tbody>";
+      it->curr->print_possible_splittings(&currD);
+      currD<<std::endl<<"</tbody></table>";
+      currD<<std::endl<<"</body></html>"<<std::endl;
 
-    //html file:
-    list_file<<"<h1>"<<ssz<<"</h1>"<<std::endl;
-    curr->write_svg(&list_file);
-    list_file<<"<table border=\"1\">"<<std::endl;
-    list_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<ssz<<".html"
-      <<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<std::endl;
-    curr->print_param_mx(&list_file);
-    list_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
-      " dimensional components: "<< "(" <<curr->osszefuggo(0);
-    for (int i=1;i<dim+1;i++) list_file <<","<<curr->osszefuggo(i);
-    list_file << ")</td></tr>"<<std::endl;
-    list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
-    if (dualchk==0)
-      list_file<<"Not "<<dim<<"-connected";
-    else
-      if (dualchk==ssz)
-	list_file<<"Selfdual";
+      //html file:
+      list_file<<"<h1>"<<ssz<<"</h1>"<<std::endl;
+      curr->write_svg(&list_file);
+      list_file<<"<table border=\"1\">"<<std::endl;
+      list_file<<"<tr><td colspan=\""<<car<<"\"><a href=\""<<ssz<<".html"
+	<<"\">Number of matrices: "<<curr->mxnum<<"</a></td></tr>"<<std::endl;
+      curr->print_param_mx(&list_file);
+      list_file << "<tr><td colspan=\""<<car<<"\">Number of " << dim-1 << 
+	" dimensional components: "<< "(" <<curr->osszefuggo(0);
+      for (int i=1;i<dim+1;i++) list_file <<","<<curr->osszefuggo(i);
+      list_file << ")</td></tr>"<<std::endl;
+      list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dual: ";
+      if (dualchk==0)
+	list_file<<"Not found";
       else
-	list_file<<"D."<<dualchk;
-    list_file<<"</td></tr>"<<std::endl;
-    list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
-    for(int i=0;i<dim;i++) {
-      list_file << "(" <<i<<","<<i+1<<") ";
-      curr->print_params(i,&list_file);
-      if (i<dim-1) list_file <<"<br>"<<std::endl;
-      else list_file<<std::endl<<"</td></tr>"<<std::endl;
+	if (dualchk==ssz)
+	  list_file<<"Selfdual";
+	else
+	  list_file<<"D."<<dualchk;
+      list_file<<"</td></tr>"<<std::endl;
+      list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Parameters: <br>"<<std::endl;
+      for(int i=0;i<dim;i++) {
+	list_file << "(" <<i<<","<<i+1<<") ";
+	curr->print_params(i,&list_file);
+	if (i<dim-1) list_file <<"<br>"<<std::endl;
+	else list_file<<std::endl<<"</td></tr>"<<std::endl;
+      }
+      list_file<<std::endl<<"</table><br><hr>"<<std::endl;
     }
-    list_file<<std::endl<<"</table><br><hr>"<<std::endl;
+    /*else{
+      throw 5; //Do not reach
+      }*/
     delete curr;
   }
 
