@@ -212,6 +212,7 @@ class Dsym {
 	outbound_edges, std::list<kisebbdim*> part1list, std::list<kisebbdim*> rest);
     int is_connected(std::list<kisebbdim*>*);
     void print_point(std::ostream* out,kisebbdim* point, int* szimnum);
+    void print_point_simpleces(std::ostream* out,kisebbdim* point);
     void print_fundom_eltranzitiv(std::ostream* out);
 };
 

@@ -1460,11 +1460,12 @@ void Dsym::print_param_mx(std::ostream *out){
 void Dsym::print_fundom_eltranzitiv(std::ostream* out){
   // Useful param: params[0][2]: it's always alone in eltranzitiv case
   // Maximal value of params[0][2]: eltranzitiv_visual_hack
-  param* my_param=params[0][2];
+  std::list<Dsym::param>::iterator my_param=params[0][2];
   //FIXME
   /*for (int i=my_param->min_ertek; i<=eltranzitiv_visual_hack; i++){
   }*/
   int i=eltranzitiv_visual_hack;
+  int maxnum=2*abs(my_param->eh * i);
 
   /* Elkepzeles: 1_{osszes} szimplex csucsot kozepre tesszuk; 
    * 0_{1-essel kezdodo csomag} z=1-be kerul, 0_{masik_csomag, ha van} z=-1-be kerul.
@@ -1475,6 +1476,102 @@ void Dsym::print_fundom_eltranzitiv(std::ostream* out){
    * Minden csucsot feliratozunk: 2 db. 3d texttel (egy nagyobbal es egy
    * kisebbel)
    */
+  *out << "                <div id=\"container\"></div> \
+                <script src=\"js/three.js\"></script> \
+                <script src=\"js/libs/stats.min.js\"></script> \
+                <script src=\"js/controls/TrackballControls.js\"></script> \
+                <script src=\"js/fonts/helvetiker_regular.typeface.js\"></script> \
+                <script src=\"js/Detector.js\"></script> \
+                <script src=\"js/eltranzitiv_fundom.js\"></script>" << std::endl;
+  *out << "<script>" << std::endl;
+  std::list<simplex*> starting_simpleces;
+  int op=2;
+  simplex* current=csucsok[0][0];
+  while(current->szomszed[op] != current and current->szomszed[op] !=
+      csucsok[0][0]){
+    current=current->szomszed[op];
+    op++;
+    if(op==4)
+      op=2;
+  }
+  op++;
+  if(op==4)
+    op=2;
+
+  int counter=1;
+  simplex* start=current;
+  while(current->szomszed[op] != current and current->szomszed[op] !=
+      start){
+    counter++;
+    current=current->szomszed[op];
+    op++;
+    if(op==4)
+      op=2;
+  }
+  //counter++; // Az utolsot nem szamoltuk az elobb vagy megsem?
+  starting_simpleces.push_back(current);
+
+  if(counter == car/2){
+    starting_simpleces.push_back(current->szomszed[0]);
+  }
+  else if (counter == car){
+    ; // that's fine
+  }
+  else {
+    std::cerr << counter << std::endl;
+    throw "Up";
+  }
+
+  for(std::list<simplex*>::iterator it=starting_simpleces.begin();
+      it!=starting_simpleces.end();it++){
+    simplex* start=*it;
+    int num=1;
+    int z=1;
+    if (it!=starting_simpleces.begin()){
+      z=-1;
+    }
+    current=start;
+    op=2;
+    if(start->szomszed[3] != start){
+      op=3;
+      num=0;
+    }
+    do {
+      *out << "                  new_simplex(" << z
+	<< ", " << num << ", " << maxnum << ", [";
+      int ops[4]={1,0,2,3};
+      if (op == 3){
+	ops[2]=3;
+	ops[3]=2;
+      }
+      for(int j=0;j<4;j++){
+	int currkis=ops[j];
+	for(std::list<kisebbdim>::iterator curr=klist[currkis].begin();
+	    curr!=klist[currkis].end();curr++){
+	  if(find(curr->szek.begin(),curr->szek.end(),current) !=
+	      curr->szek.end()){
+	    if (j>0)
+	      *out <<", ";
+            *out << "{op: " << currkis << ", simpleces: \"";
+	    print_point_simpleces(out, &*curr);
+	    *out << "\"}";
+	    break;
+	  }
+	}
+      }
+      *out << "]);" << std::endl;
+      if(current==current->szomszed[op])
+	break;
+      else{
+	current=current->szomszed[op];
+	num++;
+	op++;
+	if (op==4)
+	  op=2;
+      }
+    } while (current != start);
+  }
+  *out << "</script>" << std::endl;
 }
 
 void Dsym::print_possible_splittings(std::ostream *out){
@@ -1775,6 +1872,17 @@ void Dsym::print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kis
       print_point(out,edge->second,NULL);
       *out << "<br>";
     }
+    *out << "<button onclick=\"create_splitting([";
+    for (std::list<std::pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
+      if (edge!=outbound_edges.begin())
+	*out<<", ";
+      *out<<"{op1: " << edge->first->op << ", simpleces1: '";
+      print_point_simpleces(out,edge->first);
+      *out << "', op2: " << edge->second->op << ", simpleces2: '";
+      print_point_simpleces(out,edge->second);
+      *out << "'}";
+    }
+    *out << "])\">Show</button>";
     *out << "</td>";
 
     *out << "</tr>"<<std::endl;
@@ -1784,8 +1892,8 @@ void Dsym::print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kis
 void Dsym::print_point(std::ostream* out,kisebbdim* point, int* szimnum){
   *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << point->op << "</mi><mn>";
   struct classcomp {
-      bool operator() (const simplex* lhs, const simplex* rhs) const
-	  {return lhs->sorszam[0] < rhs->sorszam[0];}
+    bool operator() (const simplex* lhs, const simplex* rhs) const
+    {return lhs->sorszam[0] < rhs->sorszam[0];}
   };
   std::set<simplex*,classcomp> szek_set;   
   for ( std::list<simplex*>::iterator szimp=point->szek.begin();
@@ -1799,6 +1907,24 @@ void Dsym::print_point(std::ostream* out,kisebbdim* point, int* szimnum){
     *out << (*szimp)->sorszam[0]+1 << " ";
   }
   *out << "</mn></msub></mrow></math>";
+}
+
+void Dsym::print_point_simpleces(std::ostream* out,kisebbdim* point){
+  struct classcomp {
+    bool operator() (const simplex* lhs, const simplex* rhs) const
+    {return lhs->sorszam[0] < rhs->sorszam[0];}
+  };
+  std::set<simplex*,classcomp> szek_set;   
+  for ( std::list<simplex*>::iterator szimp=point->szek.begin();
+      szimp!=point->szek.end(); szimp++ ){
+    szek_set.insert(*szimp);
+  }
+  for ( std::set<simplex*,classcomp>::iterator szimp=szek_set.begin();
+      szimp!=szek_set.end(); szimp++ ){
+    if(szimp!=szek_set.begin())
+      *out << " ";
+    *out << (*szimp)->sorszam[0]+1;
+  }
 }
 
 bool operator == (Dsym::param a,Dsym::param b) {
@@ -1928,8 +2054,8 @@ void backtrack_edges(Dsym* D,Dsymlista* saved,int honnan,int hova) {
       Dsym* ujD=D->save_with_start(start);
       if (saved->check(ujD)==0){
 	std::cerr << "\r" << bte2++;
-        //animation->add_sleep(timetick);
-        timetick+=10;
+	//animation->add_sleep(timetick);
+	timetick+=10;
 	saved->append(ujD);
       }
       delete ujD;
@@ -2478,6 +2604,8 @@ void Dsymlista::print_html(std::string filebase){
       currD<<"</tr></thead><tbody>"<<std::endl;
       currD << possible_params.str();
       currD<<std::endl<<"</tbody></table><br>";
+      //Fundamental domain
+      curr->print_fundom_eltranzitiv(&currD);
       // Possible splittings
       currD<<"<table border=\"1\" cellpadding=\"3\">"
 	<<std::endl<<"<caption>Possible splittings:</caption>"<<std::endl

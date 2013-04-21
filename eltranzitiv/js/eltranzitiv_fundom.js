@@ -6,7 +6,7 @@ var points_labels = new Array;
 init();
 animate();
 
-function new_simplex(z, num, maxnum, parity, labels) {
+function new_simplex(z, num, maxnum, labels) {
   // z=+1 vagy -1 (also vagy felso szimplex)
   // num: hanyadik (0-val kezdve, also es a felso kor kulon szamit)
   // maxnum: mennyibol (ez ugyanaz kell legyen alul-felul)
@@ -15,6 +15,7 @@ function new_simplex(z, num, maxnum, parity, labels) {
   //   1-es operacio, 2. a 0-as operacio, 3-4. pedig felvaltva a 2-es, 3-as
   //   operacio.
   // parity: 0 vagy 1 az elozoekben emlitett felvaltva dolgozas elojelzese
+  var parity = num % 2;
   var dszog = 2*Math.PI/maxnum;
   var szog = num*dszog;
   var simplex_v = [
@@ -88,7 +89,7 @@ function create_text(text, subscript, position){
   textGeo.computeVertexNormals();
   var textMesh = new THREE.Mesh( textGeo,
       tm );
-  textMesh.position=position;
+  textMesh.position=position.clone();
   textMesh.position.z += 0.01;
   textMesh.rotation.x = Math.PI/2;
 
@@ -96,7 +97,7 @@ function create_text(text, subscript, position){
 
   var textGeo = new THREE.TextGeometry( subscript, {
 
-    size: 0.02,
+    size: 0.04,
       height: 0.001,
       curveSegments: 4,
 
@@ -104,12 +105,12 @@ function create_text(text, subscript, position){
       weight: "normal",
       style: "normal",
 
-      bevelThickness: 0.001,
-      bevelSize: 0.0004,
+      bevelThickness: 0.002,
+      bevelSize: 0.0008,
       bevelEnabled: true,
 
       material: 0,
-      extrudeMaterial: 0.0004
+      extrudeMaterial: 0.0008
 
   });
 
@@ -118,9 +119,9 @@ function create_text(text, subscript, position){
   var textMesh = new THREE.Mesh( textGeo,
       tm );
   textMesh.rotation.x = Math.PI/2;
-  textMesh.position = position;
+  textMesh.position = position.clone();
   textMesh.position.x += 0.08;
-  textMesh.position.z += 0.01;
+  textMesh.position.z -= 0.01;
 
   scene.add(textMesh);
 }
@@ -137,29 +138,28 @@ function create_splitting(labels){
   var geometry = new THREE.Geometry();
   for (var i = 0; i < labels.length; i++){
     // Find first and second points
-    var p1=null;
-    var p2=null;
+    var p1=new Array;
+    var p2=new Array;
     for (var j=0; j < points_labels.length; j++){
-      if(p1 == null && labels[i].op1 == points_labels[j].op &&
+      if(labels[i].op1 == points_labels[j].op &&
 	  labels[i].simpleces1 == points_labels[j].simpleces){
-	    p1 = points_labels[j].point;
+	    p1.push(points_labels[j].point);
 	  }
-      if(p2 == null && labels[i].op2 == points_labels[j].op &&
+      if(labels[i].op2 == points_labels[j].op &&
 	  labels[i].simpleces2 == points_labels[j].simpleces){
-	    p2 = points_labels[j].point;
+	    p2.push(points_labels[j].point);
 	  }
     }
 
-    var moveto = [0,0,0];
-    for (var k=0; k<p1.length; k++){
-      moveto[k]=(p1[k]+p2[k])/2;
+    for (var i1=0; i1<p1.length; i1++){
+      for (var i2=0; i2<p2.length; i2++){
+	var vertex = new THREE.Vector3();
+	vertex.x = (p1[i1].x+p2[i2].x)/2;
+	vertex.y = (p1[i1].y+p2[i2].y)/2;
+	vertex.z = (p1[i1].z+p2[i2].z)/2;
+	geometry.vertices.push( vertex );
+      }
     }
-
-    var vertex = new THREE.Vector3();
-    vertex.x = moveto[0];
-    vertex.y = moveto[1];
-    vertex.z = moveto[2];
-    geometry.vertices.push( vertex );
   }
   splitting_system = new THREE.ParticleSystem(geometry, new
       THREE.ParticleBasicMaterial({color: 0x0f0f0f, size: 0.2, opacity: 0.8}) );
@@ -171,7 +171,7 @@ function init() {
 
   container = document.getElementById( 'container' );
 
-  stats = new Stats();
+  //stats = new Stats();
 
   camera = new THREE.PerspectiveCamera( 70,
       window.innerWidth / window.innerHeight, 0.1, 10 );
@@ -185,14 +185,14 @@ function init() {
   scene = new THREE.Scene();
 
   renderer = new THREE.WebGLRenderer({antialias: true});
-  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setSize( window.innerWidth/2, window.innerHeight/2 );
 
   container.appendChild( renderer.domElement );
 
-  stats = new Stats();
-  stats.domElement.style.position = 'absolute';
-  stats.domElement.style.top = '0px';
-  container.appendChild( stats.domElement );
+  //stats = new Stats();
+  //stats.domElement.style.position = 'absolute';
+  //stats.domElement.style.top = '0px';
+  //container.appendChild( stats.domElement );
 
   window.addEventListener( 'resize', onWindowResize, false );
 
@@ -203,7 +203,7 @@ function onWindowResize() {
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
 
-  renderer.setSize( window.innerWidth, window.innerHeight );
+  renderer.setSize( window.innerWidth/2, window.innerHeight/2 );
 }
 
 function animate() {
@@ -211,7 +211,7 @@ function animate() {
   requestAnimationFrame( animate );
 
   render();
-  stats.update();
+  //stats.update();
 
 }
 
