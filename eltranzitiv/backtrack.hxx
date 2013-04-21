@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <list>
+#include <set>
 #include <vector>
 #include <algorithm>
 #include <set>
@@ -210,6 +211,8 @@ class Dsym {
     void print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kisebbdim*> >
 	outbound_edges, std::list<kisebbdim*> part1list, std::list<kisebbdim*> rest);
     int is_connected(std::list<kisebbdim*>*);
+    void print_point(std::ostream* out,kisebbdim* point, int* szimnum);
+    void print_fundom_eltranzitiv(std::ostream* out);
 };
 
 bool operator == (Dsym::param,Dsym::param);

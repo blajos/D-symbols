@@ -1191,6 +1191,7 @@ void Dsym::print_possible_mxes(std::list<param>::iterator currparam,std::ostream
 //Mivel semmi sem garantalja, hogy nem letezhetnek vegtelen sorok, ezert a
 //parametereknek adunk egy ertelmes felso korlatot (ezt dinamikusan noveljuk,
 //ahogy szukseges)
+int eltranzitiv_visual_hack=0;
 int Dsym::print_possible_params(std::list<param>::iterator currparam,std::ostream *out){
   //A vegtelen sorokat nem szeretjuk...  
   if(currparam->ertek==pmaxertek && currparam!=plist.end() ) return 0;
@@ -1199,6 +1200,9 @@ int Dsym::print_possible_params(std::list<param>::iterator currparam,std::ostrea
     if(currparam==plist.end()) 
       return print_possible_infs(1,plist.begin(),out);
     else {
+      if (currparam->op == 2){
+        eltranzitiv_visual_hack = currparam->ertek;
+      }
       std::list<param>::iterator curr1=currparam;	//curr1=currparam+1
       curr1++;
       int curr_mxnum=print_possible_params(curr1,out);
@@ -1453,6 +1457,26 @@ void Dsym::print_param_mx(std::ostream *out){
   *out<<"</tr>"<<std::endl;
 }
 
+void Dsym::print_fundom_eltranzitiv(std::ostream* out){
+  // Useful param: params[0][2]: it's always alone in eltranzitiv case
+  // Maximal value of params[0][2]: eltranzitiv_visual_hack
+  param* my_param=params[0][2];
+  //FIXME
+  /*for (int i=my_param->min_ertek; i<=eltranzitiv_visual_hack; i++){
+  }*/
+  int i=eltranzitiv_visual_hack;
+
+  /* Elkepzeles: 1_{osszes} szimplex csucsot kozepre tesszuk; 
+   * 0_{1-essel kezdodo csomag} z=1-be kerul, 0_{masik_csomag, ha van} z=-1-be kerul.
+   * 2_{1-essel kezdodo} x=1-be kerul, az osszes tobbi pedig a z=0 sikban 1
+   * sugaru koron elosztva szepen. 
+   * A szimplexeket poliderkent hozzuk letre.
+   * Minden elre teszunk egy lathatatlan particle-t.
+   * Minden csucsot feliratozunk: 2 db. 3d texttel (egy nagyobbal es egy
+   * kisebbel)
+   */
+}
+
 void Dsym::print_possible_splittings(std::ostream *out){
   /*
      std::list of points=...
@@ -1694,13 +1718,7 @@ void Dsym::print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kis
     for(int i=0;i<car;i++)
       part1szimnum[i]=0;
     for ( std::list<kisebbdim*>::iterator currpoint=part1list.begin(); currpoint!=part1list.end(); currpoint++ ){
-      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << (*currpoint)->op << "</mi><mn>";
-      for ( std::list<simplex*>::iterator szimp=(*currpoint)->szek.begin();
-	  szimp!=(*currpoint)->szek.end(); szimp++ ){
-	*out << (*szimp)->sorszam[0]+1 << " ";
-	part1szimnum[(*szimp)->sorszam[0]]++;
-      }
-      *out << "</mn></msub></mrow></math>";
+      print_point(out,*currpoint,part1szimnum);
       *out << "<br>";
     }
     *out << "</td>";
@@ -1710,13 +1728,7 @@ void Dsym::print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kis
     for(int i=0;i<car;i++)
       restszimnum[i]=0;
     for ( std::list<kisebbdim*>::iterator currpoint=rest.begin(); currpoint!=rest.end(); currpoint++ ){
-      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << (*currpoint)->op << "</mi><mn>";
-      for ( std::list<simplex*>::iterator szimp=(*currpoint)->szek.begin();
-	  szimp!=(*currpoint)->szek.end(); szimp++ ){
-	*out << (*szimp)->sorszam[0]+1 << " ";
-	restszimnum[(*szimp)->sorszam[0]]++;
-      }
-      *out << "</mn></msub></mrow></math>";
+      print_point(out,*currpoint,restszimnum);
       *out << "<br>";
     }
     *out << "</td>";
@@ -1758,22 +1770,35 @@ void Dsym::print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kis
     //debug
     *out << "<td>";
     for (std::list<std::pair<kisebbdim*,kisebbdim*> >::iterator edge=outbound_edges.begin(); edge!=outbound_edges.end(); edge++){
-      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << edge->first->op << "</mi><mn>";
-      for ( std::list<simplex*>::iterator szimp=edge->first->szek.begin(); szimp!=edge->first->szek.end(); szimp++ )
-	*out << (*szimp)->sorszam[0]+1 << " ";
-      *out << "</mn></msub></mrow></math>";
+      print_point(out,edge->first,NULL);
       *out << " &rarr; ";
-
-      *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << edge->second->op << "</mi><mn>";
-      for ( std::list<simplex*>::iterator szimp=edge->second->szek.begin(); szimp!=edge->second->szek.end(); szimp++ )
-	*out << (*szimp)->sorszam[0]+1 << " ";
-      *out << "</mn></msub></mrow></math>";
+      print_point(out,edge->second,NULL);
       *out << "<br>";
     }
     *out << "</td>";
 
     *out << "</tr>"<<std::endl;
   }
+}
+
+void Dsym::print_point(std::ostream* out,kisebbdim* point, int* szimnum){
+  *out << "<math xmlns=\"http://www.w3.org/1998/Math/MathML\"><mrow><msub><mi>" << point->op << "</mi><mn>";
+  struct classcomp {
+      bool operator() (const simplex* lhs, const simplex* rhs) const
+	  {return lhs->sorszam[0] < rhs->sorszam[0];}
+  };
+  std::set<simplex*,classcomp> szek_set;   
+  for ( std::list<simplex*>::iterator szimp=point->szek.begin();
+      szimp!=point->szek.end(); szimp++ ){
+    szek_set.insert(*szimp);
+    if ( szimnum != NULL )
+      szimnum[(*szimp)->sorszam[0]]++;
+  }
+  for ( std::set<simplex*,classcomp>::iterator szimp=szek_set.begin();
+      szimp!=szek_set.end(); szimp++ ){
+    *out << (*szimp)->sorszam[0]+1 << " ";
+  }
+  *out << "</mn></msub></mrow></math>";
 }
 
 bool operator == (Dsym::param a,Dsym::param b) {
