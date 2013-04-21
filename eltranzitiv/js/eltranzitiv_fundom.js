@@ -27,10 +27,6 @@ function new_simplex(z, num, maxnum, labels) {
     new THREE.Vector3(Math.pow(Math.cos(dszog),1-parity)*Math.cos(szog+dszog),
         Math.pow(Math.cos(dszog),1-parity)*Math.sin(szog+dszog),
 	0)];
-  for (var i = 0; i < simplex_v.length; i++){
-    points_labels.push({point: simplex_v[i], op: labels[i].op, 
-      simpleces: labels[i].simpleces});
-  }
   var simplex_faces = [[2,1,0],[0,3,2],[1,3,0],[2,3,1]];
 //  var simplex_g = new THREE.PolyhedronGeometry(
 //      simplex_v, simplex_faces);
@@ -54,76 +50,70 @@ function new_simplex(z, num, maxnum, labels) {
 
   //Text:
   for (var i = 0; i < simplex_v.length; i++){
+    var j;
+    for (j = 0; j < points_labels.length; j++){
+      if (points_labels[j].point == simplex_v[i] &&
+	  points_labels[j].op == labels[i].op &&
+	  points_labels[j].simpleces == labels[i].simpleces){
+	    break;
+	  }
+    }
+    if(j == points_labels.length){
+    points_labels.push({point: simplex_v[i], op: labels[i].op, 
+      simpleces: labels[i].simpleces});
     create_text(labels[i].op,labels[i].simpleces,simplex_v[i]);
+    }
   }
 }
 
 function create_text(text, subscript, position){
-  // Szovegek
-  var textGeo = new THREE.TextGeometry( text, {
+  var canvas1 = document.createElement('canvas');
+  var context1 = canvas1.getContext('2d');
+  context1.font = "Bold 40px Arial";
+  context1.fillStyle = "rgba(15,15,15,1)";
+  context1.fillText(text, 0, 50);
 
-    size: 0.1,
-      height: 0.001,
-      curveSegments: 4,
+  // canvas contents will be used for a texture
+  var texture1 = new THREE.Texture(canvas1) 
+    texture1.needsUpdate = true;
 
-      font: "helvetiker",
-      weight: "normal",
-      style: "normal",
+  var material1 = new THREE.MeshBasicMaterial( {map: texture1, side:THREE.DoubleSide } );
+  material1.transparent = true;
 
-      bevelThickness: 0.003,
-      bevelSize: 0.002,
-      bevelEnabled: true,
+  var mesh1 = new THREE.Mesh(
+      new THREE.PlaneGeometry(canvas1.width, canvas1.height),
+      material1
+      );
+  mesh1.scale.x = mesh1.scale.y = mesh1.scale.z = 0.001;
+  mesh1.position=position.clone();
+  mesh1.position.z += 0.01;
+  mesh1.rotation.x = Math.PI/2;
+  scene.add( mesh1 );
 
-      material: 0,
-      extrudeMaterial: 0.002
+  var canvas2 = document.createElement('canvas');
+  var context2 = canvas2.getContext('2d');
+  context2.font = "Bold 16px Arial";
+  context2.fillStyle = "rgba(15,15,15,1)";
+  context2.fillText(subscript, 0, 50);
 
-  });
+  // canvas contents will be used for a texture
+  var texture2 = new THREE.Texture(canvas2) 
+    texture2.needsUpdate = true;
 
-  var tm = new THREE.MeshBasicMaterial( {
-    color: 0x000000,
-      opacity: 1,
-      transparent: false,
-      wireframe: false } );
+  var material1 = new THREE.MeshBasicMaterial( {map: texture2, side:THREE.DoubleSide } );
+  material1.transparent = true;
 
-  textGeo.computeBoundingBox();
-  textGeo.computeVertexNormals();
-  var textMesh = new THREE.Mesh( textGeo,
-      tm );
-  textMesh.position=position.clone();
-  textMesh.position.z += 0.01;
-  textMesh.rotation.x = Math.PI/2;
-
-  scene.add(textMesh);
-
-  var textGeo = new THREE.TextGeometry( subscript, {
-
-    size: 0.04,
-      height: 0.001,
-      curveSegments: 4,
-
-      font: "helvetiker",
-      weight: "normal",
-      style: "normal",
-
-      bevelThickness: 0.002,
-      bevelSize: 0.0008,
-      bevelEnabled: true,
-
-      material: 0,
-      extrudeMaterial: 0.0008
-
-  });
-
-  textGeo.computeBoundingBox();
-  textGeo.computeVertexNormals();
-  var textMesh = new THREE.Mesh( textGeo,
-      tm );
-  textMesh.rotation.x = Math.PI/2;
-  textMesh.position = position.clone();
-  textMesh.position.x += 0.08;
-  textMesh.position.z -= 0.01;
-
-  scene.add(textMesh);
+  var mesh2 = new THREE.Mesh(
+      new THREE.PlaneGeometry(canvas2.width, canvas2.height),
+      material1
+      );
+  console.log("Canvas2:", canvas2.width, canvas2.height);
+  mesh2.scale.x = mesh2.scale.y = mesh2.scale.z = 0.001;
+  mesh2.position=position.clone();
+  mesh2.position.x += 0.08;
+  mesh2.position.z -= 0.01;
+  mesh2.rotation.x = Math.PI/2;
+  scene.add( mesh2 );
 }
 
 function create_splitting(labels){
