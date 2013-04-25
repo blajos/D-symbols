@@ -214,6 +214,7 @@ class Dsym {
     void print_point(std::ostream* out,kisebbdim* point, int* szimnum);
     void print_point_simpleces(std::ostream* out,kisebbdim* point);
     void print_fundom_eltranzitiv(std::ostream* out);
+    std::string make_color(simplex* simplex,int op);
 };
 
 bool operator == (Dsym::param,Dsym::param);

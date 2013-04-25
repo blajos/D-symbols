@@ -1508,7 +1508,6 @@ void Dsym::print_fundom_eltranzitiv(std::ostream* out){
     if(op==4)
       op=2;
   }
-  //counter++; // Az utolsot nem szamoltuk az elobb vagy megsem?
   starting_simpleces.push_back(current);
 
   if(counter == car/2){
@@ -1559,7 +1558,16 @@ void Dsym::print_fundom_eltranzitiv(std::ostream* out){
 	  }
 	}
       }
-      *out << "]);" << std::endl;
+      *out << "]";
+      *out << ", [";
+      for(int j=0;j<4;j++){
+	int currop=ops[j];
+	if (j>0)
+	  *out <<", ";
+	*out << make_color(current,currop);
+      }
+      *out << "]";
+      *out << ");" << std::endl;
       if(current==current->szomszed[op])
 	break;
       else{
@@ -1572,6 +1580,28 @@ void Dsym::print_fundom_eltranzitiv(std::ostream* out){
     } while (current != start);
   }
   *out << "</script>" << std::endl;
+}
+
+std::string Dsym::make_color(simplex* simplex,int op){
+  // op=0..3
+  // simplex=1..24
+  // color: utolso 2 bit: op
+  //        elso 5 bit: kisebbik simplex
+  // igy 0..127 kozotti szamot kapunk 3^5 > 127, ezert 5 fele osztjuk az egyes
+  // szinek tartomanyait: 30, 60, 90, c0, f0
+  int ssz=simplex->sorszam[0];
+  if (simplex->szomszed[op]->sorszam[0] < ssz)
+    ssz=simplex->szomszed[op]->sorszam[0];
+  int szam=ssz*4;
+  szam+=op;
+  int output_num = (int)(((float) szam) * 0xffffff / ((car+1)*4));
+
+  if (simplex->szomszed[op] == simplex)
+    output_num = 0xffffff;
+
+  std::ostringstream output;
+  output << "0x" << std::hex << output_num;
+  return output.str();
 }
 
 void Dsym::print_possible_splittings(std::ostream *out){
