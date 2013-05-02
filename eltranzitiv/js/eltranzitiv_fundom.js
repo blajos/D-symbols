@@ -1,7 +1,8 @@
 var container, stats;
 var camera, scene, renderer;
-var splitting_system;
+var splitting_system = new Array;
 var points_labels = new Array;
+var edges = new Array;
 
 init();
 animate();
@@ -23,79 +24,69 @@ function new_simplex(z, num, maxnum, labels, colors) {
   var simplex_v = [
     new THREE.Vector3(0,0,0),
 	new THREE.Vector3(0,0,z), 
-	new THREE.Vector3(Math.pow(Math.cos(dszog),parity)*Math.cos(szog), 
-	    Math.pow(Math.cos(dszog),parity)*Math.sin(szog),
-	    0),
-	new THREE.Vector3(Math.pow(Math.cos(dszog),1-parity)*Math.cos(szog+dszog),
-	    Math.pow(Math.cos(dszog),1-parity)*Math.sin(szog+dszog),
-	    0)];
-  var simplex_faces = [[1,2,3],
-      [0,2,3],
-      [0,1,3],
-      [0,1,2]];
+	new THREE.Vector3(Math.cos(szog),Math.sin(szog),0).multiplyScalar(Math.pow(Math.cos(dszog),parity)),
+	new THREE.Vector3(Math.cos(szog+dszog),Math.sin(szog+dszog),0).multiplyScalar(Math.pow(Math.cos(dszog),1-parity))];
 
-  var simplex_g = new THREE.Geometry();
-  var simplex_materials = new Array;
-
-  for(var i=0;i<simplex_v.length; i++){
-    simplex_g.vertices.push(simplex_v[i]);
-
-    simplex_materials.push(new THREE.MeshBasicMaterial( {
-      //opacity: 0.5,
-      color: colors[i],
-      //transparent: true,
-      //vertexColors: THREE.FaceColors,
-      side: THREE.DoubleSide,
-      shading: THREE.FlatShading, 
-      overdraw: true,
-      wireframe: false } ));
-
-    //console.log("Color:",colors[i]);
-    var currface=new THREE.Face3(simplex_faces[i][0],simplex_faces[i][1],simplex_faces[i][2]);
-    currface.materialIndex = i;
-    currface.color.setHex(colors[i]);
-    simplex_g.faces.push(currface);
-    var faceuv = [
-                    new THREE.UV(0,1),
-                    new THREE.UV(1,1),
-                    new THREE.UV(1,0)
-                ];
-    simplex_g.faceUvs[0].push(new THREE.UV(0,1));
-    simplex_g.faceVertexUvs[0].push(faceuv);
-  }
-  //simplex_g.materials = simplex_materials;
-
-  var simplex_m1 = new THREE.MeshBasicMaterial( {
-    color: 0x000000,
-      wireframe: true } );
-
-  var simplex_m2 = new THREE.MeshBasicMaterial( {
-    opacity: 0.8,
-    color: colors[0],
-    transparent: true,
-    //vertexColors: THREE.FaceColors,
-    side: THREE.DoubleSide,
-    //shading: THREE.FlatShading, 
-    //overdraw: true,
-    wireframe: false } );
-
-  simplex_g.computeBoundingBox();
-  //simplex_g.computeCentroids();
-  simplex_g.computeFaceNormals();
-  for(var i=0;i<simplex_g.faces.length;i++){
-    for (var j=0;j<3;j++){
-      simplex_g.faces[i].vertexNormals.push(simplex_g.faces[i].normal.clone());
+  if(edges.length == 0){
+    var vertices=new Array;
+    for (var z=-1;z<2;z+=2){
+      var start=new THREE.Vector3(0,0,z);
+      vertices.push(start);
+      var dir1=new THREE.Vector3(Math.cos(szog),Math.sin(szog),0).multiplyScalar(parity*2);
+      dir1.add(new THREE.Vector3(Math.cos(szog+dszog),Math.sin(szog+dszog),0).multiplyScalar((1-parity)*2));
+      var dir2=new THREE.Vector3(Math.cos(szog+2*dszog),Math.sin(szog+2*dszog),0).multiplyScalar(parity*2);
+      dir2.add(new THREE.Vector3(Math.cos(szog-dszog),Math.sin(szog-dszog),0).multiplyScalar((1-parity)*2));
+      vertices.push(new THREE.Vector3().addVectors(start,dir1));
+      vertices.push(new THREE.Vector3().addVectors(start,dir2));
+      vertices.push(new THREE.Vector3().addVectors(start,new THREE.Vector3().addVectors(dir1,dir2)));
     }
+    var geometry=new THREE.Geometry();
+    geometry.vertices=vertices;
+    var faces=[[0,1,3,2],[4,5,7,6],[0,4,5,1],[0,4,6,2],[3,7,5,1],[3,7,6,2]];
+    for(var i=0;i<faces.length;i++){
+      geometry.faces.push(new THREE.Face4(faces[i][0],faces[i][1],faces[i][2],faces[i][3]));
+    }
+    scene.add(new THREE.Mesh( 
+	  geometry,
+	  new THREE.MeshBasicMaterial( { color: 0x000000, wireframe: true } )));
   }
-  //simplex_g.computeMorphNormals();
-  //simplex_g.computeTangents();
-  //simplex_g.computeLineDistances();
 
+  for(var elhagy=0;elhagy < simplex_v.length; elhagy++){
+    var simplex_g = new THREE.Geometry();
 
-  scene.add(new THREE.Mesh( simplex_g, simplex_m1 ));
-  console.log("Geometry:",simplex_g);
-  //scene.add(new THREE.Mesh( simplex_g, new THREE.MeshFaceMaterial(simplex_g.materials) ));
-  scene.add(new THREE.Mesh( simplex_g, simplex_m2 ));
+    for(var i=0;i<simplex_v.length; i++){
+      if (i!=elhagy)
+	simplex_g.vertices.push(simplex_v[i]);
+    }
+    for(var i=0;i<simplex_v.length; i++){
+      for(var j=i+1;j<simplex_v.length; j++){
+	if (i!=elhagy && j!=elhagy)
+	  edges.push({from: simplex_v[i], to: simplex_v[j]});
+      }
+    }
+    simplex_g.faces.push(new THREE.Face3(0,1,2));
+
+    var simplex_m1 = new THREE.MeshBasicMaterial( {
+      color: 0x000000,
+	wireframe: true } );
+
+    var simplex_m2 = new THREE.MeshBasicMaterial( {
+      opacity: 0.8,
+	color: colors[elhagy],
+	transparent: true,
+	side: THREE.DoubleSide,
+	wireframe: false } );
+
+    simplex_g.computeBoundingBox();
+    simplex_g.computeFaceNormals();
+    for (var j=0;j<3;j++){
+      simplex_g.faces[0].vertexNormals.push(simplex_g.faces[0].normal.clone());
+    }
+
+    scene.add(new THREE.Mesh( simplex_g, simplex_m1 ));
+    scene.add(new THREE.Mesh( simplex_g, simplex_m2 ));
+  }
+
 
   //Text:
   for (var i = 0; i < simplex_v.length; i++){
@@ -195,12 +186,10 @@ function create_splitting(labels){
   // labels: Array of: { op1: <elhagyott operacio>, simpleces1: "<szokozzel
   //   felsorolva az erintett szimplexek rendezetten>", op2: <tulso veg op>,
   //   simpleces2: <tulso veg simpleces> } 
-  try {
-    scene.remove(splitting_system);
-  }
-  catch (err){}
+  for (var i=0;i<splitting_system.length;i++)
+    scene.remove(splitting_system[i]);
+  splitting_system = new Array;
 
-  var geometry = new THREE.Geometry();
   for (var i = 0; i < labels.length; i++){
     // Find first and second points
     var p1=new Array;
@@ -218,30 +207,67 @@ function create_splitting(labels){
 
     for (var i1=0; i1<p1.length; i1++){
       for (var i2=0; i2<p2.length; i2++){
-	var vertex = new THREE.Vector3();
-	vertex.x = (p1[i1].x+p2[i2].x)/2;
-	vertex.y = (p1[i1].y+p2[i2].y)/2;
-	vertex.z = (p1[i1].z+p2[i2].z)/2;
-	geometry.vertices.push( vertex );
+	var is_really_edge=false;
+	for (var j=0; j<edges.length; j++){
+	  if((edges[j].from.equals(p1[i1]) && edges[j].to.equals(p2[i2])) ||
+	     (edges[j].from.equals(p2[i2]) && edges[j].to.equals(p1[i1])))
+	    is_really_edge=true;
+	}
+	if (is_really_edge){
+	  var plane_g=new THREE.PlaneGeometry(0.1,0.1);
+	  var plane_m1=new THREE.Mesh( plane_g, new THREE.MeshBasicMaterial( { color: 0xff0000}));
+	  var plane_m2=new THREE.Mesh( plane_g, new THREE.MeshBasicMaterial( { color: 0x00ff00}));
+
+	  var halfpos = new THREE.Vector3((p1[i1].x+p2[i2].x)/2,
+	      (p1[i1].y+p2[i2].y)/2, (p1[i1].z+p2[i2].z)/2);
+	  var normal = new THREE.Vector3().subVectors(p1[i1],halfpos).normalize();
+	  var mx1 = new THREE.Matrix4(1,0,0,halfpos.x,
+	                              0,1,0,halfpos.y,
+				      0,0,normal.z,halfpos.z,
+				      0,0,0,1);
+          if (normal.x != 0 || normal.y != 0){
+	    var b1=new THREE.Vector3().crossVectors(normal, new
+		THREE.Vector3(0,0,1));
+	    var b2=new THREE.Vector3().crossVectors(normal, b1);
+	    mx1.elements[0]=b1.x;
+	    mx1.elements[4]=b1.y;
+	    mx1.elements[8]=b1.z;
+	    mx1.elements[1]=b2.x;
+	    mx1.elements[5]=b2.y;
+	    mx1.elements[9]=b2.z;
+	    mx1.elements[2]=normal.x;
+	    mx1.elements[6]=normal.y;
+	    mx1.elements[10]=normal.z;
+	  }
+	  mx1.transpose();
+          plane_m1.applyMatrix(mx1);
+	  plane_m1.position=halfpos;
+	  mx1.elements[8]=-mx1.elements[8];
+	  mx1.elements[9]=-mx1.elements[9];
+	  mx1.elements[10]=-mx1.elements[10];
+          plane_m2.applyMatrix(mx1);
+	  plane_m2.position=halfpos;
+	  splitting_system.push(plane_m1);
+	  scene.add(plane_m1);
+	  splitting_system.push(plane_m2);
+	  scene.add(plane_m2);
+	}
       }
     }
   }
-  splitting_system = new THREE.ParticleSystem(geometry, new
-      THREE.ParticleBasicMaterial({color: 0x0f0f0f, size: 0.2, opacity: 0.8}) );
-  scene.add(splitting_system);
 }
 
 function init() {
-  if ( ! Detector.webgl ) Detector.addGetWebGLMessage();
 
   container = document.getElementById( 'container' );
 
   //stats = new Stats();
 
-  camera = new THREE.PerspectiveCamera( 70,
-      window.innerWidth / window.innerHeight, 0.1, 10 );
-  camera.position.y = -2;
-  camera.position.z = 1;
+  //camera = new THREE.OrthographicCamera(-3, 3, -2, 2, 0.1, 10);
+  camera = new THREE.PerspectiveCamera( 40, window.innerWidth /
+      window.innerHeight, 0.0001, 1000 );
+  camera.position.y = -4;
+  camera.position.z = 2;
   camera.up.x = 0;
   camera.up.y = 0;
   camera.up.z = 1;
@@ -249,9 +275,14 @@ function init() {
 
   scene = new THREE.Scene();
 
-  renderer = new THREE.WebGLRenderer({antialias: true});
-  //renderer = new THREE.CanvasRenderer();
-  renderer.setSize( window.innerWidth/2, window.innerHeight/2 );
+  if ( ! Detector.webgl ){
+    Detector.addGetWebGLMessage();
+    renderer = new THREE.CanvasRenderer();
+  }
+  else {
+    renderer = new THREE.WebGLRenderer({antialias: true});
+  }
+  renderer.setSize( window.innerWidth, window.innerHeight );
 
   container.appendChild( renderer.domElement );
 

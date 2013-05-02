@@ -1477,12 +1477,12 @@ void Dsym::print_fundom_eltranzitiv(std::ostream* out){
    * kisebbel)
    */
   *out << "                <div id=\"container\"></div> \
-                <script src=\"js/three.js\"></script> \
-                <script src=\"js/libs/stats.min.js\"></script> \
-                <script src=\"js/controls/TrackballControls.js\"></script> \
-                <script src=\"js/fonts/helvetiker_regular.typeface.js\"></script> \
-                <script src=\"js/Detector.js\"></script> \
-                <script src=\"js/eltranzitiv_fundom.js\"></script>" << std::endl;
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/three.min.js\"></script> \
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/libs/stats.min.js\"></script> \
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/controls/TrackballControls.js\"></script> \
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/fonts/helvetiker_regular.typeface.js\"></script> \
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/Detector.js\"></script> \
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/eltranzitiv_fundom.js\"></script>" << std::endl;
   *out << "<script>" << std::endl;
   std::list<simplex*> starting_simpleces;
   int op=2;
@@ -1871,6 +1871,11 @@ void Dsym::print_splitting(std::ostream *out, std::list<std::pair<kisebbdim*,kis
     *out <<"</td>";
 
     *out << "<td>";
+    // FIXME Ennel bonyolultabb a tortenet: az is kell, hogy minden erintett
+    // csucsban pontosan 2 el van. Ez pontosan akkor van igy, ha az adott
+    // nem idealis csucs koruli kovezesben legfeljebb 2 (egyesitett) parameter
+    // van es ezek a megfelelo elek. Idealis csucs eseten legfeljebb 1 parameter
+    // van, ami a megfelelo el.
     bool part1fiber=true;
     bool restfiber=true;
     for(int i=0;i<car;i++){
@@ -2534,6 +2539,8 @@ std::string Dsymlista::get_path(std::string fbase, int num){
 //annyi pluszt teszunk hozza, hogy kulon fajlba (currD) kiirjuk az osszes
 //lehetseges matrix-rendszert is.
 void Dsymlista::print_html(std::string filebase){
+  if(count==0)
+    return;
   std::string path="-1";
   std::string prev_path="-1";
   std::string fbase;
