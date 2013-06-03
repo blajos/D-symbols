@@ -2586,7 +2586,8 @@ void Dsymlista::print_html(std::string filebase){
       }
       list_file.open((fbase+path+"list.html").c_str());
       list_file<<"<html>"<<std::endl<<"<body>"<<std::endl;
-      index_file << "<a href=\"" << (path+"list.html") << "\">From " << ssz << " to " << ssz+output_limit-1 << "<br>" << std::endl;
+      index_file << "<a href=\"" << (path+"list.html") << "\">From " << ssz << 
+	" to " << (ssz+output_limit-1 > count ? count : ssz+output_limit-1)  << "<br>" << std::endl;
     }
     std::ostringstream possible_params;
     curr->mxnum=curr->print_possible_params(curr->plist.begin(), &possible_params);
@@ -2647,7 +2648,7 @@ void Dsymlista::print_html(std::string filebase){
       currD<<"<table border=\"1\" cellpadding=\"3\">"
 	<<std::endl<<"<caption>Possible splittings:</caption>"<<std::endl
 	<<"<thead><tr>";
-      currD<<std::endl<<"<td>Vertices of one part</td><td>Vertices of other part</td><td>Type of splitting</td><td>Fiber like?</td><td>Essential parameters</td><td>Edges split</td></tr></thead><tbody>";
+      currD<<std::endl<<"<td>Vertices of one part</td><td>Vertices of other part</td><td>Type of splitting</td><td>Possible fiber</td><td>Essential parameters</td><td>Edges split</td></tr></thead><tbody>";
       curr->print_possible_splittings(&currD);
       currD<<std::endl<<"</tbody></table>";
       currD<<std::endl<<"</body></html>"<<std::endl;
