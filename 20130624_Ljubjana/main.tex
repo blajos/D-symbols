@@ -10,6 +10,7 @@
 \usetheme{Goettingen}
 \beamertemplatenavigationsymbolsempty
 \beamertemplatetextbibitems
+\setbeamertemplate{footline}[frame number]
 
 \newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
 
@@ -208,7 +209,7 @@ tiling.
 	\item The values of the main diagonal has to be $1$\mode<article>{,
 	  because we have adjacency operations.}
 	\item The values of the first diagonal above and below the main has to
-	  be $\ge2$\mode<article>{. In case of nice tilings in 3 dimensions
+	  be $\geq3$\mode<article>{. In case of nice tilings in 3 dimensions
 	  every vertex joins at least 3 edges and 3 facets, every facet has at
 	  least 3 edges and every edge joins 3 facets and 3 bodies.}
 	\item Every other value has to be exactly $2$\mode<article>{, so we stay
@@ -216,7 +217,7 @@ tiling.
 	  $\forall i,j\in I, \forall D\in \mathcal{D}$:
 	  \begin{align*}
 	    i=j & \Rightarrow m_{ij}(D)=1 \\
-	    |i-j| = 1 &\Rightarrow m_{ij}(D)\geq2 \\
+	    |i-j| = 1 &\Rightarrow m_{ij}(D)\geq3 \\
 	    |i-j|\geq2 &\Rightarrow m_{ij}(D)=2
 	  \end{align*}
       \end{enumerate}
@@ -306,13 +307,14 @@ tiling.
 \begin{frame}
   How can we use the D-symbols for $3$-dimensional edge-transitive tilings?
   \begin{itemize}
-    \item Very simple new constraint: $|\mathcal{C}_1|=1$. In english: the
+    \item Very simple new constraint: $|\mathcal{C}_1|=1$. The
       D-diagram cannot "fall apart" if we cancel it's $1$-colored (dashed)
       edges
-    \item Let's enumerate diagrams without $1$-colored edges, and put back them
-      in every possible (good) way
-    \item Enumerating diagrams becomes easier
-    \item It can be proved that the maximal cardinality of such tilings is $24$.
+    \item Enumerating diagrams becomes easier: Let's enumerate diagrams without
+      $1$-colored edges, and put back them in every possible (good) way
+    \item It can be proved that the maximal cardinality of such tilings is $24$
+      based on the combinatorial curvature function of
+      $(\leftexp{1}{\Sigma_I}^1,\leftexp{1}{\mathcal{D}}^1,\leftexp{1}{\mathcal{M}}^1)$.
       We could enumerate all of them. \mode<article>{Last time maximum: $18$.}
   \end{itemize}
 \end{frame}
@@ -374,20 +376,24 @@ tiling.
 \end{frame}
 
 \begin{frame}
-  Further constraints for tilings without splittings
+  Further constraints for D-symbols without splittings
   \begin{itemize}
-    \item The above figures and remarks show that if we calculate the
-      combinatorial curvature function for the appropriate $2$-dimensional
-      tilings, we can get a lower bound for the parameters.
     \item Based on the $3$-dimensional D-diagram, we can describe the tiling's
       simplex-vertice classes and the edges between simplex-vertice classes.
       Take this system as a graph and examine the border between every possible
       2-partitions \mode<article>{(where both partitions have at least 2
       vertices) using the above mentioned combinatorial curvature function.}
+    \item Every such border gives us a $2$-dimensional tiling of which we
+      already know the generators and relations. \mode<article>{There's a slight
+      problem though: these tilings can have triangles and quadrangles
+      (splitting a tetrahedron can give you a triangle or a quadrangle,) but our
+      combinatorial curvature function is for triangles only. This can be
+      resolved quite easily by triangulating the quadrangles.}
     \item Examining such "splitting-candidates", we can get lower bounds
       for the parameters of D-symbols without splittings. \mode<article>{If and
       only if there is no splitting in a D-symbol, then every such 2 dimensional
-      tiling is $H^2$-tiling.}
+      tiling is $H^2$-tiling and this is a lower bound for $m$-values in the
+      combinatorial curvature function.}
     \item (If we could find one such that it's not realizable in any of the 8
       Thurston-geometries, then this would be a counter-example of the Thurston
       conjecture.)
@@ -402,11 +408,11 @@ tiling.
   \mode<article>{Figure \ref{fig:d3c6_31}. looks like a screenshot, let's see
   the original at
   \href{http://math.bme.hu/~boroczki/D-symbols-edge-transitive/d3c6/31.html}{my
-  homepage.}}
+  homepage.}
   Constructing a visualisation of the fundamental
   domain for edge transitive tilings is pretty straightforward: Take the 1 or 2
   simplex edges between 0 and 1 vertices, and put around them the simpleces
-  using their single parameter.}}
+  using their single parameter.}
   \begin{figure}
     \mode<article>{\caption{\label{fig:d3c6_31} 31st D-symbol with cardinality 6
     in 3D}}
