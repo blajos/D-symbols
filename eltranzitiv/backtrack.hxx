@@ -137,6 +137,8 @@ class simplex {
 //  print_params: (int,int+1) operacio-parhoz tartozo parameterek es
 //   egyutthatoik kiirasa ("+"-t irunk moge, ha iranyitott.) A karakter ahhoz
 //   kell, hogy atlathatobb legyen a kimenet.
+//  min_print_smaller: Ha nem maximalis a Dsym, irjuk ki a kisebb elemszamu
+//   diagramot.
 class Dsym {
   public:
     int dim,car;
@@ -195,6 +197,7 @@ class Dsym {
 
     int kdimsf(std::list<param>::iterator);
     int min(void);
+    void min_print_smaller(std::ostream*);
     std::list<int> osszevlist;
 
     void print_param_mx(std::ostream*);

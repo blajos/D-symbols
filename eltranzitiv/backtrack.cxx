@@ -990,6 +990,76 @@ int Dsym::min(void){
     return 1;
 }
 
+//Dsym::min_print_smaller: Ha nem maximalis es nem atsorszamozhato, akkor
+//allitsuk elo a megfelelo kisebb elemszamu diagramot (a parameter ertekekkel
+//egyelore felesleges foglalkozni.)
+void Dsym::min_print_smaller(std::ostream *out){
+  Dsym* minimal=new Dsym(dim,car/(osszevlist.size()+1));
+  
+  // Vegigmegyunk az osszes szimplex osztalyon, a kulonbozo osszevlist beli elem
+  // szerinti sorszamozasok kozul melyikben a legkisebb a sorszama?
+  int* smallest_index=new int[car+1];
+  for(int i=0;i<car;i++){
+    int smallest=csucsok[1][i]->sorszam[1];
+    for(std::list<int>::iterator it=osszevlist.begin();it!=osszevlist.end();
+	it++){
+      if (smallest > csucsok[1][i]->sorszam[*it])
+	smallest = csucsok[1][i]->sorszam[*it];
+    }
+    smallest_index[i]=smallest;
+  }
+
+  // A kulonbozo smallest_indexekhez hozzarendelunk a minimal diagramban egy
+  // sorszamot.
+  int* minimal_diag_index=new int[car+1];
+  int max=0;
+  for(int i=0;i<car;i++){
+    minimal_diag_index[i] = -1;
+  }
+  for(int i=0;i<car;i++){
+    if (minimal_diag_index[smallest_index[i]] == -1)
+      minimal_diag_index[smallest_index[i]] = max++;
+  }
+  for(int d=0;d<dim+1;d++){
+    for(int i=0;i<car;i++)
+      minimal->elhozzaad(d, minimal_diag_index[smallest_index[i]],
+	  minimal_diag_index[smallest_index[csucsok[1][i]->szomszed[d]->sorszam[1]]]);
+  }
+
+  // A sorszamozas meg nem biztos, hogy jo, ezt kijavitjuk
+  minimal->ellenoriz();
+  int start=1;
+  for(int i=1;i<minimal->car;i++){
+    minimal->atsorszamoz(i+1);
+    if(kisebb(minimal,i+1,minimal,start)==1)
+      start=i+1;
+  }
+  Dsym* ujminimal=minimal->save_with_start(start);
+  ujminimal->ellenoriz();
+  *out << "<!--";
+  ujminimal->dump(out);
+  *out << "-->";
+
+  char buffer [50];
+  sprintf (buffer, "d%dc%d", dim, ujminimal->car);
+  std::string fn(buffer);
+  Dsymlista* prevlist=new Dsymlista(dim,ujminimal->car,fn);
+  if( prevlist->verify_ok ){
+    int index=prevlist->check_sorted(ujminimal,1);
+    *out << "d" << dim << "c" << ujminimal->car << "_" << index;
+  }
+  else {
+    *out << "d" << dim << "c" << ujminimal->car << " database error";
+  }
+
+
+  delete[] smallest_index;
+  delete[] minimal_diag_index;
+  delete prevlist;
+  delete ujminimal;
+  delete minimal;
+}
+
 //Dsym::create_params: plist parameter lista feltoltese az egyutthatoval, a
 //megfelelo operacio-parral, es a szimplexekkel, amiket a parameter erint;
 //illetve a parameter ertek beallitasa arra a minimalis ertekre, ahol az
@@ -1270,6 +1340,8 @@ int Dsym::print_possible_infs(int pass,std::list<param>::iterator currparam,
 	      it++)
 	    *out<<"="<<*it;
 	  *out<<")";
+	  *out << "<br>";
+	  min_print_smaller(out);
 	}
 	*out<<"</td>";
 	/*else if(min()==-1)
@@ -2238,7 +2310,7 @@ int Dsymlista::check_with_start(Dsym* element,int start){
 int Dsymlista::check_sorted(Dsym* element,int start){
   std::ostringstream dumpsstr;
   Dsym* ujD=element->save_with_start(start);
-  int ret=-3;
+  int real_ret=-3;
   if (check(ujD)){
     ujD->dump(&dumpsstr);
     std::string dumpstr=dumpsstr.str();
@@ -2249,17 +2321,17 @@ int Dsymlista::check_sorted(Dsym* element,int start){
 
     int ret=sorteddb.get(NULL, &key, &data, 0);
     if (ret == DB_NOTFOUND)
-      ret=-1;
+      real_ret=-1;
     else
-      ret=a;
+      real_ret=*(int*)data.get_data();
   }
   else{
     // Elvileg nem erhetunk ide
     throw -2;
-    ret=-2;
+    real_ret=-2;
   }
   delete ujD;
-  return ret;
+  return real_ret;
 }
 
 
