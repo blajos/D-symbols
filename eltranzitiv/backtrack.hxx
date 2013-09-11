@@ -173,6 +173,7 @@ class Dsym {
     struct param {
       int eh,min_ertek,ertek,op;
       char kar;
+      std::string label;
       std::list<simplex*> szek;
     };
     std::list<param> plist;

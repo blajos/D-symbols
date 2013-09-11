@@ -518,7 +518,7 @@ void Dsym::print_params(int op0,std::ostream* out) {
   for (std::list<param>::iterator currparam=plist.begin();currparam!=plist.end();
       currparam++)
     if(op0==currparam->op){
-      *out << abs(currparam->eh) << currparam->kar;
+      *out << abs(currparam->eh) << "(" << currparam->label << ")";
       if ( currparam->eh>0 ) *out<<"+";
       *out<<" ";
     }
@@ -1009,6 +1009,7 @@ void Dsym::create_params(void){
       currparam.eh=0;	//a param egyutthatoja
       currparam.op=op0;
       currparam.kar=karakter;
+      currparam.label=karakter;
       karakter++;
       int akt=-1; //az aktualis hely a koron
       int ir=1; //1 iranyitott, 0 iranyitatlan
@@ -1099,6 +1100,8 @@ void Dsym::filter_bad_orbifolds(void){
 	  params[(*szit)->sorszam[1]][op]=egyik;
 
 	egyik->szek.splice(egyik->szek.end(),masik->szek);
+	egyik->label+="=";
+	egyik->label+=masik->label;
 
 	plist.erase(masik);
       }
@@ -1281,7 +1284,6 @@ int Dsym::print_possible_infs(int pass,std::list<param>::iterator currparam,
 	else
 	  *out<<badorb.str();
 	*out<<"</td>";
-	//backup info
 	*out<<"</tr>"<<std::endl;
 	return 1;
       }
@@ -2631,6 +2633,9 @@ void Dsymlista::print_html(std::string filebase){
 	if (i<dim-1) currD <<"<br>"<<std::endl;
 	else currD<<std::endl<<"</td></tr>"<<std::endl;
       }
+      currD<<"<tr><td colspan=\""<<car<<"\">"<<"Dump: ";
+      curr->dump(&currD);
+      currD<<"</td></tr>"<<std::endl;
       currD<<"</table><br><table border=\"1\" cellpadding=\"3\">"
 	<<std::endl<<"<caption>Possible parameter values:</caption>"<<std::endl
 	<<"<thead><tr>";
@@ -2680,6 +2685,9 @@ void Dsymlista::print_html(std::string filebase){
 	if (i<dim-1) list_file <<"<br>"<<std::endl;
 	else list_file<<std::endl<<"</td></tr>"<<std::endl;
       }
+      list_file<<"<tr><td colspan=\""<<car<<"\">"<<"Dump: ";
+      curr->dump(&list_file);
+      list_file<<"</td></tr>"<<std::endl;
       list_file<<std::endl<<"</table><br><hr>"<<std::endl;
     }
     /*else{
