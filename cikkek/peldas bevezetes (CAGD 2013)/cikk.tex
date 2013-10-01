@@ -4,21 +4,33 @@
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{verbatim}
-\usepackage[colorlinks=true,linkcolor=black,urlcolor=blue]{hyperref}
+\usepackage[hidelinks]{hyperref}
 \usepackage{bookmark}
 \usepackage{listings}
 \usepackage{amsmath}
 \usepackage{amssymb}
+\usepackage{amsthm}
 \usepackage{ae,aecompl}
 
 \newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
+\newcommand{\leftsub}[2]{{\vphantom{#2}}_{#1}{#2}}
+
+\theoremstyle{plain}% default
 \newtheorem{thm}{Theorem}[section]
-\newtheorem{defn}[thm]{Definition}
 \newtheorem{lem}[thm]{Lemma}
-\newtheorem{kov}[thm]{Corollary}
-\newtheorem{sej}[thm]{Conjecture}
-\newtheorem{alg}[thm]{Algorithm}
-\newenvironment{biz}{Proof: }{\qed}
+\newtheorem{prop}[thm]{Proposition}
+\newtheorem*{cor}{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{defn}{Definition}[section]
+\newtheorem{conj}{Conjecture}[section]
+\newtheorem{exmp}{Example}[section]
+
+\theoremstyle{remark}
+\newtheorem*{rem}{Remark}
+\newtheorem*{note}{Note}
+\newtheorem{case}{Case}
+
 
 
 \begin{document}
@@ -33,11 +45,11 @@
   domain, can be represented by a diagram and a matrix valued function, based on
   their barycentric subdivision and the adjacency relations between the orbits
   and the particular simplices. The representation is called the D-symbol of a
-  tiling in honour of Delone, Delaney and Dress. The representation is easily
-  adoptable to computer programs.
+  tiling in honour of B. N. Delone, M.S. Delaney and A.W.M. Dress. The
+  representation is easily adoptable to computer programs.
 
-  After a short introduction and definition of D-symbols we would like to
-  present some recent examples of edge transitive D-symbols and some of their
+  After a short introduction and definition of D-symbols we 
+  present some recent results of edge transitive D-symbols and some of their
   nice properties found by computer analysis.
 \end{abstract}
 
@@ -54,14 +66,15 @@ Why just some examples?
 We shall briefly introduce D-symbols (for a more comprehensive introduction see
 also \cite{BSzK02}, \cite{DHM93}, \cite{M96}, FIXME). 
 
-For an equivariant periodic tiling $(\mathcal{T},\Gamma)$ on a $d$-dimensional simply
-connected manifold $\mathcal{S}^d$ the barycentric simplex subdivision of $\mathcal{T}$
-can be taken, which remains compatible with the action of $\Gamma$. Let's denote
-the resulting chamber system with $\mathcal{C}$, the $\Gamma$ orbits of the
-chambers with $C^\Gamma$ for every $C\in \mathcal{C}$ and $\mathcal{D}:=
-\mathcal{C}^\Gamma$. Every $C\in \mathcal{C}$
+For an equivariant periodic tiling $(\mathcal{T},\Gamma)$ in a $d$-dimensional simply
+connected manifold $\mathcal{S}^d$ (with its piece-wise linear (PL) topology) the barycentric simplex subdivision of $\mathcal{T}$
+can be taken, which remains compatible with the group action of $\Gamma$. Let's denote
+the resulting chamber system by $\mathcal{C}$, the $\Gamma$ orbits of the
+chambers by $D=C^\Gamma$ for every $C\in \mathcal{C}$ and $\mathcal{D}:=
+\mathcal{C}^\Gamma$ the set of chamber orbits. Every $C\in \mathcal{C}$
 is a $d$-dimensional simplex, and the vertices of the simplex can be labeled by
-the numbers $0\ldots d$ showing the dimension of their respective face. For
+the numbers $0\ldots d$ showing the dimension of their respective face centered
+in the corresponding vertex. For
 example if we take the baricentric subdivision of a $3$-dimensional cube: we get
 a body center labeled by $3$, a facet center labeled by $2$, an edge center
 labeled by $1$ and one of the original vertices labeled by $0$. The facets
@@ -69,31 +82,44 @@ of the chambers ($d-1$ dimensional faces) can be labeled by the same $0\ldots d$
 using the label of the only vertex, that the facet doesn't contain.
 
 Every chamber has $d+1$ neighbours by the facet they share and this adjacency is
-conserved by the action of $\Gamma$. So we can take the adjacency operations and
+preserved by the action of $\Gamma$. So we can take the adjacency operations and
 use them formally as a free Coxeter group $\Sigma^I := <(\sigma^i, i\in I) |
 ((\sigma^i)^2=1, i\in I)>$ acting on $\mathcal{C}$ or $\mathcal{D}$
-respectively, where $I$ is the index set of $0\ldots d$. Note 1: It's possible to
-get back to the starting chamber (or starting chamber-orbit) without $\sigma$
-being $1$ for example take a route around an edge of the starting chamber. Note
-2: As we only consider periodic tilings, $\mathcal{D}$ is finite, this
-automatically defines some relations of $\Sigma^I$ affecting $\mathcal{D}$.
+respectively, where $I$ is the index set of $0\ldots d$. 
+
+\begin{note}
+  It's possible to
+get back to the starting chamber (or starting chamber-orbit) FIXME (nem
+javitottam, mert szerintem fontos a gondolat, a javitas mast jelentene. A
+gondolat lenyege hogy a szabad Coxeter-csoport mennyire csak formalis dolog) without $\sigma$
+being $1$ for example take a route around an edge of the starting chamber. 
+\end{note}
+
+\begin{note}
+As we only consider periodic tilings, $\mathcal{D}$ is finite, this
+automatically defines some relations of $\Sigma^I$ (FIXME nem javitottam, mert
+$\Gamma$ adott ezen a ponton, igy a relacioi is. Ez egy masik pelda, hogy a
+szomszedsagi operacioknak meg kell legyenek relacioi az orbitokon. (Lehet, hogy
+a ket megjegyzes egy az egyben kihagyhato.)) affecting $\mathcal{D}$.
+\end{note}
 
 Next we have to deal with the remaining relations. We require that the following
 relations hold for every $C\in\mathcal{C}$:
 \begin{itemize}
   \item For every $i,j\in I$, where $|i-j|=1$, there exists
-    $m\in\mathbb{N}\setimnus {0}$:
+    $m\in\mathbb{N}^+$:
     $(\sigma^j\sigma^i)^mC=(\sigma^i\sigma^j)^mC=C$, lets denote the smallest
-    possible $m$ value with $m_{ij}(C)=m_{ji}(C)$.
+    possible $m$ value by $m^{ij}(C)=m^{ji}(C)$.
   \item For every $i,j\in I$, where $|i-j|>1$:
-    $(\sigma^j\sigma^i)^2C=(\sigma^i\sigma^j)^2C=C$, $m_{ij}(C)=m_{ji}(C)=2$, for the compatibility with
-    baricentric subdivision.  
-  \item (For every $i\in I$: $(\sigma^i)^2C=C$, $m_{ii}(C)=1$, which is already defined.)
+    $(\sigma^j\sigma^i)^2C=(\sigma^i\sigma^j)^2C=C$, $m^{ij}(C)=m^{ji}(C)=2$,
+    for the compatibility with the baricentric subdivision.  
+  \item (For every $i\in I$: $(\sigma^i)^2C=C$, $m^{ii}(C)=1$, which has already
+    been defined.)
 \end{itemize}
 
 We can introduce the matrix valued function $\mathcal{M}: \mathcal{C}
-\rightarrow \mathbb{N}^{d\times d}$: $\mathcal{M}(C)_{i,j}=m_{ij}(C)$, which
-gives us half the number of chambers around an edge. Notice that $\mathcal{M}$
+\rightarrow \mathbb{N}^{(d+1)\times (d+1)}$: $\mathcal{M}(C)^{i,j}=m^{ij}(C)$, which
+gives us half the number of chambers around an $ij$-edge. Notice that $\mathcal{M}$
 is the same for the orbits ($\mathcal{D}$), because the action of $\Gamma$
 doesn't change the number of chambers around a given edge.
 
@@ -103,50 +129,55 @@ half the number of chamber-orbits around an edge. Every value of the $\mathcal{R
 matrix valued function has to divide the respective value of $\mathcal{M}$ for
 every $D\in\mathcal{D}$, for every $i,j\in I$ exists the value $r$ such that
 $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$. Lets denote the smallest
-possible $r$ value with $r_{ij}(D)=r_{ji}(D)$. There exists $C\in\mathcal{C}$ so
+possible $r$ value by $r^{ij}(D)=r^{ji}(D)$. There exists $C\in\mathcal{C}$ so
 that $D=C^\Gamma$.
-\begin{itemize}
-  \item If $|i-j|=1$: $r_{ij}(D)|m_{ij}(C)$
-  \item If $|i-j|>1$: $r_{ij}(D)=1$ or $r_{ij}(D)=2$
-  \item If $i=j$: $r_{ij}(D)=1$
-\end{itemize}
+\begin{align}
+  |i-j|=1 & \Rightarrow r^{ij}(D)|m^{ij}(C) \\
+  |i-j|>1 & \Rightarrow 1\leq r^{ij}(D)\leq 2 \\
+  i=j & \Rightarrow r^{ij}(D)=1
+\end{align}
 
-It's easy to see that the values of both matrix valued functions must be the
-same around an edge ($D,D'\in\mathcal{D}$, $C,C'\in\mathcal{C}$, $i,j\in I$,
-$a\in {0,1}$, $b\in \mathbb{N}$):
-\begin{eqnarray}
-  D'=(\sigma^i)^a(\sigma^i\sigma^j)^b(D) & \Rightarrow &
-  \mathcal{R}(D)_{i,j}=\mathcal{R}(D')_{i,j} \\
-  D'=(\sigma^i)^a(\sigma^i\sigma^j)^b(D) & \Rightarrow &
-  \mathcal{M}(D)_{i,j}=\mathcal{M}(D')_{i,j} \\
-  C'=(\sigma^i)^a(\sigma^i\sigma^j)^b(C) & \Rightarrow &
-  \mathcal{M}(C)_{i,j}=\mathcal{M}(C')_{i,j} \\
-\end{eqnarray}
+Let $v^{ij}(D)$ the following: $m^{ij}(D)=r^{ij}(D)v^{ij}(D)$ and
+let's define the valence matrix valued function
+$\mathcal{V}(D)^{i,j}=v^{ij}(D)$.
+
+%It's easy to see that the values of both matrix valued functions must be the
+%same around an edge ($D,D'\in\mathcal{D}$, $C,C'\in\mathcal{C}$, $i,j\in I$,
+%$a\in {0,1}$, $b\in \mathbb{N}$):
+%\begin{align}
+%  D'=(\sigma^i)^a(\sigma^i\sigma^j)^b(D) & \Rightarrow
+%  \mathcal{R}(D)^{i,j}=\mathcal{R}(D')^{i,j} \\
+%  D'=(\sigma^i)^a(\sigma^i\sigma^j)^b(D) & \Rightarrow
+%  \mathcal{M}(D)^{i,j}=\mathcal{M}(D')^{i,j} \\
+%  C'=(\sigma^i)^a(\sigma^i\sigma^j)^b(C) & \Rightarrow
+%  \mathcal{M}(C)^{i,j}=\mathcal{M}(C')^{i,j}
+%\end{align}
 
 If we take a small ball around every chamber-vertex (so small, that it doesn't
 contain another chamber vertex), then the tiling on the boundary of the ball
 induced by the original tiling must be an $S^{d-1}$ tiling \cite{D87} if the
 chamber vertice is a proper vertice (not an ideal or an out-of-model vertice).
 
-The tuple $(\Sigma^I,\mathcal{D},\mathcal{M})$ is called the D-symbol of a
-tiling in honour of Delone, Delaney and Dress. (FIXME: $\mathcal{M}$-et bele
-lehetne olvasztani a $\Sigma^I$-be relaciokkent.) $(\mathcal{T},\Gamma)$ and
+The triplet $(\Sigma^I,\mathcal{D},\mathcal{M})$ is called the D-symbol of a
+tiling in honour of Delone, Delaney and Dress. $(\mathcal{T},\Gamma)$ and
 $(\mathcal{T}',\Gamma')$ are equivalent (topologically equivariant (homeomeric))
 if and only if the correspondig $(\Sigma^I,\mathcal{D},\mathcal{M})$ and
-$(\Sigma^I',\mathcal{D}',\mathcal{M}')$ D-symbols are isomorphic \cite{D87}.
+$(\Sigma^I,\mathcal{D}',\mathcal{M}')$ D-symbols are isomorphic \cite{D87}.
 
-\section{Inverse problem}
-Our main concern is the inverse problem: Which tuples
+\section{The inverse problem}
+Our main concern is the inverse problem: Which triplets
 $(\Sigma^I,\mathcal{D},\mathcal{M})$ exist with some nice constraints and how
-can we find the orbifold and the geometry it realizes?
+can we find the orbifold and the geometry it realizes by an equivariant tiling
+$(\mathcal{T},\Gamma)$?
 
 Let's recall the definitions and theorems used in this paper.
 \begin{defn}
-  A $d$-dimensional \em{D-diagram} is a $d+1$ colored graph of the adjacency
-  operations $(\Sigma^I,\mathcal{D})$. Where $|I|=d+1$, $|\mathcal{D}|$ is the
-  finite \em{cardinality} of the diagram, for every $i\in I$ $\sigma^i^2=1$ and
-  for every $i,j\in I$ if $|i-j|>1$ then $(\sigma^i\sigma^j)^2D=D$. We use the
-  following colors on our figures up to 3 dimensions:
+  A $d$-dimensional {\em D-diagram} is a $d+1$ colored connected graph of the
+  adjacency operations $(\Sigma^I,\mathcal{D})$. Where $|I|=d+1$,
+  $|\mathcal{D}|$ is the finite {\em cardinality} of the diagram, for every $i\in
+  I$ $(\sigma^i)^2=1$ and for every $i,j\in I$ if $|i-j|>1$ then
+  $(\sigma^i\sigma^j)^2D=D$. We use the following colors on our figures up to 3
+  dimensions:
 
   \setlength{\unitlength}{1cm}
   $\sigma^0$:
@@ -169,96 +200,371 @@ Let's recall the definitions and theorems used in this paper.
 \end{defn}
 
 \begin{defn}
-  \em{$\mathcal{R}$ matrix valued function.}
-  Let $\mathcal{R}$: $\mathcal{D} \rightarrow \mathbb{N}^{d\times d}$.
+  {\em The matrix valued function $\mathcal{R}$.}
+  Let $\mathcal{R}$: $\mathcal{D} \rightarrow \mathbb{N}^{(d+1)\times (d+1)}$.
   For every $D\in\mathcal{D}$, for every $i,j\in I$ there exists $r\in
-  \mathbb{N}\setminus{0}$ such that
+  \mathbb{N}\setminus \{0\}$ such that
   $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$ ($|\mathcal{D}|<\infinity$).
-  $\mathcal{R}(D)_{i,j}:=r$
+  $\mathcal{R}(D)^{i,j}:=r$
 \end{defn}
   
 \begin{defn}
-  \em{$\mathcal{M}$ matrix valued function.}
-  Let $\mathcal{M}$: $\mathcal{D} \rightarrow \mathbb{N}^{d\times d}$.
-  For every $D\in\mathcal{D}$,
-  \begin{itemize}
-    \item for every $i\in I$: $\mathcal{M}(D)_{i,i}=1$
-    \item for every $i,j\in I$: if $|i-j|>1$ then $\mathcal{M}(D)_{i,j}=2$
-    \item for every $i,j\in I$: if $|i-j|=1$ then $\mathcal{R}(D)_{i,j}|\mathcal{M}(D)_{i,j}$
-  \end{itemize}
+  {\em The matrix valued function $\mathcal{M}$.}
+  Let $\mathcal{M}$: $\mathcal{D} \rightarrow \mathbb{N}^{(d+1)\times (d+1)}$.
+  For every $D\in\mathcal{D}$, for every $i,j\in I$:
+  \begin{align}
+    i=j & \Rightarrow \mathcal{M}(D)^{i,i}=1 \\
+    |i-j|>1 & \Rightarrow \mathcal{M}(D)^{i,j}=2 \\
+    |i-j|=1 & \Rightarrow \mathcal{R}(D)^{i,j}|\mathcal{M}(D)^{i,j}
+  \end{align}
 \end{defn}
 
 \begin{defn}
-  \em{$\mathcal{P}$ matrix valued function of parameters.}
-  Let $\mathcal{P}$: $\mathcal{D} \rightarrow \mathbb{N}^{d\times d}$.
-  For every $D\in\mathcal{D}$, for every $i,j\in I$
-  $\mathcal{P}(D)_{i,j}=\frac{\mathcal{M}(D)_{i,j}}{\mathcal{R}(D)_{i,j}}$.
+  {\em The matrix valued function $\mathcal{V}$ of valences as rotational orders
+  as parameters.}
+  Let $\mathcal{V}$: $\mathcal{D} \rightarrow \mathbb{N}^{(d+1)\times (d+1)}$.
+  $\mathcal{M}(D)=\mathcal{R}(D)\mathcal{V}(D)$.
 \end{defn}
 
 \begin{defn}
-  We call the tuple $(\Sigma^I,\mathcal{D},\mathcal{M})$ \em{D-symbol}, if the
-  following additional constraints are met:
-  \begin{itemize}
-    \item $\forall D\in \mathcal{D}$, $\forall i,j\in I$, $\forall a\in {0,1}$,
+  We call the triplet $(\Sigma^I,\mathcal{D},\mathcal{M})$ {\em D-symbol}, if the
+  following additional constraint is met:
+  $\forall D\in \mathcal{D}$, $\forall i,j\in I$, $\forall a\in {0,1}$,
       $\forall b\in \mathbb{N}$: if $D'=(\sigma^i)^a(\sigma^i\sigma^j)^b(D)$,
-      then $\mathcal{M}(D)_{i,j}=\mathcal{M}(D')_{i,j}$, namely the
-      $\mathcal{M}$ matrix function has the same values around edges.
-    \item FIXME(talan nem felejtettem ki semmi olyat, amit nem akartam)
-  \end{itemize}
+      then $\mathcal{M}(D)^{i,j}=\mathcal{M}(D')^{i,j}$, namely the
+      $\mathcal{M}$ matrix function has the same values around edges. (FIXME:
+      Mivel ezt az elejen csak bevezetes szinten emlegettem, szerintem szukseges
+      a defincios reszben kulon kiterni ra, persze lehet, hogy nem ebben a
+      cikkben.)
+\end{defn}
+
+%\begin{defn}
+%  Based on the previous definition one can define the {\em parametric D-symbol} of
+%  a given D-diagram, which has a parametric $\mathcal{M}$ matrix function,
+%  which is the same for every $D\in\mathcal{D}$, for every $i,j\in I$ when
+%  $|i-j|\neq 1$ as the original $\mathcal{M}$ matrix function. If $|i-j|=1$,
+%  then it has a parametric value with coefficent $\mathcal{R}(D)^{i,j}$, and the
+%  parameter values must be the same around edges.
+%\end{defn}
+
+\begin{defn}
+  If we cancel the $i$th operation of a D-symbol (both in the diagram and in
+  $\mathcal{M}$-s rows and columns) the $D_i$-diagram can fall apart to multiple
+  connected subdiagrams, which we call components. The $i$th {\em D-subsymbols} are
+  those components with the corresponding $\mathcal{M}_i$ matrix function:
+  $\leftsub{c}{(\Sigma^I,\mathcal{D}_i,\mathcal{M}_i)}$
+\end{defn}
+
+\begin{note}
+  Every $D_i$-subsymbol defines a tiling
+  $(\leftsub{c}{\mathcal{T}}_i,\leftsub{c}{\Gamma}_i)$ around a chamber-vertex, which has to lie
+  on a $(d-1)$-dimensional ball ($S^{d-1}$) for proper vertices or on a $(d-1)$-dimensional
+  euclidean space ($\mathbb{E}^{d-1}$) for ideal vertices.
+\end{note}
+
+\begin{note}
+  The number of components gives us the number of $i$th labelled chamber-vertex
+  classes under the action of stabilizer $\leftsub{c}{\Gamma}_i$ in $\Gamma$.
+\end{note}
+
+\begin{thm}
+  \label{thm:curvature}
+  FIXME(cite) For $2$-dimensional D-symbols one can decide in which geometry the
+  D-symbol realizes by using the {\em combinatorial curvature function}:
+  \begin{align*}
+    K(\mathcal{D})=\sum_{D\in
+    \mathcal{D}}\left(-1+\sum_{\substack{0\le j<k\le 2}}\frac{1}{m^{jk}(D)}\right)
+    \begin{array}{cccc}
+      > & & S^2 \\
+      = & 0 & \mathbb{E}^2 \\
+      < & & H^2
+    \end{array}
+  \end{align*}
+  And excluding the possible bad orbifolds in case of $S^2$ with 
+  signatures \cite{Ma67}:
+  \begin{align*}
+    u=(+,0;[u];\{\}), & & 1<u;\\
+    *u=(+,0;[];\{(u)\}), & & 1<u;\\
+    uv=(+,0;[u,v];\{\}), & & 1<u<v;\\
+    *uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
+  \end{align*}}
+\end{thm}
+
+\begin{defn}
+  A {\em geometric D-symbol} is a D-symbol which
+  has only proper $1\ldots (d-1)$ labeled chamber vertices, proper or ideal $0$ or
+  $d$ labeled vertices; and $\forall D\in \mathcal{D}$, $\forall i\in
+  I\setminus\{0\}$ $\mathcal{M}(D)^{i,i-1}\geq3$.
+\end{defn}
+
+\begin{note}
+  The last statement of the definition makes sure, that we won't get degenerate
+  cases. It means in $3$ dimensions that the basic structure of the barycentric
+  subdivision had at least 3 bodies around an edge, 3 edges connecting in a
+  vertex and at least triangles as facets.
+\end{note}
+
+\begin{lem}
+  Based on the D-symbol one can decide if it is a geometric $3$-dimensional
+  D-symbol.
+\end{lem}
+
+\begin{proof}
+  Let's take every $i$th D-subsymbol of the original ($i\in I$), which are in
+  fact $2$-dimensional D-symbols, calculate the curvature function from
+  \ref{thm:curvature}. In case of $i=0$ or $i=3$, the geometry must be $S^3$
+  (proper vertices) or $\mathbb{E}^3$ (ideal vertices); in case of $i=1$ or $i=2$, the
+  geometry must be $S^3$.
+
+  The bad orbifold criteria can be tested by generating the parametric D-symbol
+  of the original, then checking the valences leading to the real D-symbol.
+\end{proof}
+
+\begin{note}
+  As there is no easy formula to decide wheter a D-symbol (or any representation
+  of a tiling that the author knows of) is realizable in $S^d$ or $E^d$ for
+  values $d>2$, we cannot apply this definition in higher dimensions yet.
+\end{note}
+
+\begin{defn}
+  $\phi: (\Sigma^I,\mathcal{D},\mathcal{M}) \rightarrow
+  (\Sigma^I,\mathcal{D}',\mathcal{M}')$ is a {\em homomorphism} if for all $D\in
+  \mathcal{D}$, $i \in I$:
+  \begin{align}
+    \phi(\sigma^iD)= & \sigma^i\phi(D) \\
+    \phi(\mathcal{M}(D))= & \mathcal{M}'(\phi(D))
+  \end{align}
+\end{defn}
+
+\begin{note}
+  It's easy to see that this homomorphism is always surjective because we
+  defined the diagram to be connected.
+\end{note}
+
+\begin{defn}
+  $(\Sigma^I,\mathcal{D},\mathcal{M})$ and
+  $(\Sigma^I,\mathcal{D}',\mathcal{M}')$ are {\em isomorphic} if there exist $\phi$ and
+  $\phi'$ homomorphisms: $\phi: (\Sigma^I,\mathcal{D},\mathcal{M}) \rightarrow
+  (\Sigma^I,\mathcal{D}',\mathcal{M}')$ and $\phi':
+  (\Sigma^I,\mathcal{D}',\mathcal{M}') \rightarrow
+  (\Sigma^I,\mathcal{D},\mathcal{M})$
+\end{defn}
+
+\begin{note}
+  For a homomorphism to be isomorphism, its enough to see if
+  $|\mathcal{D}|=|\mathcal{D}'|$ because $|\mathcal{D}|$ is finite.
+\end{note}
+
+\begin{defn}
+  $(\Sigma^I,\mathcal{D},\mathcal{M})$ is a {\em maximal D-symbol} if all of its
+  homomorphic images are also isomorphic.
 \end{defn}
 
 \begin{defn}
-  Parametric D-symbol
+  $\rho: (\Sigma^I,\mathcal{D},\mathcal{M}) \rightarrow
+  (\Sigma^I,\mathcal{D}',\mathcal{M}')$ is the {\em dual mapping of a D-symbol}
+  the former being the {\em dual D-symbol} if for all $D\in \mathcal{D}$, $i,j
+  \in I$ ($d=|I|$):
+  \begin{align}
+    \rho(\sigma^i(D))= & \sigma^{d-i}\rho(D) \\
+    \rho(\mathcal{M}(D)^{i,j})= & \mathcal{M}'(\rho(D))^{d-i,d-j}
+  \end{align}
 \end{defn}
 
-\begin{defn}
-  D-subsymbol
-\end{defn}
-Note 1: tiling around vertex d-1 ball
-
-Note 2: Number of components: number of chamber-vertex classes
-
-curvature function
-
-\begin{defn}
-  Proper 3 dimensional D-symbol: S2 (bad orbifold problem), E2
-\end{defn}
-Note: Higher dimensions...
-
-From now on we only consider proper $3$-dimensional D-symbols.
-
-\begin{defn}
-  homomorphism(isomorphism)
-\end{defn}
-
-\begin{defn}
-  maximality
-\end{defn}
-
-\begin{defn}
-  duality
-\end{defn}
+%\begin{prop}
+%  FIXME Let's define the splittings of a given D-symbol as those borders between
+%  $2$-partitions of the chamber-vertex classes of the D-symbol, which has a
+%  tiling (induced by the D-symbol) realizable on $\mathbb{E}^2$ or $S^2$.
+%\end{prop}
 
 \subsection{Edge transitive D-symbols}
-Extra Constraint
 
-Finite
+\begin{defn}
+  $(\Sigma^I,\mathcal{D},\mathcal{M})$ is an {\em edge transitive} D-symbol if
+  there is only a single $1$st D-subsymbol. (There is only a single class of
+  $1$-labeled "edge"-type chamber vertices.)
+\end{defn}
+
+There are finitely many $3$-dimensional edge transitive D-symbols, because their
+cardinality can be at most $24$; based on the fact that they are the dual
+D-symbols of face-transitive D-symbols, which were thoroughly analysed in
+\cite{DHM93}.
 
 \section{Examples}
-d3c24\_2 (d3c12\_30), d3c24\_30 (d3c12\_61)
+%d3c24\_2 (d3c12\_30), d3c24\_30 (d3c12\_61)
 
-Start with cardinality 24 as there are maximal examples, but go down to
-cardinality 6 or 3 so it's easier to see... Graphics
+Let's see a nice $3$ dimensional example with cardinality $3$, so we can get
+familiar with the concepts described above. The D-diagram is shown in Fig.
+\ref{fig:d3c3_2}. $D_i\in \mathcal{D}$ (but only the index $i$ is indicated) and
+the diagram shows the adjacency relations.
 
-R matrix functions. Some possible M matrix functions (maximal, non max): Let's
-see a sphere's curvature function around a vertex (smaller cardinality?).
+\begin{figure}
+  \caption{\label{fig:d3c3_2} D diagram of d3c3\_2, loops are not indicated}
+  \center
+  \includegraphics[width=0.3\textwidth]{d3c3_2.pdf}
+\end{figure}
+
+A hypothetical fundamental domain is shown on figure \ref{fig:d3c3_2_fundom}.
+transparent chamber facets are mirrors, colored facets are glued together. (The
+only gluing this fundamental domain has is the $\sigma^1$ adjacency between
+$D_2$ and $D_3$.) The wireframe of a parallelepiped is shown to give an idea of
+the base of the barycentric subdivision and the vertices of the chambers are
+labelled with a number and a set of numbers $i_{\leftsub{c}{\mathcal{D}}^i}$
+where $i$ is the label of vertex in the barycentric subdivision and
+$\leftsub{c}{\mathcal{D}}^i$ are the chamber-classes having this vertex in
+common.
+
+\begin{figure}
+  \caption{\label{fig:d3c3_2_fundom} Fundamental domain of d3c3\_2}
+  \center
+  \includegraphics[width=0.4\textwidth]{d3c3_2_fundom.png}
+\end{figure}
+
+Figure \ref{fig:d3c3_2_r}. shows the $\mathcal{R}$ matrix function based on the
+diagram. (FIXME olvasora hagyhato, de nagyon hasznos az S3 szignaturak
+felirasakor)
+
+\begin{figure}
+  \caption{\label{fig:d3c3_2_r} $\mathcal{R}$ matrix function of d3c3\_2}
+  \begin{equation*}
+    \mathcal{R}(D_1)=
+    \left(
+    \begin{array}{cccc}
+      1 & 1 & 2 & 1\\
+      1 & 1 & 3 & 1\\
+      2 & 3 & 1 & 3\\
+      1 & 1 & 3 & 1
+    \end{array}
+    \right)
+  \end{equation*}
+  \begin{equation*}
+    \mathcal{R}(D_2)=
+    \left(
+    \begin{array}{cccc}
+      1 & 2 & 2 & 2\\
+      2 & 1 & 3 & 1\\
+      2 & 3 & 1 & 3\\
+      2 & 1 & 3 & 1
+    \end{array}
+    \right)
+  \end{equation*}
+  \begin{equation*}
+    \mathcal{R}(D_3)=
+    \left(
+    \begin{array}{cccc}
+      1 & 2 & 1 & 2\\
+      2 & 1 & 3 & 1\\
+      1 & 3 & 1 & 3\\
+      2 & 1 & 3 & 1
+    \end{array}
+    \right)
+  \end{equation*}
+\end{figure}
+
+Figure \ref{fig:d3c3_2_pm}. shows the parametric $\mathcal{M}$ matrix function
+based on the diagram. One can examine that the values are the same around the
+edges of the chambers (eg. let $i=0$ and $j=1$, then
+$D_1=\sigma^0D_1=\sigma^0\sigma_1D_1$ gets parameter $a$ and $D_2$,
+$D_3=\sigma^1D_2$ gets parameter $2b$.)
+
+\begin{figure}
+  \caption{\label{fig:d3c3_2_pm} Parametric $\mathcal{M}$ matrix function of d3c3\_2}
+  \begin{equation*}
+    \mathcal{R}(D_1)=
+    \left(
+    \begin{array}{cccc}
+      1 & a & 2 & 2\\
+      a & 1 & 3c & 2\\
+      2 & 3c & 1 & 3d\\
+      2 & 2 & 3d & 1
+    \end{array}
+    \right)
+  \end{equation*}
+  \begin{equation*}
+    \mathcal{R}(D_2)=
+    \left(
+    \begin{array}{cccc}
+      1 & 2b & 2 & 2\\
+      2b & 1 & 3c & 2\\
+      2 & 3c & 1 & 3d\\
+      2 & 2 & 3d & 1
+    \end{array}
+    \right)
+  \end{equation*}
+  \begin{equation*}
+    \mathcal{R}(D_3)=
+    \left(
+    \begin{array}{cccc}
+      1 & 2b & 2 & 2\\
+      2b & 1 & 3c & 2\\
+      2 & 3c & 1 & 3d\\
+      2 & 2 & 3d & 1
+    \end{array}
+    \right)
+  \end{equation*}
+\end{figure}
+
+Let's consider the case where $b=2$, $c=1$, $d=2$. We'll show that any $a\geq3$ value
+gives us a proper D-symbol. Take every D-subsymbol:
+\begin{enumerate}
+  \setcounter{enumi}{-1}
+  \item If we cancel the $0$th adjacency we get a single D-subsymbol, lets
+    calculate its combinatorial curvature function:
+    \begin{align*}
+      K(\leftsub{c}{\mathcal{D}^i})&=\sum_{D\in
+      \leftsub{c}{\mathcal{D}^i}}\left(-1+\sum_{\substack{0\le j<k\le d \\ j,k\ne i}}\frac{1}{m^{jk}(D)}\right)= \\
+      &
+      \sum_{D\in\leftsub{1}{\mathcal{D}^0}}\left(-1+\frac{1}{m^{12}(D)}+\frac{1}{m^{13}(D)}+\frac{1}{m^{23}(D)}\right)= \\
+      & -3 + 3\frac{1}{3c} + 3\frac{1}{2} + 3\frac{1}{3d} = -\frac{3}{2}+\frac{1}{c}+\frac{1}{d} = 0
+    \end{align*}
+    We got a euclidean tiling, which means that the vertex labeled with $0$ must
+    be an ideal vertex.
+  \item Cancelling the $1$st adjacency the curvature function is:
+    \begin{align*}
+      K(\leftsub{1}{\mathcal{D}^1})&= -3 + 3\frac{1}{2} + 3\frac{1}{2} +
+      3\frac{1}{3d} = \frac{1}{d} > 0
+    \end{align*}
+    Which means we have to check the good orbifold criteria: the signature is
+    $*22d$ which is a good orbifold (even for $d=1$), so this must be a proper vertex.
+  \item Cancelling the $2$nd adjacency the curvature functions are:
+    \begin{align*}
+      K(\leftsub{1}{\mathcal{D}^2})&= -1 + \frac{1}{2} + \frac{1}{2} +
+      \frac{1}{a} = \frac{1}{a} > 0
+    \end{align*}
+    Which means we have to check the good orbifold criteria: the signature is
+    $*22a$, good orbifold, proper vertex.
+    \begin{align*}
+      K(\leftsub{2}{\mathcal{D}^2})&= -2 + 2\frac{1}{2} + 2\frac{1}{2} +
+      2\frac{1}{2b} = \frac{1}{b} > 0
+    \end{align*}
+    The signature is $2*b$, good orbifold, proper vertex if $b\geq2$, which is
+    the case.
+  \item Cancelling the $3$rd adjacency the curvature function is:
+    \begin{align*}
+      K(\leftsub{1}{\mathcal{D}^3})&= -3 + 3\frac{1}{2} + \frac{1}{a} +
+      2\frac{1}{2b} + 3\frac{1}{3c} =
+       -\frac{3}{2} + \frac{1}{b} + \frac{1}{c} + \frac{1}{a} > 0
+    \end{align*}
+    If $b=2$ and $c=1$, then for any value of $a$ the above formula is positive.
+    The signature is $*22ac$, good orbifold proper vertex.
+\end{enumerate}
+
+%\begin{figure}
+%  \caption{}
+%\end{figure}
+
+
+%Start with cardinality 24 as there are maximal examples, but go down to
+%cardinality 6 or 3 so it's easier to see... Graphics
+
+%R matrix functions. Some possible M matrix functions (maximal, non max): Let's
+%see a sphere's curvature function around a vertex (smaller cardinality?).
+
+(Non-)maximality example.
 
 Bad orbifolds?
 
-Infinite parameters WTF?
-
-Ideal vertices?
-
+Splitting?
 
 \section{Future work}
 Analyse every edge-transitive symbol
@@ -267,8 +573,11 @@ Check 2 dimensional tilings on the border of partitions (splitting/fiber)
 
 Difficult part: find out the signature and type of underlying geometries
 
+\section{Acknowledgement}
+
+
 %Bibiliography
-\nocite{DHM93,D87,Du88,H93,LM90,Ma67,M94,T82,VS93,F94,F03}
+\nocite{DHM93,D87,Du88,H93,LM90,Ma67,M94,T82,VS93,F94,M11,DDH98,K11}
 \bibliographystyle{plain}
 \bibliography{dsym}
 

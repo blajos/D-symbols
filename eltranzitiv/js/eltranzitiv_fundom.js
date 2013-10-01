@@ -19,7 +19,7 @@ function new_simplex(z, num, maxnum, labels, colors) {
   // colors: face colors: mindig a labels azonos indexuvel szemkozti szint
   // mondjuk meg.
   var parity = num % 2;
-  var dszog = 2*Math.PI/maxnum;
+  var dszog = -2*Math.PI/maxnum;
   var szog = num*dszog;
   var simplex_v = [
     new THREE.Vector3(0,0,0),
