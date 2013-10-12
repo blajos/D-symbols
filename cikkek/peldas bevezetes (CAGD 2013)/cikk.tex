@@ -130,7 +130,7 @@ respectively):
 \end{itemize}
 
 We can introduce the matrix function $\mathcal{M}: \mathcal{C}
-\rightarrow \mathbb{N}^{(d+1)\times (d+1)}$: $\mathcal{M}(C)^{i,j}=m^{ij}(C)$, which
+\rightarrow \mathbb{N}^{I\times I}$: $\mathcal{M}(C)^{i,j}=m^{ij}(C)$, which
 gives us half the number of chambers around an $ij$-edge. Notice that $\mathcal{M}$
 will be the same for the orbits ($\mathcal{D}$), as requirement, expressing that
 the action of $\Gamma$ doesn't change the number of chambers around a given
@@ -191,10 +191,10 @@ $(\mathcal{T},\Gamma)$?
 Let's recall the definitions and theorems used in this paper.
 \begin{defn}
   A $d$-dimensional {\em D-diagram} is a $d+1$ colored connected graph of the
-  adjacency operations $(\Sigma^I,\mathcal{D})$. Where $|I|=d+1$,
+  adjacency operations $(\Sigma^I,\mathcal{D})$. Where $I={0, 1, \ldots, d}$,
   $|\mathcal{D}|$ is the finite {\em cardinality} of the diagram, for every $i\in
   I$ $(\sigma^i)^2=1$ and for every $i,j\in I$ if $|i-j|>1$ then
-  $(\sigma^i\sigma^j)^2D=D$. We use the following colors on our figures up to 3
+  $(\sigma^i\sigma^j)^2D=D$. We use the following colors in our figures up to 3
   dimensions:
 
   \setlength{\unitlength}{1cm}
@@ -219,23 +219,23 @@ Let's recall the definitions and theorems used in this paper.
 
 \begin{defn}
   {\em The matrix function $\mathcal{R}$.}
-  Let $\mathcal{R}$: $\mathcal{D} \rightarrow \mathbb{N}^{(d+1)\times (d+1)}$.
+  Let $\mathcal{R}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
   For every $D\in\mathcal{D}$, for every $i,j\in I$ there exists $r\in
-  \mathbb{N}\setminus \{0\}$ such that
+  \mathbb{N}^+$ such that
   $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$ ($|\mathcal{D}|<\infinity$).
   $\mathcal{R}(D)^{i,j}:=r$
 \end{defn}
   
 \begin{defn}
   {\em The matrix function $\mathcal{M}$.}
-  Let $\mathcal{M}$: $\mathcal{D} \rightarrow \mathbb{N}^{(d+1)\times (d+1)}$.
+  Let $\mathcal{M}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
   For every $D\in\mathcal{D}$, for every $i,j\in I$:
   \begin{align}
     i=j & \Rightarrow \mathcal{M}(D)^{i,i}=1 \\
     |i-j|>1 & \Rightarrow \mathcal{M}(D)^{i,j}=2 \\
     |i-j|=1 & \Rightarrow \mathcal{R}(D)^{i,j}|\mathcal{M}(D)^{i,j}
   \end{align}
-  The only interesting values of the matrix function are at the subdiagonals, so
+  The most interesting entries of the matrix function are at the subdiagonals, so
   we can use the following shorter notation:
   $D_1(\mathcal{M}(D_1)^{0,1},\ldots,\mathcal{M}(D_1)^{d,d+1})$, $\ldots$,
   $D_{|\mathcal{D}|}(\mathcal{M}(D_{|\mathcal{D}|})^{0,1},\ldots,\mathcal{M}(D_{|\mathcal{D}|})^{d,d+1})$
@@ -244,20 +244,25 @@ Let's recall the definitions and theorems used in this paper.
 \begin{defn}
   {\em The matrix function $\mathcal{V}$ of valences as rotational orders
   as parameters.}
-  Let $\mathcal{V}$: $\mathcal{D} \rightarrow \mathbb{N}^{(d+1)\times (d+1)}$.
+  Let $\mathcal{V}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
   $\mathcal{M}(D)=\mathcal{R}(D)\mathcal{V}(D)$.
-\end{defn}
+\end{defn}o
+
+So a fundamental domain $\mathcal{F}$, as a topological (PL) polytope, can be collected
+from the representative chambers $C_k$ of $D_k$, $D_k\in\mathcal{D}$ (by a
+lexicographic ordering), glued along the adjacent facets. The free (not glued
+yet) facets define the generators of the fundamental group $\Gamma$, the above
+valence parameters at the free (not covered yet) $ij$-edges of $\mathcal{F}$
+give the defining relations of $\Gamma$. (See the references for more details,
+e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 
 \begin{defn}
   We call the triplet $(\Sigma^I,\mathcal{D},\mathcal{M})$ {\em D-symbol}, if the
   following additional constraint is met:
-  $\forall D\in \mathcal{D}$, $\forall i,j\in I$, $\forall a\in {0,1}$,
-      $\forall b\in \mathbb{N}$: if $D'=(\sigma^i)^a(\sigma^i\sigma^j)^b(D)$,
-      then $\mathcal{M}(D)^{i,j}=\mathcal{M}(D')^{i,j}$, namely the
-      $\mathcal{M}$ matrix function has the same values around edges.\footnote{FIXME:
-      Mivel ezt az elejen csak bevezetes szinten emlegettem, szerintem szukseges
-      a defincios reszben kulon kiterni ra, persze lehet, hogy nem ebben a
-      cikkben.}
+  $\forall D\in \mathcal{D}$, $\forall i,j\in I$: if $D' \in
+  <\sigma^i,\sigma^j>D$, then $\mathcal{M}(D)^{i,j}=\mathcal{M}(D')^{i,j}$.
+  Namely the $\mathcal{M}$ matrix function has the same entries around the
+  corresponding $ij$-edges.
 \end{defn}
 
 %\begin{defn}
@@ -271,14 +276,14 @@ Let's recall the definitions and theorems used in this paper.
 
 \begin{defn}
   If we cancel the $i$th operation of a D-symbol (both in the diagram and in
-  $\mathcal{M}$-s rows and columns) the $D_i$-diagram can fall apart to multiple
+  $i$th rows and columns of $\mathcal{M}$) the so obtained diagram $D_i$ can fall apart to multiple
   connected subdiagrams, which we call components. The $i$th {\em D-subsymbols} are
   those components with the corresponding $\mathcal{M}_i$ matrix function:
   $\leftsub{c}{(\Sigma^I,\mathcal{D}_i,\mathcal{M}_i)}$
 \end{defn}
 
 \begin{note}
-  Every $D_i$-subsymbol defines a tiling
+  Every $D_i$-subsymbol component defines a tiling
   $(\leftsub{c}{\mathcal{T}}_i,\leftsub{c}{\Gamma}_i)$ around a chamber-vertex, which has to lie
   on a $(d-1)$-dimensional ball ($S^{d-1}$) for proper vertices or on a $(d-1)$-dimensional
   euclidean space ($\mathbb{E}^{d-1}$) for ideal vertices.
@@ -286,7 +291,7 @@ Let's recall the definitions and theorems used in this paper.
 
 \begin{note}
   The number of components gives us the number of $i$th labelled chamber-vertex
-  classes under the action of stabilizer $\leftsub{c}{\Gamma}_i$ in $\Gamma$.
+  classes under the action of the stabilizer $\leftsub{c}{\Gamma}_i$ in $\Gamma$.
 \end{note}
 
 \begin{thm}
@@ -316,15 +321,15 @@ Let's recall the definitions and theorems used in this paper.
 \begin{defn}
   A {\em geometric D-symbol} is a D-symbol which
   has only proper $1,\ldots,(d-1)$ labeled chamber vertices, proper or ideal $0$ or
-  $d$ labeled vertices; and $\forall D\in \mathcal{D}$, $\forall i\in
+  $d$ labeled vertices; moreover, $\forall D\in \mathcal{D}$, $\forall i\in
   I\setminus\{0\}$ $\mathcal{M}(D)^{i,i-1}\geq3$.
 \end{defn}
 
 \begin{note}
   The last statement of the definition makes sure, that we won't get degenerate
-  cases. It means in $3$ dimensions that the basic structure of the barycentric
-  subdivision had at least 3 bodies around an edge, 3 edges connecting in a
-  vertex and at least triangles as facets.
+  tilings. It means in $3$ dimensions that the basic structure of the barycentric
+  subdivision had at least 3 bodies around an edge, 3 edges meeting in a
+  vertex and we have at least triangles as facets.
 \end{note}
 
 \begin{lem}
@@ -333,20 +338,23 @@ Let's recall the definitions and theorems used in this paper.
 \end{lem}
 
 \begin{proof}
-  Let's take every $i$th D-subsymbol of the original ($i\in I$), which are in
-  fact $2$-dimensional D-symbols, calculate the curvature function from
-  \ref{thm:curvature}. In case of $i=0$ or $i=3$, the geometry must be $S^3$
-  (proper vertices) or $\mathbb{E}^3$ (ideal vertices); in case of $i=1$ or $i=2$, the
-  geometry must be $S^3$.
+  By the above procedure and curvature formula.
 
-  The bad orbifold criteria can be tested by generating the parametric D-symbol
-  of the original, then checking the valences leading to the real D-symbol.
+%  Let's take every $i$th D-subsymbol of the original ($i\in I$), which are in
+%  fact $2$-dimensional D-symbols, calculate the curvature function from
+%  \ref{thm:curvature}. In case of $i=0$ or $i=3$, the geometry must be $S^3$
+%  (proper vertices) or $\mathbb{E}^3$ (ideal vertices); in case of $i=1$ or $i=2$, the
+%  geometry must be $S^3$.
+%
+%  The bad orbifold criteria can be tested by generating the parametric D-symbol
+%  of the original, then checking the valences leading to the real D-symbol.
 \end{proof}
 
 \begin{note}
-  As there is no easy formula to decide wheter a D-symbol (or any representation
-  of a tiling that the author knows of) is realizable in $S^d$ or $E^d$ for
-  values $d>2$, we cannot apply this definition in higher dimensions yet.
+  As there does not exist any procedure (till now) to decide wheter a D-symbol
+  (or any representation of a tiling that the author knows of) is realizable in
+  $S^d$ or $E^d$ for values $d>2$, we cannot apply this definition in higher
+  dimensions yet.
 \end{note}
 
 \begin{defn}
@@ -366,11 +374,8 @@ Let's recall the definitions and theorems used in this paper.
 
 \begin{defn}
   $(\Sigma^I,\mathcal{D},\mathcal{M})$ and
-  $(\Sigma^I,\mathcal{D}',\mathcal{M}')$ are {\em isomorphic} if there exist $\phi$ and
-  $\phi'$ homomorphisms: $\phi: (\Sigma^I,\mathcal{D},\mathcal{M}) \rightarrow
-  (\Sigma^I,\mathcal{D}',\mathcal{M}')$ and $\phi':
-  (\Sigma^I,\mathcal{D}',\mathcal{M}') \rightarrow
-  (\Sigma^I,\mathcal{D},\mathcal{M})$
+  $(\Sigma^I,\mathcal{D}',\mathcal{M}')$ are {\em isomorphic} if there exists a
+  bijective homomorphism
 \end{defn}
 
 \begin{note}
@@ -405,14 +410,16 @@ Let's recall the definitions and theorems used in this paper.
 
 \begin{defn}
   $(\Sigma^I,\mathcal{D},\mathcal{M})$ is an {\em edge transitive} D-symbol if
-  there is only a single $1$st D-subsymbol. (There is only a single class of
+  there is only a single $1$st D-subsymbol component $\leftsub{1}\mathcal{D}$. (There is only a single class of
   $1$-labeled "edge"-type chamber vertices.)
 \end{defn}
 
-There are finitely many $3$-dimensional edge transitive D-symbols, because their
+There are finitely many $3$-dimensional edge transitive D-diagrams, because their
 cardinality can be at most $24$; based on the fact that they are the dual
 D-symbols of face-transitive D-symbols, which were thoroughly analysed in
-\cite{DHM93}.
+\cite{DHM93}, see also \cite{DDH98}. This fact implies the finiteness of edge-transitive
+Euclidean D-symbols and tilings (e.g. their number is $88$ in $E^3$ by
+\cite{DHM93}). But we found infinite series (e.g. in $S^3$ and $H^3$) in this work.
 
 \section{Examples}
 %d3c24\_2 (d3c12\_30), d3c24\_30 (d3c12\_61)
