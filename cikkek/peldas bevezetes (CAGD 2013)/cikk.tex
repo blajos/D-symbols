@@ -38,7 +38,35 @@
 \newtheorem*{note}{Note}
 \newtheorem{case}{Case}
 
-
+\newbox{\LegendVertex}
+\savebox{\LegendVertex}{
+  \setlength{\unitlength}{1cm}
+  $\sigma^0$:
+  \begin{picture}(1,0.2)
+    \multiput(0,0.1)(0.2,0){5}{\circle*{0.001}}
+  \end{picture}}
+\newbox{\LegendEdge}
+\savebox{\LegendEdge}{
+  \setlength{\unitlength}{1cm}
+  $\sigma^1$:
+  \begin{picture}(1,0.2)
+    \multiput(0,0.1)(0.25,0){4}{\line(1,0){0.15}}
+  \end{picture}}
+\newbox{\LegendFace}
+\savebox{\LegendFace}{
+  \setlength{\unitlength}{1cm}
+  $\sigma^2$:
+  \begin{picture}(1,0.2)
+    \put(0,0.1){\line(1,0){1}}
+  \end{picture}}
+\newbox{\LegendBody}
+\savebox{\LegendBody}{
+  \setlength{\unitlength}{1cm}
+  $\sigma^3$:
+  \begin{picture}(1.5,0.2)
+    \multiput(0,0.1)(0.5,0){3}{\line(1,0){0.2}}
+    \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
+  \end{picture}}
 
 \begin{document}
 
@@ -61,13 +89,20 @@
 \end{abstract}
 
 \section{Introduction}
-This work is based on...
+This work is mostly based on the work of B. N. Delone, M.S. Delaney,
+A.W.M. Dress and E. Molnár amongst many others. The concept of D-symbols were
+established $30$ years ago and most $2$-dimensional questions are already
+answered. There are still a lot of open questions in $3$ (or more) dimensions
+in non-Euclidean geometries.
 
-Why D-symbol?
+Using D-symbols one can easily translate some geometric problems into algebraic
+ones, which can be solved by computer algorithms. Of course these algebraic
+problems can still be difficult or computationally very expensive.
 
-Unpublished accomplishments?
-
-Why just some examples?
+In this paper we discuss some properties of D-symbols through examples focusing
+on those which can be found by computer analysis. We omit presenting every edge
+transitive D-symbol, due to space constraints, but they can be found at the
+author's homepage (\cite{MYHOME_edge_trans}).
 
 \section{D-symbols}
 We shall briefly introduce D-symbols (for a more comprehensive introduction see
@@ -92,7 +127,15 @@ Every chamber has $d+1$ neighbours by the facet they share and this adjacency is
 preserved by the action of $\Gamma$. So we can take the adjacency operations and
 use them formally as a free Coxeter group $\Sigma^I := <(\sigma^i, i\in I) |
 ((\sigma^i)^2=1, i\in I)>$ acting on $\mathcal{C}$ and on $\mathcal{D}$
-respectively, where $I$ is the index set of $0,\ldots,d$. 
+respectively, where $I$ is the index set of $0,\ldots,d$. For a simple
+$2$-dimensional example see Fig. \ref{fig:rhombic_tiling}.
+
+\begin{figure}
+  \caption{\label{fig:rhombic_tiling} $2$-dimensional rhombic tiling and its
+  D-diagram (\usebox{\LegendVertex}, \usebox{\LegendEdge}, \usebox{\LegendFace})}
+  \center
+  \includegraphics[width=0.7\textwidth]{rhombic_tiling.pdf}
+\end{figure}
 
 \begin{note}
   It's possible to get back to a starting chamber (or later its orbit) if we
@@ -130,7 +173,7 @@ respectively), for every $i,j\in I$:
   i=j & \Rightarrow (\sigma^i)^2C=C
 \end{align}
 Lets denote the smallest possible $m$ values by $m^{ij}(C)=m^{ji}(C)$.
-If $|i-j|>1$, $m^{ij}(C)=m^{ji}(C)=2$ in compatibility with the baricentric subdivision.  
+If $|i-j|>1$, then $m^{ij}(C)=m^{ji}(C)=2$ in compatibility with the baricentric subdivision.  
 $m^{ii}(C)=1$, because $\sigma^i$ is an adjacency operation.
 
 We can introduce the matrix function $\mathcal{M}: \mathcal{C}
@@ -142,7 +185,8 @@ edge.
 
 Similarly one can define the $\mathcal{R}$ matrix function for the
 relations of the $\Gamma$ orbits of the chambers ($\mathcal{D}$), which gives us
-half the number of chamber-orbits around an edge. Every entry of the $\mathcal{R}$
+half the number of chamber-orbits around an edge (see Fig. \ref{fig:rhombic_mx}.
+for the matrix functions of the previous example.) Every entry of the $\mathcal{R}$
 matrix function has to divide the respective entry of $\mathcal{M}$ for
 every $D\in\mathcal{D}$. Namely, for every $i,j\in I$ exists the value $r$ such that
 $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$. Lets denote the smallest
@@ -152,6 +196,30 @@ that $D=C^\Gamma$.
   |i-j|\ne1 & \Rightarrow r^{ij}(D)|m^{ij}(C) \\
   \label{eqn:mxfun_constraint_end}i=j & \Rightarrow r^{ij}(D)=1
 \end{align}
+
+\begin{figure}
+  \caption{\label{fig:rhombic_mx} Matrix functions of the rhombic tiling}
+  \begin{equation*}
+    \mathcal{M}(D_1)=\mathcal{M}(D_2)=
+    \left(
+    \begin{array}{cccc}
+      1 & 4 & 2\\
+      4 & 1 & 4\\
+      2 & 4 & 1
+    \end{array}
+    \right)
+  \end{equation*}
+  \begin{equation*}
+    \mathcal{R}(D_1)=\mathcal{R}(D_2)=
+    \left(
+    \begin{array}{cccc}
+      1 & 2 & 1\\
+      2 & 1 & 2\\
+      1 & 2 & 1
+    \end{array}
+    \right)
+  \end{equation*}
+\end{figure}
 
 Let $v^{ij}(D)$ the following: $m^{ij}(D)=r^{ij}(D)v^{ij}(D)$ and
 let's define the valence matrix function
@@ -200,24 +268,8 @@ Let's recall the definitions and theorems used in this paper.
   $(\sigma^i\sigma^j)^2D=D$. We use the following colors in our figures up to 3
   dimensions:
 
-  \setlength{\unitlength}{1cm}
-  $\sigma^0$:
-  \begin{picture}(1,0.2)
-    \multiput(0,0.1)(0.2,0){5}{\circle*{0.001}}
-  \end{picture},
-  $\sigma^1$:
-  \begin{picture}(1,0.2)
-    \multiput(0,0.1)(0.25,0){4}{\line(1,0){0.15}}
-  \end{picture},
-  $\sigma^2$:
-  \begin{picture}(1,0.2)
-    \put(0,0.1){\line(1,0){1}}
-  \end{picture},
-  $\sigma^3$:
-  \begin{picture}(1.5,0.2)
-    \multiput(0,0.1)(0.5,0){3}{\line(1,0){0.2}}
-    \multiput(0.35,0.1)(0.5,0){3}{\circle*{0.001}}
-  \end{picture}
+  \usebox{\LegendVertex}, \usebox{\LegendEdge}, \usebox{\LegendFace},
+  \usebox{\LegendBody}
 \end{defn}
 
 \begin{defn}
@@ -225,7 +277,7 @@ Let's recall the definitions and theorems used in this paper.
   Let $\mathcal{R}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
   For every $D\in\mathcal{D}$, for every $i,j\in I$ there exists $r\in
   \mathbb{N}^+$ such that
-  $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$ ($|\mathcal{D}|<\infinity$).
+  $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$ ($|\mathcal{D}|<\infty$).
   $\mathcal{R}(D)^{i,j}:=r$
 \end{defn}
   
@@ -299,7 +351,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
   \label{thm:curvature}
   For $2$-dimensional D-symbols one can decide in which geometry the
   D-symbol realizes by using the {\em combinatorial curvature function}
-  \fotnote{FIXME cite}:
+  \footnote{FIXME cite}:
   \begin{align*}
     K(\mathcal{D})=\sum_{D\in
     \mathcal{D}}\left(-1+\sum_{\substack{0\le j<k\le 2}}\frac{1}{m^{jk}(D)}\right)
@@ -316,7 +368,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
     *u=(+,0;[];\{(u)\}), & & 1<u;\\
     uv=(+,0;[u,v];\{\}), & & 1<u<v;\\
     *uv=(+,0;[];\{(u,v)\}), & & 1<u<v.
-  \end{align*}}
+  \end{align*}
 \end{thm}
 
 \begin{defn}
@@ -411,7 +463,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 
 \begin{defn}
   $(\Sigma^I,\mathcal{D},\mathcal{M})$ is an {\em edge transitive} D-symbol if
-  there is only a single $1$st D-subsymbol component $\leftsub{1}\mathcal{D}$. (There is only a single class of
+  there is only a single $1$st D-subsymbol component $\leftsub{1}{\mathcal{D}}$. (There is only a single class of
   $1$-labeled "edge"-type chamber vertices.)
 \end{defn}
 
@@ -599,7 +651,7 @@ gives us a proper D-symbol. Take every D-subsymbol:
 %(Non-)maximality example. d3c6\_13
 
 Let's see another $3$-dimensional example but with cardinality $6$. The
-D-diagram with the possible homomorphisms is shown in Fig.
+D-diagram is shown in Fig.
 \ref{fig:d3c6_13}.
 
 \begin{figure}
@@ -640,7 +692,7 @@ with $D_6$, $D_2$ with $D_5$ and $D_3$ with $D_4$. The adjacency operations and
 the $\mathcal{M}$ matrix function act nicely on the resulting D-symbol
 with cardinality $3$ which is isomorphic to our previous example (up to a
 permutation). This means that this D-symbol is non-maximal, but a symmetry
-breaking of the previous one. 
+breaking of the previous one.
 
 If we take another set of valid parameter values: $a=2$, $b=c=3$, $d=3$, $e=1$,
 $f=1$, $g=1$ the resulting D-symbol is maximal, because the homomorphisms of the
@@ -648,7 +700,7 @@ D-diagram cannot be extended to the $\mathcal{M}$ matrix functions.
 
 As was mentioned in section \ref{sec:edge_transitive} the biggest edge
 transitive D-symbols have a cardinality of $24$, let's see an example:
-The D-diagram with the possible homomorphisms is shown in Fig.
+The D-diagram is shown in Fig.
 \ref{fig:d3c24_2}.
 
 \begin{figure}
@@ -675,27 +727,43 @@ $D_{18}(4e, 3i, 6k)$, $D_{19}(4e, 3i, 6k)$, $D_{20}(4e, 3h, 6k)$, $D_{21}(4e,
 3h, 6k)$, $D_{22}(4e, 3i, 6k)$, $D_{23}(4e, 3i, 6k)$, $D_{24}(4e, 3h, 6k)$.
 
 If we take the valid parameter values: $a=b=2$, $e=f=g=h=i=k=1$ and any value
-for $c\geq2$, then the D-symbol is non-maximal, every homomorphism of the
-D-diagram shown in Fig. \ref{fig:d3c24_2} is also a homomorphism of the D-symbol
-(including the $\mathcal{M}$ matrix function) and we got a symmetry breaking of
-our first example (Fig. \ref{fig:d3c3_2}).
+for $c\geq2$, then the D-symbol is non-maximal, it can be verified, that the
+following operation is a homomorphism:
+\begin{align}
+  i\in{9,10,11,12,13,14,15,16}: & \phi{D_i}=D_1' \\
+  i\in{1,2,7,8,17,18,21,22}: & \phi{D_i}=D_2' \\
+  i\in{3,4,5,6,19,20,23,24}: & \phi{D_i}=D_3'
+\end{align}
+So we got a symmetry breaking of our first example (Fig. \ref{fig:d3c3_2}).
 
 If we take another valid parameter set: $a=c=2$, $e=f=g=h=i=k=1$ and any value
 for $b\geq3$\footnote{the case where $b=2$ is contained in the previous set},
 then the D-symbol is maximal.
 
 \section{Future work}
-Analyse every edge-transitive symbol
+We already noted that it should be possible to do the previous analisys on every
+edge-transitive D-symbol, because there are finitely many D-diagrams. Now we can
+say it is really possible to do so on a decent PC or Laptop, there is a
+manuscript in preparation on the results and on the alghorithms used.
 
-Check 2 dimensional tilings on the border of partitions (splitting/fiber)
+One may notice that there could be a lot more $2$-dimensional subtilings in a
+$3$-dimensional tiling, than those examined (around the simplex-vertices). It
+should be possible to test all those subtilings using D-symbols. The exact
+effect of these are not yet covered, but we suspect that $S^2$ and $E^2$
+subtilings cause some nice effects (for example splittings or indicate a fiber)
+while $H^2$ subtilings can be tought of as normal.
 
-Difficult part: find out the signature and type of underlying geometries
+The most difficult question seems to be now the calculation of the signature of
+the underlying geometry. But if it would be possible, then one could determine
+the underlying geometry of a D-symbol, which would be of much use in the use
+cases of the Thurston theorem.
 
 \section{Acknowledgement}
-
+The author would like to say thank you for the hospitality and hard work of the
+organisers of the conference CGTA2013 in Ljubljana.
 
 %Bibiliography
-\nocite{DHM93,D87,Du88,H93,LM90,Ma67,M94,T82,VS93,F94,M11,DDH98,K11}
+\nocite{DHM93,D87,Du88,H93,LM90,Ma67,M94,T82,VS93,F94,M11,DDH98,K11,LMS94}
 \bibliographystyle{plain}
 \bibliography{dsym}
 
