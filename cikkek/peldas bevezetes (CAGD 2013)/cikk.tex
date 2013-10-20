@@ -12,6 +12,13 @@
 \usepackage{amsthm}
 \usepackage{ae,aecompl}
 
+\usepackage{enumitem}
+\setenumerate[1]{label=\thesection.\arabic*.}
+\setenumerate[2]{label*=\arabic*.}
+
+\renewcommand{\theequation}{\thesection.\arabic{equation}}
+\numberwithin{equation}{section}
+
 \newcommand{\leftexp}[2]{{\vphantom{#2}}^{#1}{#2}}
 \newcommand{\leftsub}[2]{{\vphantom{#2}}_{#1}{#2}}
 
@@ -116,18 +123,15 @@ vannak relaciok.}
 
 Next we have to deal with these relations. We require that the following
 relations hold for every $C\in\mathcal{C}$ (and every $C^\Gamma=D\in\mathcal{D}$
-respectively):
-\begin{itemize}
-  \item For every $i,j\in I$, where $|i-j|=1$, there exists
-    $m\in\mathbb{N}^+$:
-    $(\sigma^j\sigma^i)^mC=(\sigma^i\sigma^j)^mC=C$, lets denote the smallest
-    possible $m$ value by $m^{ij}(C)=m^{ji}(C)$.
-  \item For every $i,j\in I$, where $|i-j|>1$:
-    $(\sigma^j\sigma^i)^2C=(\sigma^i\sigma^j)^2C=C$, $m^{ij}(C)=m^{ji}(C)=2$,
-    in compatibility with the baricentric subdivision.  
-  \item (For every $i\in I$: $(\sigma^i)^2C=C$, $m^{ii}(C)=1$, which has already
-    been naturally defined.)
-\end{itemize}
+respectively), for every $i,j\in I$:
+\begin{align}
+  \label{eqn:mxfun_constraint_begin}|i-j|=1 & \Rightarrow \exists m\in\mathbb{N}^+: (\sigma^j\sigma^i)^mC=(\sigma^i\sigma^j)^mC=C \\
+  |i-j|>1 & \Rightarrow (\sigma^j\sigma^i)^2C=(\sigma^i\sigma^j)^2C=C \\
+  i=j & \Rightarrow (\sigma^i)^2C=C
+\end{align}
+Lets denote the smallest possible $m$ values by $m^{ij}(C)=m^{ji}(C)$.
+If $|i-j|>1$, $m^{ij}(C)=m^{ji}(C)=2$ in compatibility with the baricentric subdivision.  
+$m^{ii}(C)=1$, because $\sigma^i$ is an adjacency operation.
 
 We can introduce the matrix function $\mathcal{M}: \mathcal{C}
 \rightarrow \mathbb{N}^{I\times I}$: $\mathcal{M}(C)^{i,j}=m^{ij}(C)$, which
@@ -145,9 +149,8 @@ $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$. Lets denote the smallest
 possible $r$ value by $r^{ij}(D)=r^{ji}(D)$. There exists $C\in\mathcal{C}$ so
 that $D=C^\Gamma$.
 \begin{align}
-  |i-j|=1 & \Rightarrow r^{ij}(D)|m^{ij}(C) \\
-  |i-j|>1 & \Rightarrow 1\leq r^{ij}(D)\leq 2 \\
-  i=j & \Rightarrow r^{ij}(D)=1
+  |i-j|\ne1 & \Rightarrow r^{ij}(D)|m^{ij}(C) \\
+  \label{eqn:mxfun_constraint_end}i=j & \Rightarrow r^{ij}(D)=1
 \end{align}
 
 Let $v^{ij}(D)$ the following: $m^{ij}(D)=r^{ij}(D)v^{ij}(D)$ and
@@ -229,12 +232,10 @@ Let's recall the definitions and theorems used in this paper.
 \begin{defn}
   {\em The matrix function $\mathcal{M}$.}
   Let $\mathcal{M}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
-  For every $D\in\mathcal{D}$, for every $i,j\in I$:
-  \begin{align}
-    i=j & \Rightarrow \mathcal{M}(D)^{i,i}=1 \\
-    |i-j|>1 & \Rightarrow \mathcal{M}(D)^{i,j}=2 \\
-    |i-j|=1 & \Rightarrow \mathcal{R}(D)^{i,j}|\mathcal{M}(D)^{i,j}
-  \end{align}
+  The above requirements
+  (\ref{eqn:mxfun_constraint_begin})-(\ref{eqn:mxfun_constraint_end}) will be
+  fulfilled for every $D\in\mathcal{D}$ instead of $C\in\mathcal{C}$ in the
+  above sense, mutatis mutandis.
   The most interesting entries of the matrix function are at the subdiagonals, so
   we can use the following shorter notation:
   $D_1(\mathcal{M}(D_1)^{0,1},\ldots,\mathcal{M}(D_1)^{d,d+1})$, $\ldots$,
@@ -246,7 +247,7 @@ Let's recall the definitions and theorems used in this paper.
   as parameters.}
   Let $\mathcal{V}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
   $\mathcal{M}(D)=\mathcal{R}(D)\mathcal{V}(D)$.
-\end{defn}o
+\end{defn}
 
 So a fundamental domain $\mathcal{F}$, as a topological (PL) polytope, can be collected
 from the representative chambers $C_k$ of $D_k$, $D_k\in\mathcal{D}$ (by a
