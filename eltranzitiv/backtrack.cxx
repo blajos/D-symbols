@@ -637,7 +637,8 @@ void Svg::create_line(int n0,int n1,int szin,std::ostream* out) {
     "\" y1=\"" << koordy[n0]+diffy <<
     "\" x2=\"" << koordx[n1]+diffx <<
     "\" y2=\"" << koordy[n1]+diffy <<
-    "\" stroke=\"black\" stroke-width=\"1\"/>";
+    "\" fill=\"none\"" <<
+    " stroke=\"black\" stroke-width=\"1\"/>";
 }
 
 Svg::~Svg(void) {

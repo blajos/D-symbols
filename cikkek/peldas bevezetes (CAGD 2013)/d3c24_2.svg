@@ -52,6 +52,7 @@
      fit-margin-left="0"
      fit-margin-right="0"
      fit-margin-bottom="0" />
+  <g id="lines" style="fill:none">
   <line
      style="stroke:#000000;stroke-width:3;stroke-dasharray:2, 10"
      x1="186.29224"
@@ -388,6 +389,7 @@
      x2="207.29224"
      y2="789.21478"
      id="line98" />
+  </g>
   <circle
      cx="20"
      cy="600"
