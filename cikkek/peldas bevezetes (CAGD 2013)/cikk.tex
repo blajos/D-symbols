@@ -224,7 +224,7 @@ that $D=C^\Gamma$.
   \end{equation*}
 \end{figure}
 
-Let $v^{ij}(D)$ the following: $m^{ij}(D)=r^{ij}(D)v^{ij}(D)$ and
+Let $v^{ij}(D)$ be the following: $m^{ij}(D)=r^{ij}(D)v^{ij}(D)$ and
 let's define the valence matrix function
 $\mathcal{V}(D)^{i,j}=v^{ij}(D)$.
 
@@ -244,7 +244,7 @@ If we take a small ball around every chamber-vertex (so small, that it doesn't
 contain another chamber vertex), then the tiling on the boundary of the ball (a
 $d-1$-sphere)
 induced by the original tiling must be a finite $S^{d-1}$ tiling \cite{D87} if the
-chamber vertex is a proper one (not an ideal vertex (at infinity) or an
+chamber vertex is a proper one (not an ideal vertex - at infinity, or an
 out-of-model vertex).
 
 The triplet $(\Sigma^I,\mathcal{D},\mathcal{M})$ is called the D-symbol of a
@@ -252,7 +252,7 @@ tiling in honour of Delone, Delaney and Dress. A main consequence is the
 following theorem \cite{D87}.
 \begin{thm}
 $(\mathcal{T},\Gamma)$ and
-$(\mathcal{T}',\Gamma')$ are equivalent (topologically equivariant (homeomeric))
+$(\mathcal{T}',\Gamma')$ are equivalent (topologically equivariant or homeomeric)
 if and only if the correspondig $(\Sigma^I,\mathcal{D},\mathcal{M})$ and
 $(\Sigma^I,\mathcal{D}',\mathcal{M}')$ D-symbols are isomorphic.
 \end{thm}
@@ -334,9 +334,9 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 %\end{defn}
 
 \begin{defn}
-  If we cancel the $i$th operation of a D-symbol (both in the diagram and in
-  $i$th rows and columns of $\mathcal{M}$) the so obtained diagram $D_i$ can fall apart to multiple
-  connected subdiagrams, which we call components. The $i$th {\em D-subsymbols} are
+  If we cancel the $i$-th operation of a D-symbol (both in the diagram and in
+  $i$-th rows and columns of $\mathcal{M}$) the so obtained diagram $D_i$ can fall apart to multiple
+  connected subdiagrams, which we call components. The $i$-th {\em D-subsymbols} are
   those components with the corresponding $\mathcal{M}_i$ matrix function:
   $\leftsub{c}{(\Sigma^{I\setminus\{i\}}=\Sigma^I_i,\mathcal{D}_i,\mathcal{M}_i)}$
 \end{defn}
@@ -350,7 +350,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 \end{note}
 
 \begin{note}
-  The number of components gives us the number of $i$th labelled chamber-vertex
+  The number of components gives us the number of $i$-th labelled chamber-vertex
   classes under the action of the stabilizer $\leftsub{c}{\Gamma}_i$ in $\Gamma$.
 \end{note}
 
@@ -401,7 +401,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 \begin{proof}
   By the above procedure and the curvature formula.
 
-%  Let's take every $i$th D-subsymbol of the original ($i\in I$), which are in
+%  Let's take every $i$-th D-subsymbol of the original ($i\in I$), which are in
 %  fact $2$-dimensional D-symbols, calculate the curvature formula from
 %  \ref{thm:curvature}. In case of $i=0$ or $i=3$, the geometry must be $S^3$
 %  (proper vertices) or $\mathbb{E}^3$ (ideal vertices); in case of $i=1$ or $i=2$, the
@@ -479,7 +479,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 
 \begin{defn}
   $(\Sigma^I,\mathcal{D},\mathcal{M})$ is an {\em edge transitive} D-symbol if
-  there is only a single $1$st D-subsymbol component $\leftsub{1}{\mathcal{D}}_1$. (There is only a single class of
+  there is only a single $1$-st D-subsymbol component $\leftsub{1}{\mathcal{D}}_1$. (There is only a single class of
   $1$-labeled "edge"-type chamber vertices.)
 \end{defn}
 
@@ -508,7 +508,7 @@ A hypothetical fundamental domain with canonical gluings is shown in Figure \ref
 transparent chamber facets are mirrors, the colored facets are mapped together
 by facet pairing mappings as generators (isometries) of $\Gamma$, as the
 symmetry group of the tiling $\mathcal{T}$. (The only non-mirror facet pairing
-mapping this fundamental domain has, is the $\sigma^1$ adjacency between $D_2$
+mapping of this fundamental domain is the $\sigma^1$ adjacency between $D_2$
 and $D_3$ and the corresponding relation is a half-turn about the line
 $0_{123}2_{23}$.) The wireframe of a polyhedron is shown to give an idea of the
 barycentric subdivision and the vertices of the chambers are labelled as
@@ -578,7 +578,7 @@ based on the diagram (besides all of the data, our computer analysis can find
 and the realization geometries based on Coxeter reflection simpleces see
 \cite{M96} for some details). 
 One can examine that the entries are the same around the
-edges of the corresponding chambers (eg. let $i=0$ and $j=1$, then
+edges of the corresponding chambers (e.g. let $i=0$ and $j=1$, then
 $D_1=\sigma^0D_1=\sigma^0\sigma^1D_1$ gets parameter $a$ and the
 $\sigma^0\sigma^1$-orbit $\{D_2,D_3\}$ gets parameter $2b$.) The short notation
 for $\mathcal{M}$ will be $D_1(a,3c,3d)$, $D_2(2b,3c,3d)$, $D_3(2b,3c,3d)$. 
@@ -626,7 +626,7 @@ Let's consider in our analysis first the case where $b=2$, $c=1$, $d=2$. We'll s
 gives us a geometric D-symbol. Take every D-subsymbol:
 \begin{enumerate}
   \setcounter{enumi}{-1}
-  \item If we cancel the $0$th adjacency (only loops this time) we get a single D-subsymbol component
+  \item If we cancel the $0$-th adjacency (only loops this time) we get a single D-subsymbol component
     $\leftsub{1}{\mathcal{D}}_0$, let's calculate its combinatorial curvature
     formula:
     \begin{align*}
@@ -641,7 +641,7 @@ gives us a geometric D-symbol. Take every D-subsymbol:
     be an ideal vertex (in the hyperbolic space $H^3$ as it turns out. We get a
     hyperbolic cube tiling with face angle $60^{\circ}$, if $a=4$, $b=2$, $c=1$ and
     $d=2$.)
-  \item Cancelling the $1$st adjacency, results in a single D-subsymbol
+  \item Cancelling the $1$-st adjacency, results in a single D-subsymbol
     component $\leftsub{1}{\mathcal{D}}_1$, which
     shows the edge-transitivity. Its curvature formula is:
     \begin{align*}
@@ -651,7 +651,7 @@ gives us a geometric D-symbol. Take every D-subsymbol:
     This means spherical plane tiling and we have to check the good orbifold
     criteria: the group (orbifold) signature is
     $*22d$ which is a good orbifold (even for $d=1$), so this must be a proper vertex.
-  \item Cancelling the $2$nd adjacency, we get two components
+  \item Cancelling the $2$-nd adjacency, we get two components
     $\leftsub{1}{\mathcal{D}}_2$ and $\leftsub{2}{\mathcal{D}}_2$. The curvature formulae are:
     \begin{align*}
       K(\leftsub{1}{\mathcal{D}}_2)&= -1 + \frac{1}{2} + \frac{1}{2} +
@@ -667,7 +667,7 @@ gives us a geometric D-symbol. Take every D-subsymbol:
     the case. We obtained a $2b$-gon here. See Fig. \ref{fig:d3c3_2_emil} for
     Euclidean ($a=4$, $b=3$, $c=1$ and $d=1$) edge-transitive (also for dual
     face-transitive tetrahedron, i.e. sphenoid) tiling.
-  \item Cancelling the $3$rd adjacency the curvature formula is:
+  \item Cancelling the $3$-rd adjacency the curvature formula is:
     \begin{align*}
       K(\leftsub{1}{\mathcal{D}}_3)&= -3 + 3\frac{1}{2} + \frac{1}{a} +
       2\frac{1}{2b} + 3\frac{1}{3c} =
@@ -720,8 +720,8 @@ Calculating the $\mathcal{R}$ matrix function is left to the reader as an
 exercise.
 
 The short version of the parametric $\mathcal{M}$ matrix function based on the
-diagram: $D_1(2a, 3e, 6g)$, $D_2(2a, 3e, 6g)$, $D_3(b, 3e, 6g)$, $D_4(c, 3f,
-6g)$, $D_5(2d, 3f, 6g)$, $D_6(2d, 3f, 6g)$.
+diagram is the following: $D_1(2a, 3e, 6g)$, $D_2(2a, 3e, 6g)$, $D_3(b, 3e,
+6g)$, $D_4(c, 3f, 6g)$, $D_5(2d, 3f, 6g)$, $D_6(2d, 3f, 6g)$.
 
 The combinatorial curvature formula can be calculated for every D-subsymbol
 component,
@@ -786,13 +786,13 @@ following cosets lead to a homomorphism:
 So we got a symmetry breaking of our first example (Fig. \ref{fig:d3c3_2}).
 
 If we take another parameter set: $a=c=2$, $e=f=g=h=i=k=1$ and any value
-for $b\geq3$ (the case where $b=2$ is contained in the previous set,)
+for $b\geq3$ (the case where $b=2$ is contained in the previous set)
 then the D-symbol is already maximal.
 
 \section{Results and future work}
 We have already noted that the previous analysis is possible on every
 edge-transitive D-symbol, because there are finitely many D-diagrams. Now we can
-say it is possible to do so indeed on a decent PC or Laptop, there is a
+say that it is possible to do so indeed on a decent PC or Laptop. There is a
 dissertation in preparation on our results and on the algorithms used (for some
 preliminary statistics see Fig. \ref{fig:stat}). It can be
 checked at \cite{MYHOME_edge_trans} that there are e.g. $103$ possible
@@ -807,7 +807,7 @@ there are $12$ D-diagrams corresponding to $138$ maximal D-symbols.
 \end{figure}
 
 
-One may notice that there are a lot more $2$-dimensional subtilings in a
+One may notice that there are much more $2$-dimensional subtilings in a
 $3$-dimensional tiling, than those examined (around the simplex-vertices). It
 is possible to test all those subtilings using D-symbols. The exact
 effect of these are not yet covered, but we suspect that $S^2$ and $E^2$
@@ -816,7 +816,7 @@ while $H^2$ subtilings can be tought of as normal.
 
 The most difficult question seems to be now the characterisation of
 the underlying geometry. But if it would be possible, then one could determine
-the underlying geometry of a D-symbol, which would be of much use in checking
+the underlying geometry of a D-symbol, which would be of great benefit in checking
 the Thurston conjecture (see e.g. \cite{Du88}, \cite{M11}, \cite{T82}).
 
 \section{Acknowledgement}
