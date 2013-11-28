@@ -1,0 +1,38 @@
+\documentclass{article}
+\usepackage[a4paper,landscape,margin=1cm]{geometry}
+\pagestyle{empty}
+\usepackage{tabulary}
+
+\begin{document}
+\setlength{\tymin}{10pt}
+\setlength{\tymax}{90pt}
+\begin{tabulary}{\textwidth}{|L||R|R|R||R|R||R|R|}
+  \hline
+  %\multicolumn{8}{|c|}{Statistics: edge-transitive D-symbols} \\
+  %\hline
+  \multicolumn{1}{|c||}{} & \multicolumn{3}{c||}{} & \multicolumn{4}{c|}{\# of geometric D-symbols} \\
+  \cline{5-8}
+  \multicolumn{1}{|c||}{} & \multicolumn{3}{c||}{\# of D-diagrams} &
+  \multicolumn{2}{c||}{general (Def. 3.7)} & \multicolumn{2}{c|}{maximal (Def.
+  3.10)} \\
+  \cline{2-8}
+  Cardinality & general (Def. 3.1) & has geometric D-symbols & has maximal
+  geometric D-symbols & normal
+  & infinite series & normal & infinite series\\
+  \hline
+  1 & 1 & 1 & 1 & 22 & 0 & 22 & 0 \\
+  2 & 14 & 14 & 4 & 104 & 0 & 14 & 0 \\
+  3 & 2 & 2 & 2 & 42 & 2 & 39 & 2 \\
+  4 & 55 & 55 & 8 & 247 & 1 & 70 & 1 \\
+  5 & 6 & 2 & 2 & 34 & 2 & 35 & 2 \\
+  6 & 80 & 33 & 11 & 253 & 23 & 74 & 3 \\
+  8 & 222 & 163 & 20 & 612 & 13 & 136 & 9 \\
+  10 & 324 & 29 & 15 & 199 & 21 & 73 & 12 \\
+  12 & 2131 & 113 & 15 & 731 & 91 & 142 & 21 \\
+  16 & 2608 & 319 & 37 & 904 & 40 & 133 & 14 \\
+  20 & 48458 & 112 & 49 & 453 & 82 & 194 & 27 \\
+  24 & 1302136 & 103 & 12 & 1188 & 190 & 120 & 18 \\
+  \hline
+\end{tabulary}
+
+\end{document}
