@@ -196,6 +196,8 @@ class Dsym {
     void decrease_param(std::list<param>::iterator);
 
     int kdimsf(std::list<param>::iterator);
+    bool ideal_vertex,ideal_body;
+
     int min(void);
     void min_print_smaller(std::ostream*);
     std::list<int> osszevlist;

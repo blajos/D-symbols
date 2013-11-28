@@ -58,6 +58,8 @@ void Dsym::create(void){
   for (int i=0;i<car;i++) params[i]=new std::list<param>::iterator[dim];
   dual=0;
   klist=new std::list<kisebbdim>[dim+1];
+  ideal_vertex=false;
+  ideal_body=false;
 }
 
 Dsym::Dsym(int dimin, int carin):
@@ -917,6 +919,8 @@ void Dsym::create_kdim(void) {
 //Miert nem nezzuk meg a 1-2 operaciokat: ekkor pl. 1/m23+1/2+1/2 kell nagyobb
 //legyen 1-nel, ami mindig igaz.
 int Dsym::kdimsf(std::list<param>::iterator inf_param){
+  ideal_vertex=false;
+  ideal_body=false;
   if (dim!=3) return -100;
   int ret=1;
   for (int elhagy=0;elhagy<dim+1;elhagy+=dim){
@@ -940,8 +944,13 @@ int Dsym::kdimsf(std::list<param>::iterator inf_param){
 	ret=-1;
 	return ret;
       }
-      if(sum<THRESH && sum>-THRESH) 
+      if(sum<THRESH && sum>-THRESH){ 
 	ret=0;
+	if (elhagy == 0)
+	  ideal_vertex=true;
+	else
+	  ideal_body=true;
+      }
     }
   }
   return ret;
@@ -1348,7 +1357,11 @@ int Dsym::print_possible_infs(int pass,std::list<param>::iterator currparam,
 	/*else if(min()==-1)
 	 *out<<"<td>Atsorszamozhato</td>";*/
 	*out<<"<td>";
-	if(idcs==1)
+	if(ideal_vertex)
+	  *out<<"Exists";
+	*out<<"</td>";
+	*out<<"<td>";
+	if(ideal_body)
 	  *out<<"Exists";
 	*out<<"</td>";
 	*out<<"<td>";
@@ -1557,6 +1570,7 @@ void Dsym::print_fundom_eltranzitiv(std::ostream* out){
                 <script src=\"/~boroczki/D-symbols-edge-transitive/js/controls/TrackballControls.js\"></script> \
                 <script src=\"/~boroczki/D-symbols-edge-transitive/js/fonts/helvetiker_regular.typeface.js\"></script> \
                 <script src=\"/~boroczki/D-symbols-edge-transitive/js/Detector.js\"></script> \
+                <script src=\"/~boroczki/D-symbols-edge-transitive/js/renderers/SVGRenderer.js\"></script> \
                 <script src=\"/~boroczki/D-symbols-edge-transitive/js/eltranzitiv_fundom.js\"></script>" << std::endl;
   *out << "<script>" << std::endl;
   std::list<simplex*> starting_simpleces;
@@ -2716,7 +2730,7 @@ void Dsymlista::print_html(std::string filebase){
 	  pit!=curr->plist.end();pit++)
 	currD<<"<td align=center>"<<pit->kar<<"</td>";
       currD<<"<td>Maximal</td><td>Ideal vertex</td>"  //Plusz infok
-	<<"<td>Good orbifold criteria</td>";
+	<<"<td>Ideal body center</td><td>Good orbifold criteria</td>";
       currD<<"</tr></thead><tbody>"<<std::endl;
       currD << possible_params.str();
       currD<<std::endl<<"</tbody></table><br>";

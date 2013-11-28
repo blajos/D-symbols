@@ -3,6 +3,11 @@ var camera, scene, renderer;
 var splitting_system = new Array;
 var points_labels = new Array;
 var edges = new Array;
+var g_transparency = true;
+var g_opacity = 0.8;
+var g_create_text = true;
+var g_side = THREE.DoubleSide;
+var g_update_controls = true;
 
 init();
 animate();
@@ -48,7 +53,7 @@ function new_simplex(z, num, maxnum, labels, colors) {
     }
     scene.add(new THREE.Mesh( 
 	  geometry,
-	  new THREE.MeshBasicMaterial( { color: 0x000000, wireframe: true } )));
+	  new THREE.MeshBasicMaterial( { color: 0x000000, side: g_side, wireframe: true } )));
   }
 
   for(var elhagy=0;elhagy < simplex_v.length; elhagy++){
@@ -68,13 +73,14 @@ function new_simplex(z, num, maxnum, labels, colors) {
 
     var simplex_m1 = new THREE.MeshBasicMaterial( {
       color: 0x000000,
+	side: g_side,
 	wireframe: true } );
 
     var simplex_m2 = new THREE.MeshBasicMaterial( {
-      opacity: 0.8,
+      opacity: g_opacity,
 	color: colors[elhagy],
-	transparent: true,
-	side: THREE.DoubleSide,
+	transparent: g_transparency,
+	side: g_side,
 	wireframe: false } );
 
     simplex_g.computeBoundingBox();
@@ -84,7 +90,9 @@ function new_simplex(z, num, maxnum, labels, colors) {
     }
 
     scene.add(new THREE.Mesh( simplex_g, simplex_m1 ));
-    scene.add(new THREE.Mesh( simplex_g, simplex_m2 ));
+    if (elhagy == 0) {
+      scene.add(new THREE.Mesh( simplex_g, simplex_m2 ));
+    }
   }
 
 
@@ -113,6 +121,9 @@ function new_simplex(z, num, maxnum, labels, colors) {
 }
 
 function create_text(text, subscript, position){
+  if (g_create_text != true) {
+    return;
+  }
   //console.log("Text");
   // Szovegek
   var textGeo = new THREE.TextGeometry( text, {
@@ -277,7 +288,12 @@ function init() {
 
   if ( ! Detector.webgl ){
     Detector.addGetWebGLMessage();
-    renderer = new THREE.CanvasRenderer();
+    renderer = new THREE.SVGRenderer();
+    g_transparency = false;
+    g_opacity = 1;
+    g_create_text = false;
+    //g_side = THREE.FrontSide;
+    g_update_controls = false;
   }
   else {
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -293,6 +309,7 @@ function init() {
 
   window.addEventListener( 'resize', onWindowResize, false );
 
+  controls.update();
 }
 
 function onWindowResize() {
@@ -314,7 +331,9 @@ function animate() {
 
 function render() {
 
-  controls.update();
+  if (g_update_controls == true){
+    controls.update();
+  }
   renderer.render( scene, camera );
 
 }

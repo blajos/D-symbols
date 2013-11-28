@@ -11,6 +11,7 @@
 \usepackage{amssymb}
 \usepackage{amsthm}
 \usepackage{ae,aecompl}
+\usepackage{tabulary}
 
 \usepackage{enumitem}
 \setenumerate[1]{label=\thesection.\arabic*.}
@@ -81,17 +82,19 @@
   their barycentric subdivision and the adjacency relations between the orbits
   and the particular simplices. The representation is called the D-symbol of a
   tiling in honour of B. N. Delone, M.S. Delaney and A.W.M. Dress. The
-  representation is easily adoptable to computer programs.
+  representation is easily adaptable to computer programs.
 
   After a short introduction and definition of D-symbols we 
   present some recent results of edge transitive D-symbols and some of their
-  nice properties found by computer analysis.
+  nice geometric properties found by computer analysis.
+
+  {\bf Keywords:} D-symbol; tiling; edge-transitive tiling; Thurston geometries
 \end{abstract}
 
 \section{Introduction}
-This work is mostly based on the work of B. N. Delone, M.S. Delaney,
-A.W.M. Dress and E. Molnár amongst many others. The concept of D-symbols were
-established $30$ years ago and most $2$-dimensional questions are already
+This work is mostly based on the works of B. N. Delone, M.S. Delaney,
+A.W.M. Dress and E. Molnár amongst many others. The concept of D-symbol was
+established $30$ years ago and most $2$-dimensional questions have already been
 answered. There are still a lot of open questions in $3$ (or more) dimensions
 and in non-Euclidean geometries.
 
@@ -123,7 +126,7 @@ labeled by $1$ and one of the original vertices labeled by $0$. The facets of
 the chambers ($(d-1)$-dimensional faces) can be labeled by the same $0,\ldots,d$
 using the label of the only vertex, that the facet doesn't contain.
 
-Every chamber has $d+1$ neighbours by the facet they share and this adjacency is
+Every chamber has $d+1$ neighbours along the facet they share and this adjacency is
 preserved by the action of $\Gamma$. So we can take the adjacency operations and
 use them formally as a free Coxeter group $\Sigma^I := <(\sigma^i, i\in I) |
 ((\sigma^i)^2=1, i\in I)>$ acting on $\mathcal{C}$ and on $\mathcal{D}$
@@ -131,7 +134,8 @@ respectively, where $I$ is the index set of $0,\ldots,d$. For a simple
 $2$-dimensional example see Fig. \ref{fig:rhombic_tiling}.
 
 \begin{figure}
-  \caption{\label{fig:rhombic_tiling} $2$-dimensional edge transitive rhombic tiling and its
+  \caption{\label{fig:rhombic_tiling} $2$-dimensional edge transitive rhombic
+  tiling with the plane group $\Gamma=cmm$ \cite{VS93} and its
   D-diagram (\usebox{\LegendVertex}, \usebox{\LegendEdge}, \usebox{\LegendFace})}
   \center
   \includegraphics[width=0.7\textwidth]{rhombic_tiling.pdf}
@@ -140,7 +144,7 @@ $2$-dimensional example see Fig. \ref{fig:rhombic_tiling}.
 \begin{note}
   It's possible to get back to a starting chamber (or later its orbit) if we
   take a route $\sigma^i\sigma^j\ldots\sigma^i\sigma^j(C) = C$ around an
-  $ij$-edge of the starting chamber C.
+  $ij$-edge of the starting chamber $C$.
 \end{note}
 
 \begin{note}
@@ -189,7 +193,7 @@ for the matrix functions of the previous example.) Every entry of the $\mathcal{
 matrix function has to divide the respective entry of $\mathcal{M}$ for
 every $D\in\mathcal{D}$. Namely, for every $i,j\in I$ there exists the value $r$ such that
 $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$. Let's denote the smallest
-possible $r$ value by $r^{ij}(D)=r^{ji}(D)$. There exists $C\in\mathcal{C}$ so
+possible $r$ by $r^{ij}(D)=r^{ji}(D)$. There exists $C\in\mathcal{C}$ so
 that $D=C^\Gamma$.
 \begin{align}
   |i-j|\ne0 & \Rightarrow r^{ij}(D)|m^{ij}(C) \\
@@ -261,8 +265,9 @@ $(\mathcal{T},\Gamma)$?
 
 Let's recall the definitions and theorems used in this paper.
 \begin{defn}
+  \label{def:D-diag}
   A $d$-dimensional {\em D-diagram} is a $d+1$ colored connected graph $(\Sigma^I,\mathcal{D})$ of the
-  adjacency operations. Where $I=\{0, 1, \ldots, d\}$,
+  adjacency operations, where $I=\{0, 1, \ldots, d\}$.
   $|\mathcal{D}|$ is the finite {\em cardinality} of the diagram, for every $i\in
   I$ $(\sigma^i)^2=1$ and for every $i,j\in I$ if $|i-j|>1$ then
   $(\sigma^i\sigma^j)^2D=D$. We use the following colors in our figures up to 3
@@ -276,7 +281,7 @@ Let's recall the definitions and theorems used in this paper.
   {\em The matrix function $\mathcal{R}$.}
   Let $\mathcal{R}$: $\mathcal{D} \rightarrow \mathbb{N}^{I\times I}$.
   For every $D\in\mathcal{D}$, for every $i,j\in I$ there exists a minimal
-  $r^{ij}(D)\in \mathbb{N}^+$ such that
+  $r:=r^{ij}(D)\in \mathbb{N}^+$ such that
   $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$ ($|\mathcal{D}|<\infty$).
   $\mathcal{R}(D)^{i,j}:=r^{ij}(D)$.
 \end{defn}
@@ -353,7 +358,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
   \label{thm:curvature}
   For $2$-dimensional D-symbols one can decide in which geometry the
   D-symbol realizes by using the {\em combinatorial curvature formula}
-  \footnote{FIXME cite}:
+  (e.g. \cite{M96}, \cite{LMS94}):
   \begin{align*}
     K(\mathcal{D})=\sum_{D\in
     \mathcal{D}}\left(-1+\sum_{\substack{0\le j<k\le 2}}\frac{1}{m^{jk}(D)}\right)
@@ -374,10 +379,11 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 \end{thm}
 
 \begin{defn}
+  \label{def:D-sym}
   A {\em geometric D-symbol} is a D-symbol which
   has only proper $1,\ldots,(d-1)$ labeled chamber vertices, proper or ideal $0$ or
   $d$ labeled vertices; moreover, $\forall D\in \mathcal{D}$, $\forall i\in
-  I\setminus\{0\}$ $\mathcal{M}(D)^{i,i-1}\geq3$.
+  I\setminus\{0\}$: $\mathcal{M}(D)^{i,i-1}\geq3$.
 \end{defn}
 
 \begin{note}
@@ -406,7 +412,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 \end{proof}
 
 \begin{note}
-  As there does not exist any procedure (till now) to decide wheter a D-symbol
+  As there does not exist any procedure (till now) to decide whether a D-symbol
   (or any representation of a tiling that the author knows of) is realizable in
   $S^d$, $E^d$, $H^d$ or other homogeneus $d$-space for values $d>2$, we cannot
   apply any D-symbol criteria in higher dimensions yet.
@@ -439,6 +445,7 @@ e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 %\end{note}
 
 \begin{defn}
+  \label{def:max_D-sym}
   $(\Sigma^I,\mathcal{D},\mathcal{M})$ is a {\em minimal D-symbol} if all of its
   homomorphic images are also isomorphic.
 \end{defn}
@@ -497,20 +504,35 @@ indicated) and the diagram shows the adjacency relations (operations).
   \includegraphics[width=0.3\textwidth]{d3c3_2.pdf}
 \end{figure}
 
-A hypothetical fundamental domain is shown in Figure \ref{fig:d3c3_2_fundom}.
-transparent chamber facets are mirrors, the colored facets are "glued together"
-by the half-turn about the line $0_{123}2_{23}$. (The
-only gluing this fundamental domain has is the $\sigma^1$ adjacency between
-$D_2$ and $D_3$.\footnote{FIXME nem javitottam, mert szerintem nem ugyanazt
-ertjuk alatta}) The wireframe of a polyhedron is shown to give an idea of
-the barycentric subdivision and the vertices of the chambers are
-labelled as $i$-centers indexed by the chamber classes having this vertex in
-common. 
+A hypothetical fundamental domain with canonical gluings is shown in Figure \ref{fig:d3c3_2_fundom}.
+transparent chamber facets are mirrors, the colored facets are mapped together
+by facet pairing mappings as generators (isometries) of $\Gamma$, as the
+symmetry group of the tiling $\mathcal{T}$. (The only non-mirror facet pairing
+mapping this fundamental domain has, is the $\sigma^1$ adjacency between $D_2$
+and $D_3$ and the corresponding relation is a half-turn about the line
+$0_{123}2_{23}$.) The wireframe of a polyhedron is shown to give an idea of the
+barycentric subdivision and the vertices of the chambers are labelled as
+$i$-centers indexed by the chamber classes having this vertex in common.
 
 \begin{figure}
-  \caption{\label{fig:d3c3_2_fundom} Fundamental domain of d3c3\_2}
+  \caption{\label{fig:d3c3_2_fundom} Fundamental domain of d3c3\_2. The
+  $1_{123}$ vertex (edge center) is behind. $0_{123}1_{123}$ represents the
+  unique half-edge class behind.}
   \center
-  \includegraphics[width=0.6\textwidth]{d3c3_2_fundom.png}
+  \includegraphics[width=0.5\textwidth]{d3c3_2_fundom.pdf}
+\end{figure}
+
+The same D-diagram is also examined but not published in \cite{DHM93}, a hand drawn Figure
+\ref{fig:d3c3_2_emil}. is taken from there. Note that the notation is slightly
+different: $\sigma^3$ is denoted by a wavy line.
+
+\begin{figure}
+  \caption{\label{fig:d3c3_2_emil} The same example on the base of
+  \cite{DHM93} where $a=4$, $b=3$, $c=1$ and $d=1$. The truncated regular
+  octahedron is edge transitive with square and hexagon facets, realized in
+  $E^3$.}
+  \center
+  \includegraphics[width=0.6\textwidth]{d3c3_2_emil.png}
 \end{figure}
 
 Figure \ref{fig:d3c3_2_r}. shows the $\mathcal{R}$ matrix function based on the
@@ -536,7 +558,9 @@ diagram.%\footnote{FIXME olvasora hagyhato, de nagyon hasznos az S3 szignaturak 
       2 & 3 & 1 & 3\\
       2 & 1 & 3 & 1
     \end{array}
-    \right)\;\;
+    \right)
+  \end{equation*}
+  \begin{equation*}
     \mathcal{R}(D_3)=
     \left(
     \begin{array}{cccc}
@@ -550,51 +574,59 @@ diagram.%\footnote{FIXME olvasora hagyhato, de nagyon hasznos az S3 szignaturak 
 \end{figure}
 
 Figure \ref{fig:d3c3_2_pm}. shows the parametric $\mathcal{M}$ matrix function
-based on the diagram. One can examine that the entries are the same around the
+based on the diagram (besides all of the data, our computer analysis can find
+and the realization geometries based on Coxeter reflection simpleces see
+\cite{M96} for some details). 
+One can examine that the entries are the same around the
 edges of the corresponding chambers (eg. let $i=0$ and $j=1$, then
 $D_1=\sigma^0D_1=\sigma^0\sigma^1D_1$ gets parameter $a$ and the
 $\sigma^0\sigma^1$-orbit $\{D_2,D_3\}$ gets parameter $2b$.) The short notation
 for $\mathcal{M}$ will be $D_1(a,3c,3d)$, $D_2(2b,3c,3d)$, $D_3(2b,3c,3d)$. 
 
 \begin{figure}
-  \caption{\label{fig:d3c3_2_pm} Parametric $\mathcal{M}$ matrix function of
-  d3c3\_2 based on the above $\mathcal{R}$ matrix function}
-  \begin{equation*}
-    \mathcal{M}(D_1)=
-    \left(
-    \begin{array}{cccc}
-      1 & a & 2 & 2\\
-      a & 1 & 3c & 2\\
-      2 & 3c & 1 & 3d\\
-      2 & 2 & 3d & 1
-    \end{array}
-    \right)\;\;
-    \mathcal{M}(D_2)=
-    \left(
-    \begin{array}{cccc}
-      1 & 2b & 2 & 2\\
-      2b & 1 & 3c & 2\\
-      2 & 3c & 1 & 3d\\
-      2 & 2 & 3d & 1
-    \end{array}
-    \right)\;\;
-    \mathcal{M}(D_3)=
-    \left(
-    \begin{array}{cccc}
-      1 & 2b & 2 & 2\\
-      2b & 1 & 3c & 2\\
-      2 & 3c & 1 & 3d\\
-      2 & 2 & 3d & 1
-    \end{array}
-    \right)
-  \end{equation*}
+  \caption{\label{fig:d3c3_2_pm} Computer analysis of d3c3\_2 following the parametric
+  $\mathcal{M}$ matrix function based on the above $\mathcal{R}$ matrix
+  function and realization geometries}
+  %\center
+  \includegraphics[width=\textwidth,height=0.9\textheight,keepaspectratio]{d3c3_2_analysis.pdf}
+%  \begin{equation*}
+%    \mathcal{M}(D_1)=
+%    \left(
+%    \begin{array}{cccc}
+%      1 & a & 2 & 2\\
+%      a & 1 & 3c & 2\\
+%      2 & 3c & 1 & 3d\\
+%      2 & 2 & 3d & 1
+%    \end{array}
+%    \right)\;\;
+%    \mathcal{M}(D_2)=
+%    \left(
+%    \begin{array}{cccc}
+%      1 & 2b & 2 & 2\\
+%      2b & 1 & 3c & 2\\
+%      2 & 3c & 1 & 3d\\
+%      2 & 2 & 3d & 1
+%    \end{array}
+%    \right)
+%  \end{equation*}
+%  \begin{equation*}
+%    \mathcal{M}(D_3)=
+%    \left(
+%    \begin{array}{cccc}
+%      1 & 2b & 2 & 2\\
+%      2b & 1 & 3c & 2\\
+%      2 & 3c & 1 & 3d\\
+%      2 & 2 & 3d & 1
+%    \end{array}
+%    \right)
+%  \end{equation*}
 \end{figure}
 
-Let's consider the case where $b=2$, $c=1$, $d=2$. We'll show that any $a\geq3$ value
-gives us a proper D-symbol. Take every D-subsymbol:
+Let's consider in our analysis first the case where $b=2$, $c=1$, $d=2$. We'll show that any $a\geq3$ value
+gives us a geometric D-symbol. Take every D-subsymbol:
 \begin{enumerate}
   \setcounter{enumi}{-1}
-  \item If we cancel the $0$th adjacency we get a single D-subsymbol component
+  \item If we cancel the $0$th adjacency (only loops this time) we get a single D-subsymbol component
     $\leftsub{1}{\mathcal{D}}_0$, let's calculate its combinatorial curvature
     formula:
     \begin{align*}
@@ -602,44 +634,47 @@ gives us a proper D-symbol. Take every D-subsymbol:
       \leftsub{c}{\mathcal{D}}_i}\left(-1+\sum_{\substack{0\le j<k\le d \\ j,k\ne i}}\frac{1}{m^{jk}(D)}\right)= \\
       &
       \sum_{D\in\leftsub{1}{\mathcal{D}}_0}\left(-1+\frac{1}{m^{12}(D)}+\frac{1}{m^{13}(D)}+\frac{1}{m^{23}(D)}\right)= \\
-      & -3 + 3\frac{1}{3c} + 3\frac{1}{2} + 3\frac{1}{3d} = -\frac{3}{2}+\frac{1}{c}+\frac{1}{d} = 0
+      & -3 + 3\frac{1}{3c} + 3\frac{1}{2} + 3\frac{1}{3d} =
+      -\frac{3}{2}+\frac{1}{c}+\frac{1}{d} = 0.
     \end{align*}
-    We got a euclidean tiling, which means that the vertex labeled with $0$ must
-    be an ideal vertex.
+    We got a euclidean plane tiling, which means that the vertex labeled with $0$ must
+    be an ideal vertex (in the hyperbolic space $H^3$ as it turns out. We get a
+    hyperbolic cube tiling with face angle $60^{\circ}$, if $a=4$, $b=2$, $c=1$ and
+    $d=2$.)
   \item Cancelling the $1$st adjacency, results in a single D-subsymbol
     component $\leftsub{1}{\mathcal{D}}_1$, which
     shows the edge-transitivity. Its curvature formula is:
     \begin{align*}
       K(\leftsub{1}{\mathcal{D}^1})&= -3 + 3\frac{1}{2} + 3\frac{1}{2} +
-      3\frac{1}{3d} = \frac{1}{d} > 0
+      3\frac{1}{3d} = \frac{1}{d} > 0.
     \end{align*}
-    Which means spherical plane tiling and we have to check the good orbifold
+    This means spherical plane tiling and we have to check the good orbifold
     criteria: the group (orbifold) signature is
     $*22d$ which is a good orbifold (even for $d=1$), so this must be a proper vertex.
   \item Cancelling the $2$nd adjacency, we get two components
     $\leftsub{1}{\mathcal{D}}_2$ and $\leftsub{2}{\mathcal{D}}_2$. The curvature formulae are:
     \begin{align*}
       K(\leftsub{1}{\mathcal{D}}_2)&= -1 + \frac{1}{2} + \frac{1}{2} +
-      \frac{1}{a} = \frac{1}{a} > 0
+      \frac{1}{a} = \frac{1}{a} > 0.
     \end{align*}
-    Which means we have to check the good orbifold criteria: the signature is
-    $*22a$, good orbifold, proper vertex. We obtained an $a$-gon here.
+    That means we have to check the good orbifold criteria: the signature is
+    $*22a$, good orbifold, proper face center. We obtained an $a$-gon here.
     \begin{align*}
       K(\leftsub{2}{\mathcal{D}}_2)&= -2 + 2\frac{1}{2} + 2\frac{1}{2} +
-      2\frac{1}{2b} = \frac{1}{b} > 0
+      2\frac{1}{2b} = \frac{1}{b} > 0.
     \end{align*}
     The signature is $2*b$, good orbifold, proper vertex if $b\geq2$, which is
     the case. We obtained a $2b$-gon here. See Fig. \ref{fig:d3c3_2_emil} for
-    Euclidean ($a=4$, $b=2$) edge-transitive (also for dual face-transitive)
-    tiling.
+    Euclidean ($a=4$, $b=3$, $c=1$ and $d=1$) edge-transitive (also for dual
+    face-transitive tetrahedron, i.e. sphenoid) tiling.
   \item Cancelling the $3$rd adjacency the curvature formula is:
     \begin{align*}
       K(\leftsub{1}{\mathcal{D}}_3)&= -3 + 3\frac{1}{2} + \frac{1}{a} +
       2\frac{1}{2b} + 3\frac{1}{3c} =
-       -\frac{3}{2} + \frac{1}{b} + \frac{1}{c} + \frac{1}{a} > 0
+       -\frac{3}{2} + \frac{1}{b} + \frac{1}{c} + \frac{1}{a} > 0.
     \end{align*}
     If $b=2$ and $c=1$, then for any $a$ the above formula is positive.
-    The signature $*22ac$ yields a good orbifold, proper vertex.
+    The signature $*22ac$ yields a good orbifold, proper body center.
 \end{enumerate}
 
 %FIXME Splitting?
@@ -669,15 +704,16 @@ D-diagram is shown in Fig.
 
 A hypothetical fundamental domain around the edge $\sigma^0\sigma^1$ is shown in
 Figure \ref{fig:d3c6_13_fundom}.
-Transparent chamber facets are mirrors, colored facets are glued
-together.\footnote{FIXME ugyanaz, mint az elozo ragasztasos resznel}
-(There are $2$ gluing operations in this fundamental domain: the $\sigma^1$ adjacency between
-$D_1$ and $D_2$, and between $D_5$ and $D_6$ respectively.)
+Transparent chamber facets are mirrors, colored facets are mapped together by
+facet pairing mappings. (There are $2$ non-mirror facet pairing mappings in this
+fundamental domain: the $\sigma^1$ adjacency between $D_1$ and $D_2$, and
+between $D_5$ and $D_6$ respectively.)
 
 \begin{figure}
-  \caption{\label{fig:d3c6_13_fundom} Fundamental domain of d3c6\_13}
+  \caption{\label{fig:d3c6_13_fundom} Fundamental domain of d3c6\_13. The edge
+  center $1_{123456}$ lies behind. A symbolic polyhedron is also indicated.}
   \center
-  \includegraphics[width=0.6\textwidth]{d3c6_13_fundom.png}
+  \includegraphics[width=0.5\textwidth]{d3c6_13_fundom.pdf}
 \end{figure}
 
 Calculating the $\mathcal{R}$ matrix function is left to the reader as an
@@ -709,14 +745,14 @@ If we take another set of parameter values: $a=2$, $b=c=3$, $d=3$, $e=1$,
 $f=1$, $g=1$ the resulting D-symbol is maximal, because the homomorphisms of the
 D-diagram cannot be extended to the $\mathcal{M}$ matrix functions.
 
-As was mentioned in section \ref{sec:edge_transitive} the biggest edge
+As it was mentioned in section \ref{sec:edge_transitive} the biggest edge
 transitive D-symbols have a cardinality of $24$, let's see an example from the
-12 family found by our computer program which contains maximal D-symbols.
-The D-diagram is shown in Fig.
-\ref{fig:d3c24_2}.
+$12$ family found by our computer program which contains maximal D-symbols.
+The D-diagram of d3c24\_2 is shown in Fig. \ref{fig:d3c24_2}.
 
 \begin{figure}
-  \caption{\label{fig:d3c24_2} D-diagram of d3c24\_2}
+  \caption{\label{fig:d3c24_2} Edge transitive D-diagram of d3c24\_2. See
+  Def. \ref{def:D-diag} for notation (e.g. \usebox{\LegendBody})}
   \center
   \includegraphics[width=0.8\textwidth]{d3c24_2.pdf}
 \end{figure}
@@ -724,9 +760,10 @@ The D-diagram is shown in Fig.
 A hypothetical fundamental domain is shown in Figure \ref{fig:d3c24_2_fundom}.
 
 \begin{figure}
-  \caption{\label{fig:d3c24_2_fundom} Fundamental domain of d3c24\_2}
+  \caption{\label{fig:d3c24_2_fundom} Fundamental domain of d3c24\_2 around a
+  unique edge $01$ with a symbolic polyhedron.}
   \center
-  \includegraphics[width=1\textwidth]{d3c24_2_fundom.png}
+  \includegraphics[width=.7\textwidth]{d3c24_2_fundom.pdf}
 \end{figure}
 
 The short version of the parametric $\mathcal{M}$ matrix function based on the
@@ -749,29 +786,41 @@ following cosets lead to a homomorphism:
 So we got a symmetry breaking of our first example (Fig. \ref{fig:d3c3_2}).
 
 If we take another parameter set: $a=c=2$, $e=f=g=h=i=k=1$ and any value
-for $b\geq3$\footnote{the case where $b=2$ is contained in the previous set},
+for $b\geq3$ (the case where $b=2$ is contained in the previous set,)
 then the D-symbol is already maximal.
 
 \section{Results and future work}
-We already noted that it should be possible to do the previous analysis on every
+We have already noted that the previous analysis is possible on every
 edge-transitive D-symbol, because there are finitely many D-diagrams. Now we can
-say it is really possible to do so on a decent PC or Laptop, there is a
-manuscript in preparation on the results and on the alghorithms used.
+say it is possible to do so indeed on a decent PC or Laptop, there is a
+dissertation in preparation on our results and on the algorithms used (for some
+preliminary statistics see Fig. \ref{fig:stat}). It can be
+checked at \cite{MYHOME_edge_trans} that there are e.g. $103$ possible
+D-diagrams of cardinality $24$ with $1378$ possible parameter combinations
+(infinite series are counted as single parameter combinations) out of which
+there are $12$ D-diagrams corresponding to $138$ maximal D-symbols.
 
-One may notice that there could be a lot more $2$-dimensional subtilings in a
+\begin{figure}
+  \caption{\label{fig:stat} Preliminary statistics on edge-transitive D-symbols}
+  \center
+  \includegraphics[width=1\textwidth]{statistics_crop.pdf}
+\end{figure}
+
+
+One may notice that there are a lot more $2$-dimensional subtilings in a
 $3$-dimensional tiling, than those examined (around the simplex-vertices). It
-should be possible to test all those subtilings using D-symbols. The exact
+is possible to test all those subtilings using D-symbols. The exact
 effect of these are not yet covered, but we suspect that $S^2$ and $E^2$
 subtilings cause some nice effects (for example splittings or indicate a fiber)
 while $H^2$ subtilings can be tought of as normal.
 
 The most difficult question seems to be now the characterisation of
 the underlying geometry. But if it would be possible, then one could determine
-the underlying geometry of a D-symbol, which would be of much use in the use
-cases of the Thurston theorem.
+the underlying geometry of a D-symbol, which would be of much use in checking
+the Thurston conjecture (see e.g. \cite{Du88}, \cite{M11}, \cite{T82}).
 
 \section{Acknowledgement}
-The author would like to thank the organisers of the conference CGTA2013 in
+The author would like to thank the organizers of the conference CGTA2013 in
 Ljubljana for their hospitality and hard work.
 
 %Bibiliography
