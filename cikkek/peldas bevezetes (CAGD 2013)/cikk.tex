@@ -120,7 +120,7 @@ resulting chamber system by $\mathcal{C}$, the $\Gamma$ orbit of a chamber $C\in
 chamber orbits. Every $C\in \mathcal{C}$ is a $d$-dimensional simplex, and the
 vertices of the simplex can be labeled by the numbers $0,\ldots,d$ showing the
 dimension of their respective face centered in the corresponding vertex. For
-example if we take the baricentric subdivision of a $3$-dimensional cube: we get
+example if we take the barycentric subdivision of a $3$-dimensional cube: we get
 a body center labeled by $3$, a facet center labeled by $2$, an edge center
 labeled by $1$ and one of the original vertices labeled by $0$. The facets of
 the chambers ($(d-1)$-dimensional faces) can be labeled by the same $0,\ldots,d$
@@ -135,8 +135,8 @@ $2$-dimensional example see Fig. \ref{fig:rhombic_tiling}.
 
 \begin{figure}
   \caption{\label{fig:rhombic_tiling} $2$-dimensional edge transitive rhombic
-  tiling with the plane group $\Gamma=cmm$ \cite{VS93} and its
-  D-diagram (\usebox{\LegendVertex}, \usebox{\LegendEdge}, \usebox{\LegendFace})}
+  tiling with the plane group $\Gamma=cmm$ \cite{VS93} and its D-diagram.
+  Note:\usebox{\LegendVertex}, \usebox{\LegendEdge}, \usebox{\LegendFace}}
   \center
   \includegraphics[width=0.7\textwidth]{rhombic_tiling.pdf}
 \end{figure}
@@ -168,20 +168,25 @@ $2$-dimensional example see Fig. \ref{fig:rhombic_tiling}.
 %\end{note}
 
 Next we have to deal with these relations. We require that the following
-relations hold for every $C\in\mathcal{C}$ (and every $C^\Gamma=D\in\mathcal{D}$
-respectively), for every $i,j\in I$:
+relations hold for every $C\in\mathcal{C}$ (and later on for every
+$C^\Gamma=D\in\mathcal{D}$, respectively), for every $i,j\in I$:
 \begin{align}
-  \label{eqn:mxfun_constraint_begin}|i-j|=1 & \Rightarrow \exists m\in\mathbb{N}^+: (\sigma^j\sigma^i)^mC=(\sigma^i\sigma^j)^mC=C \\
-  |i-j|>1 & \Rightarrow (\sigma^j\sigma^i)^2C=(\sigma^i\sigma^j)^2C=C \\
-  i=j & \Rightarrow (\sigma^i\sigma^i)C=C
+  \label{eqn:mxfun_constraint_begin}|i-j|=1 & \Rightarrow \exists m\in\mathbb{N}^+: (\sigma^j\sigma^i)^mC=(\sigma^i\sigma^j)^mC=C, \\
+  |i-j|>1 & \Rightarrow (\sigma^j\sigma^i)^2C=(\sigma^i\sigma^j)^2C=C, \\
+  i=j & \Rightarrow (\sigma^i\sigma^i)C=C.
 \end{align}
 Lets denote the smallest possible $m$ values by $m^{ij}(C)=m^{ji}(C)$.
-If $|i-j|>1$, then $m^{ij}(C)=m^{ji}(C)=2$ in compatibility with the baricentric subdivision.  
+If $|i-j|>1$, then $m^{ij}(C)=m^{ji}(C)=2$ in compatibility with the barycentric subdivision.  
 $m^{ii}(C)=1$, because $\sigma^i$ is an adjacency operation.
+
+Furthermore the smallest possible $m$ values must be the same around edges:
+\begin{align}
+  C'\in \left<\sigma^i,\sigma^j\right>C & \Rightarrow m^{ij}(C)=m^{ij}(C')
+\end{align}
 
 We can introduce the matrix function $\mathcal{M}: \mathcal{C}
 \rightarrow \mathbb{N}^{I\times I}$: $\mathcal{M}(C)^{i,j}=m^{ij}(C)$, which
-gives us half the number of chambers around an $ij$-edge. Notice that $\mathcal{M}$
+gives us half the number of chambers around an $ij$-edge. $\mathcal{M}$
 will be the same for the orbits ($\mathcal{D}$), as requirement, expressing that
 the action of $\Gamma$ doesn't change the number of chambers around a given
 edge.
@@ -196,8 +201,8 @@ $(\sigma^j\sigma^i)^rD=(\sigma^i\sigma^j)^rD=D$. Let's denote the smallest
 possible $r$ by $r^{ij}(D)=r^{ji}(D)$. There exists $C\in\mathcal{C}$ so
 that $D=C^\Gamma$.
 \begin{align}
-  |i-j|\ne0 & \Rightarrow r^{ij}(D)|m^{ij}(C) \\
-  \label{eqn:mxfun_constraint_end}i=j & \Rightarrow r^{ij}(D)=1
+  |i-j|\ne0 & \Rightarrow r^{ij}(D)|m^{ij}(C), \\
+  \label{eqn:mxfun_constraint_end}i=j & \Rightarrow r^{ij}(D)=1.
 \end{align}
 
 \begin{figure}
@@ -253,8 +258,8 @@ following theorem \cite{D87}.
 \begin{thm}
 $(\mathcal{T},\Gamma)$ and
 $(\mathcal{T}',\Gamma')$ are equivalent (topologically equivariant or homeomeric)
-if and only if the correspondig $(\Sigma^I,\mathcal{D},\mathcal{M})$ and
-$(\Sigma^I,\mathcal{D}',\mathcal{M}')$ D-symbols are isomorphic.
+if and only if the correspondig D-symbols $(\Sigma^I,\mathcal{D},\mathcal{M})$ and
+$(\Sigma^I,\mathcal{D}',\mathcal{M}')$ are isomorphic.
 \end{thm}
 
 \section{The inverse problem}
@@ -316,12 +321,7 @@ constructed as well. (See the references for more details,
 e.g. \cite{DHM93}, \cite{M96}, \cite{M11}).
 
 \begin{defn}
-  We call the triplet $(\Sigma^I,\mathcal{D},\mathcal{M})$ {\em D-symbol}, if the
-  following additional constraint is met:
-  $\forall D\in \mathcal{D}$, $\forall i,j\in I$: if $D' \in
-  <\sigma^i,\sigma^j>D$, then $\mathcal{M}(D)^{i,j}=\mathcal{M}(D')^{i,j}$.
-  Namely the $\mathcal{M}$ matrix function has the same $ij$-entry for chambers around the
-  corresponding $ij$-edges.
+  We call the triplet $(\Sigma^I,\mathcal{D},\mathcal{M})$ {\em D-symbol.}
 \end{defn}
 
 %\begin{defn}
